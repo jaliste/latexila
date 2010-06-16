@@ -1,0 +1,8 @@
+README
+
+This is the development version of LaTeXila.
+
+How to test?
+$ cd src/
+$ valac -o latexila --pkg gtk+-2.0 --pkg gtksourceview-2.0 *.vala
+$ ./latexila
