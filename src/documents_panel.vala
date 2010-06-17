@@ -18,7 +18,14 @@ public class DocumentsPanel : Notebook
     {
         this.documents.add (doc);
         this.active_doc = doc;
-        int i = this.append_page (doc.view, doc.tab_label);
+
+        // with a scrollbar
+        var sw = new ScrolledWindow (null, null);
+        sw.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
+        sw.add (doc.view);
+        sw.show_all ();
+
+        int i = this.append_page (sw, doc.tab_label);
         this.set_current_page (i);
         doc.close_document.connect ((t) => { remove_document (t); });
     }

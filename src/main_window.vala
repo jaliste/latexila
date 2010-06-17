@@ -74,11 +74,7 @@ public class MainWindow : Window
             file_chooser.set_current_folder (this.file_chooser_current_folder);
 
         if (file_chooser.run () == ResponseType.ACCEPT)
-        {
-            var doc = new Document.with_location (file_chooser.get_file ());
-            this.documents_panel.add_document (doc);
-            doc.load ();
-        }
+            open_document (file_chooser.get_file ());
 
         this.file_chooser_current_folder = file_chooser.get_current_folder ();
         file_chooser.destroy ();
@@ -162,5 +158,12 @@ public class MainWindow : Window
     public static void on_quit ()
     {
         Gtk.main_quit ();
+    }
+
+    public void open_document (File location)
+    {
+        var doc = new Document.with_location (location);
+        this.documents_panel.add_document (doc);
+        doc.load ();
     }
 }

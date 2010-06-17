@@ -1,8 +1,50 @@
 using Gtk;
 
+bool option_version;
+bool option_new_document;
+string[] option_remaining_args;
+
+const OptionEntry[] options =
+{
+    { "version", 'V', 0, OptionArg.NONE, ref option_version,
+    "Show version information and exit", null },
+
+    { "new-document", 'n', 0, OptionArg.NONE, ref option_new_document,
+    "Create new document", null },
+
+    { "", '\0', 0, OptionArg.FILENAME_ARRAY, ref option_remaining_args,
+    null, "[FILE...]" },
+
+    { null }
+};
+
 int main (string[] args)
 {
     Gtk.init (ref args);
+
+    /* command line options */
+    var context = new OptionContext ("- Integrated LaTeX Environment for GNOME");
+    // TODO gettext
+    context.add_main_entries (options, null);
+    context.add_group (Gtk.get_option_group (false));
+
+    try
+    {
+        context.parse (ref args);
+    }
+    catch (OptionError e)
+    {
+        stderr.printf ("%s\n", e.message);
+        stderr.printf ("Run '%s --help' to see a full list of available command line options.\n",
+            args[0]);
+        return 1;
+    }
+
+    if (option_version)
+    {
+        stdout.printf ("LaTeXila 1.99\n");
+        return 0;
+    }
 
     /* personal style */
     // make the close buttons in tabs smaller
@@ -20,6 +62,19 @@ int main (string[] args)
     var window = new MainWindow ();
     window.destroy.connect (MainWindow.on_quit);
     window.show_all ();
+
+    if (option_remaining_args != null)
+    {
+        for (int i = 0 ; option_remaining_args[i] != null ; i++)
+        {
+            var location = File.new_for_commandline_arg (option_remaining_args[i]);
+            window.open_document (location);
+        }
+    }
+
+    if (option_new_document)
+        window.on_new ();
+
     Gtk.main ();
     return 0;
 }

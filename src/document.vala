@@ -36,7 +36,6 @@ public class Document : GLib.Object
 
         view = new Gtk.SourceView.with_buffer (buffer);
         view.show_line_numbers = true;
-        view.show ();
 
         saved = true;
         update_tab_text ();
