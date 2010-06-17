@@ -2,10 +2,10 @@ TODO
 Wed June 16 -> Sun June 20
 
 Write the basis:
-	- components:
+	x components:
 		x menu
 		x toolbar
-		- notebook with documents
+		x notebook with documents
 	x open/save documents
 	- open file via the console (./latexila file1 file2)
 	- use libunique

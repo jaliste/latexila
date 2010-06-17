@@ -1,4 +1,5 @@
 using Gtk;
+using Gee;
 
 public class MainWindow : Window
 {
@@ -15,8 +16,8 @@ public class MainWindow : Window
         { "FileQuit", STOCK_QUIT, null, null, null, on_quit }
     };
 
-    private Document doc;
     private string file_chooser_current_folder = Environment.get_home_dir ();
+    private DocumentsPanel documents_panel = new DocumentsPanel ();
 
     public MainWindow ()
     {
@@ -41,22 +42,24 @@ public class MainWindow : Window
         var menu = ui_manager.get_widget ("/MainMenu");
         var toolbar = ui_manager.get_widget ("/MainToolbar");
 
+        // create one document
+        var doc = new Document ();
+        doc.buffer.text = "Welcome to LaTeXila!";
+        documents_panel.add_document (doc);
+
+        // packing widgets
         var main_vbox = new VBox (false, 0);
         main_vbox.pack_start (menu, false, false, 0);
         main_vbox.pack_start (toolbar, false, false, 0);
-
-        /* source view */
-        this.doc = new Document ();
-        this.doc.buffer.text = "Welcome to LaTeXila!";
-        main_vbox.pack_start (this.doc.view, true, true, 0);
+        main_vbox.pack_start (this.documents_panel, true, true, 0);
 
         add (main_vbox);
     }
 
     public void on_new ()
     {
-        this.doc.location = null;
-        this.doc.buffer.text = "";
+        var doc = new Document ();
+        this.documents_panel.add_document (doc);
     }
 
     public void on_open ()
@@ -72,8 +75,9 @@ public class MainWindow : Window
 
         if (file_chooser.run () == ResponseType.ACCEPT)
         {
-            this.doc.location = file_chooser.get_file ();
-            this.doc.load ();
+            var doc = new Document.with_location (file_chooser.get_file ());
+            this.documents_panel.add_document (doc);
+            doc.load ();
         }
 
         this.file_chooser_current_folder = file_chooser.get_current_folder ();
@@ -82,14 +86,22 @@ public class MainWindow : Window
 
     public void on_save ()
     {
-        if (this.doc.location == null)
+        var active_doc = this.documents_panel.active_doc;
+
+        return_if_fail (active_doc != null);
+
+        if (active_doc.location == null)
             this.on_save_as ();
         else
-            this.doc.save ();
+            active_doc.save ();
     }
 
     public void on_save_as ()
     {
+        var active_doc = this.documents_panel.active_doc;
+
+        return_if_fail (active_doc != null);
+
         var file_chooser = new FileChooserDialog ("Save File", this,
             FileChooserAction.SAVE,
             STOCK_CANCEL, ResponseType.CANCEL,
@@ -129,19 +141,22 @@ public class MainWindow : Window
                     continue;
             }
 
-            this.doc.location = file;
+            active_doc.location = file;
             break;
         }
 
         this.file_chooser_current_folder = file_chooser.get_current_folder ();
         file_chooser.destroy ();
 
-        if (this.doc.location != null)
-            this.doc.save ();
+        if (active_doc.location != null)
+            active_doc.save ();
     }
 
     public void on_close ()
     {
+        var active_doc = this.documents_panel.active_doc;
+        return_if_fail (active_doc != null);
+        this.documents_panel.remove_document (active_doc);
     }
 
     public static void on_quit ()
