@@ -1,8 +1,26 @@
-README
+General Information
+===================
 
-This is the development version of LaTeXila.
+This is the development version of LaTeXila. 
+LaTeXila is an Integrated LaTeX Environment for the GNOME desktop.
 
-How to test?
-$ cd src/
-$ valac -o latexila --pkg gtk+-2.0 --pkg gtksourceview-2.0 --pkg gee-1.0 *.vala
-$ ./latexila
+LaTeXila is released under the GNU General Public License (GPL) version 3 or
+later, see the file "COPYING" for more information.
+
+The official web site is:
+
+    http://latexila.sourceforge.net/
+
+
+Installation
+============
+
+See the file "INSTALL".
+
+
+Where to report bugs
+====================
+
+Bugs should be reported to the Tracker on SourceForge:
+
+    http://sourceforge.net/tracker/?group_id=271323

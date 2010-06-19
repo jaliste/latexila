@@ -1,0 +1,28 @@
+LaTeXila requires GTK+-2.16.x and GtkSourceView 2.4.x minimum.
+For the compilation, CMake 2.6.4 minimum is also required.
+
+Simple install procedure
+========================
+
+$ cd latexila/build/			# go to the build directory
+$ cmake ../				# run the Makefile generator
+$ make					# build LaTeXila
+[ Become root if necessary ]
+$ make install				# install LaTeXila
+
+Simple uninstall procedure
+==========================
+
+All the files installed are listed in the "install_manifest.txt" file.
+So you can uninstall LaTeXila by doing this:
+
+$ cd latexila/build/
+[ Become root if necessary ]
+$ xargs rm < install_manifest.txt
+
+Configuration
+=============
+
+* Change the install directory
+	run cmake with this option:
+	-DCMAKE_INSTALL_PREFIX=/path/to/install/directory/

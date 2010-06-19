@@ -1,0 +1,30 @@
+Guidelines for LaTeXila
+=======================
+
+TODO open a GitHub account
+
+LaTeXila source code is maintained using the Git version control system
+and is available at the following location:
+
+A Web Interface is available at:
+
+You can download the source code from the Git repository by doing:
+
+    $ git clone ...
+
+Later, to take the new commits you just have to do:
+
+    $ git pull
+
+
+If you want to contribute to LaTeXila, contact the main developer (see the file AUTHORS).
+Here is how you can generate a patch:
+
+    $ git diff origin > patch
+
+But a pull request is better.
+
+There are some rules to follow when coding:
+    - indentation: 4 spaces
+    - lines: 90 characters maximum (in some cases it can be a little more)
+    - same coding style everywhere
