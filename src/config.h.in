@@ -1,0 +1,10 @@
+#ifndef LATEXILA_CONFIG_H
+#define LATEXILA_CONFIG_H
+
+#define APP_NAME "${APP_NAME}"
+#define APP_VERSION "${APP_VERSION}"
+#define DATA_DIR "${DATA_DIR}"
+#define LOCALE_DIR "${LOCALE_DIR}"
+#define GETTEXT_PACKAGE "${GETTEXT_PACKAGE}"
+
+#endif /* LATEXILA_CONFIG_H */

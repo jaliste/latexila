@@ -7,10 +7,10 @@ string[] option_remaining_args;
 const OptionEntry[] options =
 {
     { "version", 'V', 0, OptionArg.NONE, ref option_version,
-    "Show version information and exit", null },
+    N_("Show the application's version"), null },
 
     { "new-document", 'n', 0, OptionArg.NONE, ref option_new_document,
-    "Create new document", null },
+    N_("Create new document"), null },
 
     { "", '\0', 0, OptionArg.FILENAME_ARRAY, ref option_remaining_args,
     null, "[FILE...]" },
@@ -20,12 +20,16 @@ const OptionEntry[] options =
 
 int main (string[] args)
 {
+    /* internationalisation */
+    Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
+    Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
+    Intl.textdomain (Config.GETTEXT_PACKAGE);
+
     Gtk.init (ref args);
 
     /* command line options */
-    var context = new OptionContext ("- Integrated LaTeX Environment for GNOME");
-    // TODO gettext
-    context.add_main_entries (options, null);
+    var context = new OptionContext (_("- Integrated LaTeX Environment for GNOME"));
+    context.add_main_entries (options, Config.GETTEXT_PACKAGE);
     context.add_group (Gtk.get_option_group (false));
 
     try
@@ -35,14 +39,14 @@ int main (string[] args)
     catch (OptionError e)
     {
         stderr.printf ("%s\n", e.message);
-        stderr.printf ("Run '%s --help' to see a full list of available command line options.\n",
+        stderr.printf (_("Run '%s --help' to see a full list of available command line options.\n"),
             args[0]);
         return 1;
     }
 
     if (option_version)
     {
-        stdout.printf ("LaTeXila 1.99\n");
+        stdout.printf ("LaTeXila %s\n", Config.APP_VERSION);
         return 0;
     }
 

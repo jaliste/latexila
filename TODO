@@ -8,6 +8,6 @@ Write the basis:
 		x notebook with documents
 	x open/save documents
 	x open file via the console (./latexila file1 file2)
-	- gettext
-	- CMake
+	x gettext
+	x CMake
 	- use libunique

@@ -1,0 +1,55 @@
+cmake_minimum_required (VERSION 2.6.4)
+
+project ("latexila" C)
+
+set (APP_NAME "latexila")
+set (APP_VERSION "1.99.0")
+
+message (STATUS "*** Building LaTeXila ${VERSION} ***")
+
+if (NOT DATA_DIR)
+	set (DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${APP_NAME}"
+		CACHE PATH "The directory where the data is")
+endif (NOT DATA_DIR)
+
+# Native Language Support
+set (GETTEXT_PACKAGE ${APP_NAME})
+set (LOCALE_DIR "${CMAKE_INSTALL_PREFIX}/share/locale")
+find_package (Gettext REQUIRED)
+file (GLOB latexila_PO_FILES ${latexila_SOURCE_DIR}/po/*.po)
+gettext_create_translations (po/latexila.pot ALL ${latexila_PO_FILES})
+
+configure_file (${latexila_SOURCE_DIR}/src/config.h.in
+	${latexila_BINARY_DIR}/src/config.h)
+add_definitions (-include config.h)
+
+list (APPEND CMAKE_MODULE_PATH "${latexila_SOURCE_DIR}/cmake/vala")
+include (ValaPrecompile)
+find_package (Vala REQUIRED)
+
+# TODO which minimum version of vala is required for latexila?
+#include (ValaVersion)
+#ensure_vala_version ("0.8.1" MINIMUM)
+
+find_package (PkgConfig)
+pkg_check_modules (GTK REQUIRED "gtk+-2.0 >= 2.16")
+pkg_check_modules (GTKSOURCEVIEW REQUIRED "gtksourceview-2.0 >= 2.4")
+pkg_check_modules (GEE REQUIRED "gee-1.0")
+pkg_check_modules (GIO REQUIRED "gio-2.0")
+
+add_definitions (
+	${GTK_CFLAGS}
+	${GTKSOURCEVIEW_CFLAGS}
+	${GEE_CFLAGS}
+	${GIO_CFLAGS}
+)
+
+link_libraries (
+	${GTK_LIBRARIES}
+	${GTKSOURCEVIEW_LIBRARIES}
+	${GEE_LIBRARIES}
+	${GIO_LIBRARIES}
+)
+
+include_directories (vapi)
+add_subdirectory (src)

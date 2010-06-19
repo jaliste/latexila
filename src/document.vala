@@ -104,7 +104,7 @@ public class Document : GLib.Object
     private void update_tab_text ()
     {
         if (location == null)
-            tab_text = "New document";
+            tab_text = _("New document");
         else
         {
             string basename = location.get_basename ();

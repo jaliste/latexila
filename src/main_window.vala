@@ -7,7 +7,7 @@ public class MainWindow : Window
     // name, stock_id, label, accelerator, tooltip, callback
     private const ActionEntry[] action_entries =
     {
-        { "File", null, "_File" },
+        { "File", null, N_("_File") },
         { "FileNew", STOCK_NEW, null, null, null, on_new },
         { "FileOpen", STOCK_OPEN, null, null, null, on_open },
         { "FileSave", STOCK_SAVE, null, null, null, on_save },
@@ -22,17 +22,19 @@ public class MainWindow : Window
     public MainWindow ()
     {
         this.title = "LaTeXila";
-        set_default_size (600, 500);
+        set_default_size (700, 600);
 
         /* menu and toolbar */
         var action_group = new ActionGroup ("ActionGroup");
+        action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
         action_group.add_actions (action_entries, this);
 
         var ui_manager = new UIManager ();
         ui_manager.insert_action_group (action_group, 0);
         try
         {
-            ui_manager.add_ui_from_file ("ui.xml");
+            var path = Path.build_filename (Config.DATA_DIR, "ui", "ui.xml");
+            ui_manager.add_ui_from_file (path);
         }
         catch (GLib.Error err)
         {
@@ -44,7 +46,7 @@ public class MainWindow : Window
 
         // create one document
         var doc = new Document ();
-        doc.buffer.text = "Welcome to LaTeXila!";
+        doc.buffer.text = _("Welcome to LaTeXila!");
         documents_panel.add_document (doc);
 
         // packing widgets
@@ -64,7 +66,7 @@ public class MainWindow : Window
 
     public void on_open ()
     {
-        var file_chooser = new FileChooserDialog ("Open File", this,
+        var file_chooser = new FileChooserDialog (_("Open File"), this,
             FileChooserAction.OPEN,
             STOCK_CANCEL, ResponseType.CANCEL,
             STOCK_OPEN, ResponseType.ACCEPT,
@@ -98,7 +100,7 @@ public class MainWindow : Window
 
         return_if_fail (active_doc != null);
 
-        var file_chooser = new FileChooserDialog ("Save File", this,
+        var file_chooser = new FileChooserDialog (_("Save File"), this,
             FileChooserAction.SAVE,
             STOCK_CANCEL, ResponseType.CANCEL,
             STOCK_SAVE, ResponseType.ACCEPT,
@@ -119,12 +121,12 @@ public class MainWindow : Window
                     DialogFlags.DESTROY_WITH_PARENT,
                     MessageType.QUESTION,
                     ButtonsType.NONE,
-                    "A file named \"%s\" already exists. Do you want to replace it?",
+                    _("A file named \"%s\" already exists. Do you want to replace it?"),
                     file.get_basename ());
 
                 confirmation.add_button (STOCK_CANCEL, ResponseType.CANCEL);
 
-                var button_replace = new Button.with_label ("Replace");
+                var button_replace = new Button.with_label (_("Replace"));
                 var icon = new Image.from_stock (STOCK_SAVE_AS, IconSize.BUTTON);
                 button_replace.set_image (icon);
                 confirmation.add_action_widget (button_replace, ResponseType.YES);
