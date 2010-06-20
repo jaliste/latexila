@@ -36,12 +36,14 @@ pkg_check_modules (GTK REQUIRED "gtk+-2.0 >= 2.16")
 pkg_check_modules (GTKSOURCEVIEW REQUIRED "gtksourceview-2.0 >= 2.4")
 pkg_check_modules (GEE REQUIRED "gee-1.0")
 pkg_check_modules (GIO REQUIRED "gio-2.0")
+pkg_check_modules (UNIQUE REQUIRED "unique-1.0")
 
 add_definitions (
 	${GTK_CFLAGS}
 	${GTKSOURCEVIEW_CFLAGS}
 	${GEE_CFLAGS}
 	${GIO_CFLAGS}
+	${UNIQUE_CFLAGS}
 )
 
 link_libraries (
@@ -49,6 +51,7 @@ link_libraries (
 	${GTKSOURCEVIEW_LIBRARIES}
 	${GEE_LIBRARIES}
 	${GIO_LIBRARIES}
+	${UNIQUE_LIBRARIES}
 )
 
 include_directories (vapi)

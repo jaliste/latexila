@@ -57,7 +57,7 @@ public class MainWindow : Window
         }
         catch (GLib.Error err)
         {
-            error (err.message);
+            error ("%s", err.message);
         }
 
         var menu = ui_manager.get_widget ("/MainMenu");

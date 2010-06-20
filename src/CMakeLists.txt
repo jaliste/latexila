@@ -6,6 +6,7 @@ vala_precompile (
 		gtk+-2.0
 		gtksourceview-2.0
 		gee-1.0
+		unique-1.0
 	CUSTOM_VAPIS
 		${latexila_SOURCE_DIR}/vapi/config.vapi
 )

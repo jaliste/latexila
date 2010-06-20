@@ -6,11 +6,15 @@ TODO open a GitHub account
 LaTeXila source code is maintained using the Git version control system
 and is available at the following location:
 
+    git://github.com/swilmet/latexila.git
+
 A Web Interface is available at:
+
+    http://github.com/swilmet/latexila
 
 You can download the source code from the Git repository by doing:
 
-    $ git clone ...
+    $ git clone git://github.com/swilmet/latexila.git
 
 Later, to take the new commits you just have to do:
 

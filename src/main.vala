@@ -69,35 +69,67 @@ int main (string[] args)
         return 0;
     }
 
-    /* personal style */
-    // make the close buttons in tabs smaller
-    rc_parse_string ("""
-        style "my-button-style"
-        {
-          GtkWidget::focus-padding = 0
-          GtkWidget::focus-line-width = 0
-          xthickness = 0
-          ythickness = 0
-        }
-        widget "*.my-close-button" style "my-button-style"
-        """);
-
-    var window = new MainWindow ();
-    window.destroy.connect (MainWindow.on_quit);
-    window.show_all ();
+    bool command_new = false;
+    bool command_open = false;
+    Unique.MessageData data = new Unique.MessageData ();
 
     if (option_remaining_args != null)
     {
+        command_open = true;
+
+        // get URI's
+        // The command line argument can be absolute or relative.
+        // With URI's, that's always absolute, so no problem.
+        string[] uris = new string[option_remaining_args.length];
         for (int i = 0 ; option_remaining_args[i] != null ; i++)
         {
-            var location = File.new_for_commandline_arg (option_remaining_args[i]);
-            window.open_document (location);
+            File file = File.new_for_path (option_remaining_args[i]);
+            uris[i] = file.get_uri ();
         }
+
+        data.set_uris (uris);
     }
 
     if (option_new_document)
-        window.on_new ();
+        command_new = true;
 
-    Gtk.main ();
+    var app = new Unique.App ("org.gnome.latexila", null);
+    if (app.is_running)
+    {
+        bool ok = true;
+        if (command_open)
+        {
+            var resp = app.send_message (Unique.Command.OPEN, data);
+            ok = resp == Unique.Response.OK;
+        }
+        if (ok && command_new)
+        {
+            var resp = app.send_message (Unique.Command.NEW, null);
+            ok = resp == Unique.Response.OK;
+        }
+        if (! command_open && ! command_new)
+        {
+            var resp = app.send_message (Unique.Command.ACTIVATE, null);
+            ok = resp == Unique.Response.OK;
+        }
+
+        if (! ok)
+            error ("Error with unique\n");
+        return 0;
+    }
+
+    /* start a new application */
+    else
+    {
+        var latexila = new Application ();
+        if (command_open)
+            latexila.message (app, Unique.Command.OPEN, data, 0);
+        if (command_new)
+            latexila.message (app, Unique.Command.NEW, data, 0);
+
+        app.message_received.connect (latexila.message);
+        Gtk.main ();
+    }
+
     return 0;
 }
