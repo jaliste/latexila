@@ -69,6 +69,7 @@ int main (string[] args)
         return 0;
     }
 
+    /* prepare commands */
     bool command_new = false;
     bool command_open = false;
     Unique.MessageData data = new Unique.MessageData ();
@@ -80,11 +81,11 @@ int main (string[] args)
         // get URI's
         // The command line argument can be absolute or relative.
         // With URI's, that's always absolute, so no problem.
-        string[] uris = new string[option_remaining_args.length];
+        string[] uris = {};
         for (int i = 0 ; option_remaining_args[i] != null ; i++)
         {
             File file = File.new_for_path (option_remaining_args[i]);
-            uris[i] = file.get_uri ();
+            uris += file.get_uri ();
         }
 
         data.set_uris (uris);
@@ -96,6 +97,7 @@ int main (string[] args)
     var app = new Unique.App ("org.gnome.latexila", null);
     if (app.is_running)
     {
+        /* send commands */
         bool ok = true;
         if (command_open)
         {
@@ -114,7 +116,7 @@ int main (string[] args)
         }
 
         if (! ok)
-            error ("Error with unique\n");
+            error ("Error: communication with first instance of LaTeXila failed\n");
         return 0;
     }
 
@@ -122,6 +124,8 @@ int main (string[] args)
     else
     {
         var latexila = new Application ();
+
+        /* execute commands */
         if (command_open)
             latexila.message (app, Unique.Command.OPEN, data, 0);
         if (command_new)

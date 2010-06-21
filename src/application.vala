@@ -19,7 +19,7 @@
 
 public class Application : GLib.Object
 {
-    //private List<MainWindow> windows = new List<MainWindow> ();
+    private List<MainWindow> windows = new List<MainWindow> ();
     private MainWindow active_window;
 
     public Application ()
@@ -37,15 +37,37 @@ public class Application : GLib.Object
             widget "*.my-close-button" style "my-button-style"
         """);
 
-        active_window = new MainWindow ();
-        active_window.destroy.connect (MainWindow.on_quit);
-        active_window.show_all ();
+        create_new_window ();
     }
 
     public Unique.Response message (Unique.App sender, int command,
                                     Unique.MessageData data, uint time)
     {
-        //uint workspace = data.get_workspace ();
+        uint workspace = data.get_workspace ();
+
+        // if active_window not on current workspace, try to find an other window on the
+        // current workspace.
+        if (! active_window.is_on_workspace (workspace))
+        {
+            unowned List<MainWindow> l = windows;
+            while (true)
+            {
+                if (l == null)
+                {
+                    create_new_window ();
+                    break;
+                }
+
+                MainWindow window = l.data;
+                if (window.is_on_workspace (workspace))
+                {
+                    active_window = window;
+                    break;
+                }
+
+                l = l.next;
+            }
+        }
 
         if (command == Unique.Command.NEW)
             active_window.on_new ();
@@ -55,12 +77,38 @@ public class Application : GLib.Object
             string[] files = data.get_uris ();
             for (int i = 0 ; files[i] != null ; i++)
             {
-                var location = File.new_for_commandline_arg (files[i]);
+                var location = File.new_for_uri (files[i]);
                 active_window.open_document (location);
             }
         }
 
         active_window.present_with_time (time);
         return Unique.Response.OK;
+    }
+
+    private MainWindow create_new_window ()
+    {
+        var window = new MainWindow ();
+        active_window = window;
+
+        window.destroy.connect (() =>
+        {
+            window.on_quit ();
+            windows.remove (window);
+            if (windows.length () == 0)
+                Gtk.main_quit ();
+            else if (window == active_window)
+                active_window = windows.data;
+        });
+
+        window.focus_in_event.connect (() =>
+        {
+            active_window = window;
+            return false;
+        });
+
+        windows.append (window);
+        window.show_all ();
+        return window;
     }
 }

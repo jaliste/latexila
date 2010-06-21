@@ -1,13 +1,29 @@
 TODO
-Wed June 16 -> Sun June 20
+Mon June 21 -> Sun June 27
 
-Write the basis:
-	x components:
-		x menu
-		x toolbar
-		x notebook with documents
-	x open/save documents
-	x open file via the console (./latexila file1 file2)
-	x gettext
-	x CMake
-	- use libunique
+- libunique:
+	x manage workspaces
+	- manage screens
+	- File -> New window
+	- command line option: --new-window
+
+- documents:
+	- possibility to reorder the tabs
+	- open document: check if the document is already opened, change the window if necessary
+	- change the saved status of the document when the document is modified
+	- undo, redo, copy, cut, paste, delete, select all
+	- change the title of the window with the basename of the active document
+	- tooltip on the tab label with the full path
+	- syntax highlighting
+	- source view preferences:
+		- display line numbers
+		- tab width
+		- spaces instead of tabs
+		- highlight current line
+		- highlight matching brackets
+		- font
+		- color scheme
+
+- open recent
+	- in the menu: same as in LaTeXila 0.2
+	- in the toolbar: _one_ open button with a bottom arrow to select recent files

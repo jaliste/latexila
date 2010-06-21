@@ -81,12 +81,6 @@ public class MainWindow : Window
     {
         var doc = new Document ();
         this.documents_panel.add_document (doc);
-
-        uint workspace = Gedit.Utils.get_window_workspace (this);
-        if (workspace == Gedit.Utils.Workspace.ALL_WORKSPACES)
-            stdout.printf ("all workspaces\n");
-        else
-            stdout.printf ("workspace: %u\n", workspace);
     }
 
     public void on_open ()
@@ -182,9 +176,8 @@ public class MainWindow : Window
         this.documents_panel.remove_document (active_doc);
     }
 
-    public static void on_quit ()
+    public void on_quit ()
     {
-        Gtk.main_quit ();
     }
 
     public void open_document (File location)
@@ -192,5 +185,14 @@ public class MainWindow : Window
         var doc = new Document.with_location (location);
         this.documents_panel.add_document (doc);
         doc.load ();
+    }
+
+    public bool is_on_workspace (uint workspace)
+    {
+        if (! this.get_realized ())
+            this.realize ();
+
+        uint ws = Gedit.Utils.get_window_workspace (this);
+        return ws == workspace || ws == Gedit.Utils.Workspace.ALL_WORKSPACES;
     }
 }
