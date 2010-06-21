@@ -8,7 +8,7 @@ x libunique:
 	x command line option: --new-window
 
 - documents:
-	- possibility to reorder the tabs
+	x possibility to reorder the tabs
 	- open document: check if the document is already opened, change the window if necessary
 	- change the saved status of the document when the document is modified
 	- undo, redo, copy, cut, paste, delete, select all

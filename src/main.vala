@@ -95,7 +95,7 @@ int main (string[] args)
     }
 
     var app = new Unique.App ("org.gnome.latexila", null);
-    app.add_command ("new_window", Application.CustomCommand.NEW_WINDOW);
+    app.add_command ("new_window", Application.NEW_WINDOW);
 
     if (app.is_running)
     {
@@ -103,7 +103,7 @@ int main (string[] args)
         bool ok = true;
         if (option_new_window)
         {
-            var resp = app.send_message (Application.CustomCommand.NEW_WINDOW, null);
+            var resp = app.send_message (Application.NEW_WINDOW, null);
             ok = resp == Unique.Response.OK;
         }
         if (ok && command_open)

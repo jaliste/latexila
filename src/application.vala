@@ -22,10 +22,7 @@ public class Application : GLib.Object
     private static Application instance = null;
     private List<MainWindow> windows = new List<MainWindow> ();
     private MainWindow active_window;
-    public static enum CustomCommand
-    {
-        NEW_WINDOW = 1
-    }
+    public static int NEW_WINDOW = 1;
 
     /* Application is a singleton
      * We must use Application.get_default ()
@@ -58,7 +55,7 @@ public class Application : GLib.Object
     public Unique.Response message (Unique.App sender, int command,
                                     Unique.MessageData data, uint time)
     {
-        if (command == this.CustomCommand.NEW_WINDOW)
+        if (command == NEW_WINDOW)
         {
             create_new_window ();
             return Unique.Response.OK;

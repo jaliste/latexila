@@ -27,9 +27,15 @@ public class DocumentsPanel : Notebook
 
     public DocumentsPanel ()
     {
-        this.switch_page.connect ((notebook, page, num_page) =>
+        this.switch_page.connect ((notebook, page, page_num) =>
         {
-            this.active_doc = this.documents [(int) num_page];
+            this.active_doc = this.documents [(int) page_num];
+        });
+
+        this.page_reordered.connect ((notebook, child, page_num) =>
+        {
+            documents.remove (active_doc);
+            documents.insert ((int) page_num, active_doc);
         });
     }
 
@@ -45,6 +51,7 @@ public class DocumentsPanel : Notebook
         sw.show_all ();
 
         int i = this.append_page (sw, doc.tab_label);
+        this.set_tab_reorderable (sw, true);
         this.set_current_page (i);
         doc.close_document.connect ((t) => { remove_document (t); });
     }
