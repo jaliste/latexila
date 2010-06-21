@@ -81,6 +81,12 @@ public class MainWindow : Window
     {
         var doc = new Document ();
         this.documents_panel.add_document (doc);
+
+        uint workspace = Gedit.Utils.get_window_workspace (this);
+        if (workspace == Gedit.Utils.Workspace.ALL_WORKSPACES)
+            stdout.printf ("all workspaces\n");
+        else
+            stdout.printf ("workspace: %u\n", workspace);
     }
 
     public void on_open ()

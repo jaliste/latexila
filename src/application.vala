@@ -19,7 +19,8 @@
 
 public class Application : GLib.Object
 {
-    private MainWindow window;
+    //private List<MainWindow> windows = new List<MainWindow> ();
+    private MainWindow active_window;
 
     public Application ()
     {
@@ -36,16 +37,18 @@ public class Application : GLib.Object
             widget "*.my-close-button" style "my-button-style"
         """);
 
-        window = new MainWindow ();
-        window.destroy.connect (MainWindow.on_quit);
-        window.show_all ();
+        active_window = new MainWindow ();
+        active_window.destroy.connect (MainWindow.on_quit);
+        active_window.show_all ();
     }
 
     public Unique.Response message (Unique.App sender, int command,
                                     Unique.MessageData data, uint time)
     {
+        //uint workspace = data.get_workspace ();
+
         if (command == Unique.Command.NEW)
-            window.on_new ();
+            active_window.on_new ();
 
         else if (command == Unique.Command.OPEN)
         {
@@ -53,11 +56,11 @@ public class Application : GLib.Object
             for (int i = 0 ; files[i] != null ; i++)
             {
                 var location = File.new_for_commandline_arg (files[i]);
-                window.open_document (location);
+                active_window.open_document (location);
             }
         }
 
-        window.present_with_time (time);
+        active_window.present_with_time (time);
         return Unique.Response.OK;
     }
 }
