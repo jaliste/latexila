@@ -64,11 +64,12 @@ public class Application : GLib.Object
             return Unique.Response.OK;
         }
 
-        uint workspace = data.get_workspace ();
+        var workspace = data.get_workspace ();
+        var screen = data.get_screen ();
 
         // if active_window not on current workspace, try to find an other window on the
         // current workspace.
-        if (! active_window.is_on_workspace (workspace))
+        if (! active_window.is_on_workspace_screen (screen, workspace))
         {
             unowned List<MainWindow> l = windows;
             while (true)
@@ -85,7 +86,7 @@ public class Application : GLib.Object
                     l = l.next;
                     continue;
                 }
-                if (window.is_on_workspace (workspace))
+                if (window.is_on_workspace_screen (screen, workspace))
                 {
                     active_window = window;
                     break;

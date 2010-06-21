@@ -1,9 +1,9 @@
 TODO
 Mon June 21 -> Sun June 27
 
-- libunique:
+x libunique:
 	x manage workspaces
-	- manage screens
+	x manage screens
 	x File -> New window
 	x command line option: --new-window
 

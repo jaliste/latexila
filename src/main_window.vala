@@ -194,8 +194,17 @@ public class MainWindow : Window
         doc.load ();
     }
 
-    public bool is_on_workspace (uint workspace)
+    public bool is_on_workspace_screen (Gdk.Screen screen, uint workspace)
     {
+        var cur_name = screen.get_display ().get_name ();
+        var cur_n = screen.get_number ();
+        Gdk.Screen s = this.get_screen ();
+        var name = s.get_display ().get_name ();
+        var n = s.get_number ();
+
+        if (cur_name != name || cur_n != n)
+            return false;
+
         if (! this.get_realized ())
             this.realize ();
 
