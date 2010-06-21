@@ -21,7 +21,8 @@ using Gtk;
 
 bool option_version;
 bool option_new_document;
-string[] option_remaining_args;
+bool option_new_window;
+string[] remaining_args;
 
 const OptionEntry[] options =
 {
@@ -31,7 +32,10 @@ const OptionEntry[] options =
     { "new-document", 'n', 0, OptionArg.NONE, ref option_new_document,
     N_("Create new document"), null },
 
-    { "", '\0', 0, OptionArg.FILENAME_ARRAY, ref option_remaining_args,
+    { "new-window", '\0', 0, OptionArg.NONE, ref option_new_window,
+    N_("Create a new top-level window in an existing instance of LaTeXila"), null },
+
+    { "", '\0', 0, OptionArg.FILENAME_ARRAY, ref remaining_args,
     null, "[FILE...]" },
 
     { null }
@@ -70,46 +74,49 @@ int main (string[] args)
     }
 
     /* prepare commands */
-    bool command_new = false;
     bool command_open = false;
     Unique.MessageData data = new Unique.MessageData ();
 
-    if (option_remaining_args != null)
+    if (remaining_args != null)
     {
         command_open = true;
 
-        // get URI's
-        // The command line argument can be absolute or relative.
-        // With URI's, that's always absolute, so no problem.
+        // since remaining_args.length == 0, we use a dynamic array
         string[] uris = {};
-        for (int i = 0 ; option_remaining_args[i] != null ; i++)
+        for (int i = 0 ; remaining_args[i] != null ; i++)
         {
-            File file = File.new_for_path (option_remaining_args[i]);
+            // The command line argument can be absolute or relative.
+            // With URI's, that's always absolute, so no problem.
+            File file = File.new_for_path (remaining_args[i]);
             uris += file.get_uri ();
         }
 
         data.set_uris (uris);
     }
 
-    if (option_new_document)
-        command_new = true;
-
     var app = new Unique.App ("org.gnome.latexila", null);
+    app.add_command ("new_window", Application.CustomCommand.NEW_WINDOW);
+
     if (app.is_running)
     {
         /* send commands */
         bool ok = true;
-        if (command_open)
+        if (option_new_window)
+        {
+            var resp = app.send_message (Application.CustomCommand.NEW_WINDOW, null);
+            ok = resp == Unique.Response.OK;
+        }
+        if (ok && command_open)
         {
             var resp = app.send_message (Unique.Command.OPEN, data);
             ok = resp == Unique.Response.OK;
         }
-        if (ok && command_new)
+        if (ok && option_new_document)
         {
             var resp = app.send_message (Unique.Command.NEW, null);
             ok = resp == Unique.Response.OK;
         }
-        if (! command_open && ! command_new)
+        if (! option_new_window && ! command_open && ! option_new_document)
         {
             var resp = app.send_message (Unique.Command.ACTIVATE, null);
             ok = resp == Unique.Response.OK;
@@ -123,12 +130,13 @@ int main (string[] args)
     /* start a new application */
     else
     {
-        var latexila = new Application ();
+        var latexila = Application.get_default ();
 
         /* execute commands */
+        // the --new-window option have no effect in this case
         if (command_open)
             latexila.message (app, Unique.Command.OPEN, data, 0);
-        if (command_new)
+        if (option_new_document)
             latexila.message (app, Unique.Command.NEW, data, 0);
 
         app.message_received.connect (latexila.message);

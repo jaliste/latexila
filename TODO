@@ -4,8 +4,8 @@ Mon June 21 -> Sun June 27
 - libunique:
 	x manage workspaces
 	- manage screens
-	- File -> New window
-	- command line option: --new-window
+	x File -> New window
+	x command line option: --new-window
 
 - documents:
 	- possibility to reorder the tabs

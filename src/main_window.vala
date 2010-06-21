@@ -28,6 +28,8 @@ public class MainWindow : Window
     {
         { "File", null, N_("_File") },
         { "FileNew", STOCK_NEW, null, null, null, on_new },
+        { "FileNewWindow", null, N_("New _Window"), null,
+            N_("Create a new window"), on_new_window },
         { "FileOpen", STOCK_OPEN, null, null, null, on_open },
         { "FileSave", STOCK_SAVE, null, null, null, on_save },
         { "FileSaveAs", STOCK_SAVE_AS, null, null, null, on_save_as },
@@ -81,6 +83,11 @@ public class MainWindow : Window
     {
         var doc = new Document ();
         this.documents_panel.add_document (doc);
+    }
+
+    public void on_new_window ()
+    {
+        Application.get_default ().create_new_window ();
     }
 
     public void on_open ()

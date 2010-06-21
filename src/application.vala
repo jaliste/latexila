@@ -19,10 +19,18 @@
 
 public class Application : GLib.Object
 {
+    private static Application instance = null;
     private List<MainWindow> windows = new List<MainWindow> ();
     private MainWindow active_window;
+    public static enum CustomCommand
+    {
+        NEW_WINDOW = 1
+    }
 
-    public Application ()
+    /* Application is a singleton
+     * We must use Application.get_default ()
+     */
+    private Application ()
     {
         /* personal style */
         // make the close buttons in tabs smaller
@@ -40,9 +48,22 @@ public class Application : GLib.Object
         create_new_window ();
     }
 
+    public static Application get_default ()
+    {
+        if (instance == null)
+            instance = new Application ();
+        return instance;
+    }
+
     public Unique.Response message (Unique.App sender, int command,
                                     Unique.MessageData data, uint time)
     {
+        if (command == this.CustomCommand.NEW_WINDOW)
+        {
+            create_new_window ();
+            return Unique.Response.OK;
+        }
+
         uint workspace = data.get_workspace ();
 
         // if active_window not on current workspace, try to find an other window on the
@@ -59,6 +80,11 @@ public class Application : GLib.Object
                 }
 
                 MainWindow window = l.data;
+                if (window == active_window)
+                {
+                    l = l.next;
+                    continue;
+                }
                 if (window.is_on_workspace (workspace))
                 {
                     active_window = window;
@@ -86,7 +112,7 @@ public class Application : GLib.Object
         return Unique.Response.OK;
     }
 
-    private MainWindow create_new_window ()
+    public void create_new_window ()
     {
         var window = new MainWindow ();
         active_window = window;
@@ -109,6 +135,5 @@ public class Application : GLib.Object
 
         windows.append (window);
         window.show_all ();
-        return window;
     }
 }
