@@ -53,6 +53,11 @@ public class Document : GLib.Object
         var text_tag_table = new TextTagTable ();
         buffer = new Gtk.SourceBuffer (text_tag_table);
 
+        buffer.changed.connect (() =>
+        {
+            saved = false;
+        });
+
         view = new Gtk.SourceView.with_buffer (buffer);
         view.show_line_numbers = true;
 
@@ -65,7 +70,7 @@ public class Document : GLib.Object
         close_button.name = "my-close-button";
         close_button.add (new Image.from_stock (STOCK_CLOSE, IconSize.MENU));
         close_button.clicked.connect (() => { this.close_document (); });
-        
+
         _tab_label = new HBox (false, 3);
         _tab_label.pack_start (_tab_mark, false, false, 0);
         _tab_label.pack_start (_tab_text, false, false, 0);
@@ -93,10 +98,20 @@ public class Document : GLib.Object
         {
             string text;
             FileUtils.get_contents (location.get_path (), out text, null);
-            buffer.text = text;
+            buffer.begin_not_undoable_action ();
+            buffer.set_text (text, -1);
+            buffer.end_not_undoable_action ();
+            Utils.flush_queue ();
+            saved = true;
+
+            // move the cursor at the first line
+            TextIter iter;
+            buffer.get_start_iter (out iter);
+            buffer.place_cursor (iter);
         }
         catch (Error e)
         {
+            // TODO show a message dialog
             stderr.printf ("Error: %s\n", e.message);
         }
     }
@@ -113,9 +128,11 @@ public class Document : GLib.Object
         try
         {
             FileUtils.set_contents (location.get_path (), text);
+            saved = true;
         }
         catch (FileError e)
         {
+            // TODO show a message dialog
             stderr.printf ("Error: %s\n", e.message);
         }
     }
@@ -128,6 +145,7 @@ public class Document : GLib.Object
         {
             string basename = location.get_basename ();
             var n = basename.length;
+            // if the basename is too long, we show only the begin and the end
             if (n >= 42)
                 tab_text = basename[0:19] + "..." + basename[n-19:n];
             else

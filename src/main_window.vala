@@ -68,6 +68,8 @@ public class MainWindow : Window
         // create one document
         var doc = new Document ();
         doc.buffer.text = _("Welcome to LaTeXila!");
+        Utils.flush_queue ();
+        doc.saved = true;
         documents_panel.add_document (doc);
 
         // packing widgets
