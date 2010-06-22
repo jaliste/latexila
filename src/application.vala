@@ -134,4 +134,20 @@ public class Application : GLib.Object
         windows.append (window);
         window.show_all ();
     }
+
+    public bool find_file (File file)
+    {
+        for (unowned List<MainWindow> l = windows ; l != null ; l = l.next)
+        {
+            MainWindow window = l.data;
+            var panel = window.documents_panel;
+            if (panel.find_file (file))
+            {
+                active_window = window;
+                window.present ();
+                return true;
+            }
+        }
+        return false;
+    }
 }

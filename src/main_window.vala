@@ -38,7 +38,7 @@ public class MainWindow : Window
     };
 
     private string file_chooser_current_folder = Environment.get_home_dir ();
-    private DocumentsPanel documents_panel = new DocumentsPanel ();
+    public DocumentsPanel documents_panel = new DocumentsPanel ();
 
     public MainWindow ()
     {
@@ -189,21 +189,28 @@ public class MainWindow : Window
 
     public void open_document (File location)
     {
+        /* check if the document is not already opened */
+        if (Application.get_default ().find_file (location))
+            return;
+
         var doc = new Document.with_location (location);
         this.documents_panel.add_document (doc);
         doc.load ();
     }
 
-    public bool is_on_workspace_screen (Gdk.Screen screen, uint workspace)
+    public bool is_on_workspace_screen (Gdk.Screen? screen, uint workspace)
     {
-        var cur_name = screen.get_display ().get_name ();
-        var cur_n = screen.get_number ();
-        Gdk.Screen s = this.get_screen ();
-        var name = s.get_display ().get_name ();
-        var n = s.get_number ();
+        if (screen != null)
+        {
+            var cur_name = screen.get_display ().get_name ();
+            var cur_n = screen.get_number ();
+            Gdk.Screen s = this.get_screen ();
+            var name = s.get_display ().get_name ();
+            var n = s.get_number ();
 
-        if (cur_name != name || cur_n != n)
-            return false;
+            if (cur_name != name || cur_n != n)
+                return false;
+        }
 
         if (! this.get_realized ())
             this.realize ();

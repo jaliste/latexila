@@ -132,6 +132,7 @@ int main (string[] args)
     {
         var latexila = Application.get_default ();
 
+        // TODO don't use the message() method in this case
         /* execute commands */
         // the --new-window option have no effect in this case
         if (command_open)

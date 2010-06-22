@@ -68,4 +68,17 @@ public class DocumentsPanel : Notebook
         else
             this.active_doc = null;
     }
+
+    public bool find_file (File file)
+    {
+        for (int i = 0 ; i < documents.size ; i++)
+        {
+            if (documents[i].location != null && file.equal (documents[i].location))
+            {
+                this.set_current_page (i);
+                return true;
+            }
+        }
+        return false;
+    }
 }
