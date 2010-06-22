@@ -132,13 +132,12 @@ int main (string[] args)
     {
         var latexila = Application.get_default ();
 
-        // TODO don't use the message() method in this case
         /* execute commands */
         // the --new-window option have no effect in this case
         if (command_open)
-            latexila.message (app, Unique.Command.OPEN, data, 0);
+            latexila.open_documents (data.get_uris ());
         if (option_new_document)
-            latexila.message (app, Unique.Command.NEW, data, 0);
+            latexila.create_new_document ();
 
         app.message_received.connect (latexila.message);
         Gtk.main ();

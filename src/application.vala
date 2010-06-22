@@ -94,17 +94,10 @@ public class Application : GLib.Object
         }
 
         if (command == Unique.Command.NEW)
-            active_window.on_new ();
+            create_new_document ();
 
         else if (command == Unique.Command.OPEN)
-        {
-            string[] files = data.get_uris ();
-            for (int i = 0 ; files[i] != null ; i++)
-            {
-                var location = File.new_for_uri (files[i]);
-                active_window.open_document (location);
-            }
-        }
+            open_documents (data.get_uris ());
 
         active_window.present_with_time (time);
         return Unique.Response.OK;
@@ -133,6 +126,20 @@ public class Application : GLib.Object
 
         windows.append (window);
         window.show_all ();
+    }
+
+    public void create_new_document ()
+    {
+        active_window.on_new ();
+    }
+
+    public void open_documents (string[] files)
+    {
+        for (int i = 0 ; files[i] != null ; i++)
+        {
+            var location = File.new_for_uri (files[i]);
+            active_window.open_document (location);
+        }
     }
 
     public bool find_file (File file)

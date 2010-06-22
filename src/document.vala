@@ -109,9 +109,9 @@ public class Document : GLib.Object
             buffer.get_start_iter (out iter);
             buffer.place_cursor (iter);
         }
-        catch (Error e)
+        catch (FileError e)
         {
-            // TODO show a message dialog
+            // TODO show an error message in an infobar
             stderr.printf ("Error: %s\n", e.message);
         }
     }
@@ -132,7 +132,7 @@ public class Document : GLib.Object
         }
         catch (FileError e)
         {
-            // TODO show a message dialog
+            // TODO show an error message in an infobar
             stderr.printf ("Error: %s\n", e.message);
         }
     }
