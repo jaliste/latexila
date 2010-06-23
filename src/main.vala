@@ -137,7 +137,7 @@ int main (string[] args)
         if (command_open)
             latexila.open_documents (data.get_uris ());
         if (option_new_document)
-            latexila.create_new_document ();
+            latexila.create_document ();
 
         app.message_received.connect (latexila.message);
         Gtk.main ();

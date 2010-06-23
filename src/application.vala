@@ -19,16 +19,18 @@
 
 public class Application : GLib.Object
 {
-    private static Application instance = null;
-    private List<MainWindow> windows = new List<MainWindow> ();
-    private MainWindow active_window;
     public static int NEW_WINDOW = 1;
+    private static Application instance = null;
+    public unowned List<MainWindow> windows { get; private set; }
+    public MainWindow active_window { get; private set; }
 
     /* Application is a singleton
      * We must use Application.get_default ()
      */
     private Application ()
     {
+        windows = new List<MainWindow> ();
+
         /* personal style */
         // make the close buttons in tabs smaller
         Gtk.rc_parse_string ("""
@@ -42,7 +44,7 @@ public class Application : GLib.Object
             widget "*.my-close-button" style "my-button-style"
         """);
 
-        create_new_window ();
+        create_window ();
     }
 
     public static Application get_default ()
@@ -52,12 +54,30 @@ public class Application : GLib.Object
         return instance;
     }
 
+    // get all the documents currently opened
+    public List<Document> get_documents ()
+    {
+        List<Document> res = null;
+        foreach (MainWindow w in windows)
+            res.concat (w.get_documents ());
+        return res;
+    }
+
+    // get all the document views
+    public List<DocumentView> get_views ()
+    {
+        List<DocumentView> res = null;
+        foreach (MainWindow w in windows)
+            res.concat (w.get_views ());
+        return res;
+    }
+
     public Unique.Response message (Unique.App sender, int command,
                                     Unique.MessageData data, uint time)
     {
         if (command == NEW_WINDOW)
         {
-            create_new_window ();
+            create_window ();
             return Unique.Response.OK;
         }
 
@@ -68,33 +88,25 @@ public class Application : GLib.Object
         // current workspace.
         if (! active_window.is_on_workspace_screen (screen, workspace))
         {
-            unowned List<MainWindow> l = windows;
-            while (true)
+            bool found = false;
+            foreach (MainWindow w in windows)
             {
-                if (l == null)
-                {
-                    create_new_window ();
-                    break;
-                }
-
-                MainWindow window = l.data;
-                if (window == active_window)
-                {
-                    l = l.next;
+                if (w == active_window)
                     continue;
-                }
-                if (window.is_on_workspace_screen (screen, workspace))
+                if (w.is_on_workspace_screen (screen, workspace))
                 {
-                    active_window = window;
+                    found = true;
+                    active_window = w;
                     break;
                 }
-
-                l = l.next;
             }
+
+            if (! found)
+                create_window (screen);
         }
 
         if (command == Unique.Command.NEW)
-            create_new_document ();
+            create_document ();
 
         else if (command == Unique.Command.OPEN)
             open_documents (data.get_uris ());
@@ -103,10 +115,13 @@ public class Application : GLib.Object
         return Unique.Response.OK;
     }
 
-    public void create_new_window ()
+    public void create_window (Gdk.Screen? screen = null)
     {
         var window = new MainWindow ();
         active_window = window;
+
+        if (screen != null)
+            window.set_screen (screen);
 
         window.destroy.connect (() =>
         {
@@ -128,33 +143,17 @@ public class Application : GLib.Object
         window.show_all ();
     }
 
-    public void create_new_document ()
+    public void create_document ()
     {
         active_window.on_new ();
     }
 
-    public void open_documents (string[] files)
+    public void open_documents (string[] uris)
     {
-        for (int i = 0 ; files[i] != null ; i++)
+        for (int i = 0 ; uris[i] != null ; i++)
         {
-            var location = File.new_for_uri (files[i]);
+            var location = File.new_for_uri (uris[i]);
             active_window.open_document (location);
         }
-    }
-
-    public bool find_file (File file)
-    {
-        for (unowned List<MainWindow> l = windows ; l != null ; l = l.next)
-        {
-            MainWindow window = l.data;
-            var panel = window.documents_panel;
-            if (panel.find_file (file))
-            {
-                active_window = window;
-                window.present ();
-                return true;
-            }
-        }
-        return false;
     }
 }

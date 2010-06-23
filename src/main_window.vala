@@ -18,7 +18,6 @@
  */
 
 using Gtk;
-using Gee;
 
 public class MainWindow : Window
 {
@@ -38,7 +37,47 @@ public class MainWindow : Window
     };
 
     private string file_chooser_current_folder = Environment.get_home_dir ();
-    public DocumentsPanel documents_panel = new DocumentsPanel ();
+    private DocumentsPanel documents_panel = new DocumentsPanel ();
+
+    public DocumentTab? active_tab
+    {
+        get
+        {
+            int n = documents_panel.get_current_page ();
+            if (n == -1)
+                return null;
+            return (DocumentTab) documents_panel.get_nth_page (n);
+        }
+
+        set
+        {
+            int n = documents_panel.page_num (value);
+            if (n != -1)
+                documents_panel.set_current_page (n);
+        }
+    }
+
+    public DocumentView? active_view
+    {
+        get
+        {
+            if (active_tab == null)
+                return null;
+            return active_tab.view;
+        }
+    }
+
+    public Document? active_document
+    {
+        get
+        {
+            if (active_tab == null)
+                return null;
+            return active_tab.document;
+        }
+    }
+
+
 
     public MainWindow ()
     {
@@ -65,33 +104,148 @@ public class MainWindow : Window
         var menu = ui_manager.get_widget ("/MainMenu");
         var toolbar = ui_manager.get_widget ("/MainToolbar");
 
-        // create one document
-        var doc = new Document ();
-        doc.buffer.text = _("Welcome to LaTeXila!");
-        Utils.flush_queue ();
-        doc.saved = true;
-        documents_panel.add_document (doc);
-
         // packing widgets
         var main_vbox = new VBox (false, 0);
         main_vbox.pack_start (menu, false, false, 0);
         main_vbox.pack_start (toolbar, false, false, 0);
-        main_vbox.pack_start (this.documents_panel, true, true, 0);
+        main_vbox.pack_start (documents_panel, true, true, 0);
 
         add (main_vbox);
     }
 
+    public List<Document> get_documents ()
+    {
+        List<Document> res = null;
+        int nb = documents_panel.get_n_pages ();
+        for (int i = 0 ; i < nb ; i++)
+        {
+            DocumentTab tab = (DocumentTab) documents_panel.get_nth_page (i);
+            res.append (tab.document);
+        }
+        return res;
+    }
+
+    public List<DocumentView> get_views ()
+    {
+        List<DocumentView> res = null;
+        int nb = documents_panel.get_n_pages ();
+        for (int i = 0 ; i < nb ; i++)
+        {
+            DocumentTab tab = (DocumentTab) documents_panel.get_nth_page (i);
+            res.append (tab.view);
+        }
+        return res;
+    }
+
+    public void open_document (File location)
+    {
+        /* check if the document is already opened */
+        foreach (MainWindow w in Application.get_default ().windows)
+        {
+            foreach (Document doc in w.get_documents ())
+            {
+                if (doc.location != null && location.equal (doc.location))
+                {
+                    // if the document is already opened in this window
+                    if (this == w)
+                        active_tab = doc.tab;
+
+                    // if the document is already opened in an other window
+                    else
+                        stdout.printf ("'%s' already opened in an other window\n",
+                            location.get_path ());
+
+                    return;
+                }
+            }
+        }
+
+        create_tab_from_location (location, true);
+    }
+
+    public DocumentTab? create_tab (bool jump_to)
+    {
+        var tab = new DocumentTab ();
+        return process_create_tab (tab, jump_to);
+    }
+
+    public DocumentTab? create_tab_from_location (File location, bool jump_to)
+    {
+        var tab = new DocumentTab.from_location (location);
+        return process_create_tab (tab, jump_to);
+    }
+
+    private DocumentTab? process_create_tab (DocumentTab? tab, bool jump_to)
+    {
+        if (tab == null)
+            return null;
+
+        tab.close_document.connect (() => { close_tab (tab); });
+        tab.show ();
+
+        // add the tab at the end of the notebook
+        documents_panel.add_tab (tab, -1, jump_to);
+
+        if (! this.get_visible ())
+            this.present ();
+
+        return tab;
+    }
+
+    public void close_tab (DocumentTab tab)
+    {
+        documents_panel.remove_tab (tab);
+    }
+
+    public DocumentTab? get_tab_from_location (File location)
+    {
+        foreach (Document doc in get_documents ())
+        {
+            if (location.equal (doc.location))
+                return doc.tab;
+        }
+
+        // not found
+        return null;
+    }
+
+    public bool is_on_workspace_screen (Gdk.Screen? screen, uint workspace)
+    {
+        if (screen != null)
+        {
+            var cur_name = screen.get_display ().get_name ();
+            var cur_n = screen.get_number ();
+            Gdk.Screen s = this.get_screen ();
+            var name = s.get_display ().get_name ();
+            var n = s.get_number ();
+
+            if (cur_name != name || cur_n != n)
+                return false;
+        }
+
+        if (! this.get_realized ())
+            this.realize ();
+
+        uint ws = Gedit.Utils.get_window_workspace (this);
+        return ws == workspace || ws == Gedit.Utils.Workspace.ALL_WORKSPACES;
+    }
+
+
+    /*******************
+     *    CALLBACKS
+     ******************/
+
     public void on_new ()
     {
-        var doc = new Document ();
-        this.documents_panel.add_document (doc);
+        create_tab (true);
     }
 
     public void on_new_window ()
     {
-        Application.get_default ().create_new_window ();
+        Application.get_default ().create_window ();
     }
 
+    // TODO improve this (see Gedit code)
     public void on_open ()
     {
         var file_chooser = new FileChooserDialog (_("Open File"), this,
@@ -112,21 +266,16 @@ public class MainWindow : Window
 
     public void on_save ()
     {
-        var active_doc = this.documents_panel.active_doc;
 
-        return_if_fail (active_doc != null);
-
-        if (active_doc.location == null)
+        if (active_document.location == null)
             this.on_save_as ();
         else
-            active_doc.save ();
+            active_document.save ();
     }
 
     public void on_save_as ()
     {
-        var active_doc = this.documents_panel.active_doc;
-
-        return_if_fail (active_doc != null);
+        return_if_fail (active_document != null);
 
         var file_chooser = new FileChooserDialog (_("Save File"), this,
             FileChooserAction.SAVE,
@@ -139,11 +288,10 @@ public class MainWindow : Window
 
         while (file_chooser.run () == ResponseType.ACCEPT)
         {
-            string filename = file_chooser.get_filename ();
             File file = file_chooser.get_file ();
 
             /* if the file exists, ask the user if the file can be replaced */
-            if (FileUtils.test (filename, FileTest.EXISTS))
+            if (file.query_exists (null))
             {
                 var confirmation = new MessageDialog (this,
                     DialogFlags.DESTROY_WITH_PARENT,
@@ -167,57 +315,24 @@ public class MainWindow : Window
                     continue;
             }
 
-            active_doc.location = file;
+            active_document.location = file;
             break;
         }
 
         this.file_chooser_current_folder = file_chooser.get_current_folder ();
         file_chooser.destroy ();
 
-        if (active_doc.location != null)
-            active_doc.save ();
+        if (active_document.location != null)
+            active_document.save ();
     }
 
     public void on_close ()
     {
-        var active_doc = this.documents_panel.active_doc;
-        return_if_fail (active_doc != null);
-        this.documents_panel.remove_document (active_doc);
+        return_if_fail (active_tab != null);
+        close_tab (active_tab);
     }
 
     public void on_quit ()
     {
-    }
-
-    public void open_document (File location)
-    {
-        /* check if the document is not already opened */
-        if (Application.get_default ().find_file (location))
-            return;
-
-        var doc = new Document.with_location (location);
-        this.documents_panel.add_document (doc);
-        doc.load ();
-    }
-
-    public bool is_on_workspace_screen (Gdk.Screen? screen, uint workspace)
-    {
-        if (screen != null)
-        {
-            var cur_name = screen.get_display ().get_name ();
-            var cur_n = screen.get_number ();
-            Gdk.Screen s = this.get_screen ();
-            var name = s.get_display ().get_name ();
-            var n = s.get_number ();
-
-            if (cur_name != name || cur_n != n)
-                return false;
-        }
-
-        if (! this.get_realized ())
-            this.realize ();
-
-        uint ws = Gedit.Utils.get_window_workspace (this);
-        return ws == workspace || ws == Gedit.Utils.Workspace.ALL_WORKSPACES;
     }
 }

@@ -19,24 +19,11 @@
 
 using Gtk;
 
-public class DocumentsPanel : Notebook
+public class DocumentView : Gtk.SourceView
 {
-    public DocumentsPanel ()
+    public DocumentView (Document doc)
     {
-        this.set_scrollable (true);
-    }
-
-    public void add_tab (DocumentTab tab, int position, bool jump_to)
-    {
-        int i = this.insert_page (tab, tab.label, position);
-        this.set_tab_reorderable (tab, true);
-        if (jump_to)
-            this.set_current_page (i);
-    }
-
-    public void remove_tab (DocumentTab tab)
-    {
-        int pos = page_num (tab);
-        remove_page (pos);
+        set_buffer (doc);
+        show_line_numbers = true;
     }
 }

@@ -7,7 +7,7 @@ vala_precompile (
 	PACKAGES
 		gtk+-2.0
 		gtksourceview-2.0
-		gee-1.0
+		#gee-1.0
 		unique-1.0
 		gdk-x11-2.0
 		x11
