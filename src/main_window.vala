@@ -37,7 +37,11 @@ public class MainWindow : Window
     };
 
     private string file_chooser_current_folder = Environment.get_home_dir ();
-    private DocumentsPanel documents_panel = new DocumentsPanel ();
+    private DocumentsPanel documents_panel;
+    private ActionGroup action_group;
+
+    // actions that must be insensitive if the notebook is empty
+    private const string[] file_actions = { "FileSave", "FileSaveAs", "FileClose" };
 
     public DocumentTab? active_tab
     {
@@ -77,15 +81,13 @@ public class MainWindow : Window
         }
     }
 
-
-
     public MainWindow ()
     {
         this.title = "LaTeXila";
         set_default_size (700, 600);
 
         /* menu and toolbar */
-        var action_group = new ActionGroup ("ActionGroup");
+        action_group = new ActionGroup ("ActionGroup");
         action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
         action_group.add_actions (action_entries, this);
 
@@ -100,6 +102,12 @@ public class MainWindow : Window
         {
             error ("%s", err.message);
         }
+
+        /* documents panel (notebook) */
+        documents_panel = new DocumentsPanel ();
+        documents_panel.page_added.connect (set_file_actions_sensitive);
+        documents_panel.page_removed.connect (set_file_actions_insensitive);
+        set_file_actions_insensitive ();
 
         var menu = ui_manager.get_widget ("/MainMenu");
         var toolbar = ui_manager.get_widget ("/MainToolbar");
@@ -228,6 +236,32 @@ public class MainWindow : Window
 
         uint ws = Gedit.Utils.get_window_workspace (this);
         return ws == workspace || ws == Gedit.Utils.Workspace.ALL_WORKSPACES;
+    }
+
+    private void set_file_actions_sensitive ()
+    {
+        // the notebook was empty and one page is added
+        // after, when other pages are added, we do nothing
+        if (documents_panel.get_n_pages () == 1)
+        {
+            foreach (string file_action in file_actions)
+            {
+                Action action = action_group.get_action (file_action);
+                action.set_sensitive (true);
+            }
+        }
+    }
+
+    private void set_file_actions_insensitive ()
+    {
+        if (documents_panel.get_n_pages () == 0)
+        {
+            foreach (string file_action in file_actions)
+            {
+                Action action = action_group.get_action (file_action);
+                action.set_sensitive (false);
+            }
+        }
     }
 
 

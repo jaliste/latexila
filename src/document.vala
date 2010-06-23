@@ -27,7 +27,6 @@ public class Document : Gtk.SourceBuffer
 
     public Document ()
     {
-        //var tag = new TextTagTable ();
         changed.connect (() => { saved = false; });
     }
 
