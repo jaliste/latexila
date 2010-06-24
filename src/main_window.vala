@@ -44,9 +44,9 @@ public class MainWindow : Window
 
         // Edit
         { "Edit", null, N_("_Edit") },
-        { "EditUndo", STOCK_UNDO, null, null,
+        { "EditUndo", STOCK_UNDO, null, "<Control>Z",
             N_("Undo the last action"), on_edit_undo },
-        { "EditRedo", STOCK_REDO, null, null,
+        { "EditRedo", STOCK_REDO, null, "<Shift><Control>Z",
             N_("Redo the last undone action"), on_edit_redo },
         { "EditCut", STOCK_CUT, null, null,
             N_("Cut the selection"), on_edit_cut },
@@ -56,7 +56,7 @@ public class MainWindow : Window
             N_("Paste the clipboard"), on_edit_paste },
         { "EditDelete", STOCK_DELETE, null, null,
             N_("Delete the selected text"), on_edit_delete },
-        { "EditSelectAll", STOCK_SELECT_ALL, null, null,
+        { "EditSelectAll", STOCK_SELECT_ALL, null, "<Control>A",
             N_("Select the entire document"), on_edit_select_all },
         { "EditPreferences", STOCK_PREFERENCES, null, null,
             N_("Configure the application"), null }
@@ -72,6 +72,9 @@ public class MainWindow : Window
         "FileSave", "FileSaveAs", "FileClose", "EditUndo", "EditRedo", "EditCut",
         "EditCopy", "EditPaste", "EditDelete", "EditSelectAll"
     };
+
+    // actions that must be insensitive if there is no selection
+    private const string[] selection_actions = { "EditCut", "EditCopy", "EditDelete" };
 
     public DocumentTab? active_tab
     {
@@ -240,6 +243,14 @@ public class MainWindow : Window
             set_redo_sensitivity ();
         });
 
+        /* sensitivity of cut/copy/delete */
+        tab.document.notify["has-selection"].connect (() =>
+        {
+            if (tab != active_tab)
+                return;
+            selection_changed ();
+        });
+
         tab.show ();
 
         // add the tab at the end of the notebook
@@ -247,6 +258,7 @@ public class MainWindow : Window
 
         set_undo_sensitivity ();
         set_redo_sensitivity ();
+        selection_changed ();
 
         if (! this.get_visible ())
             this.present ();
@@ -333,6 +345,19 @@ public class MainWindow : Window
         {
             Action action = action_group.get_action ("EditRedo");
             action.set_sensitive (active_document.can_redo);
+        }
+    }
+
+    private void selection_changed ()
+    {
+        if (active_tab != null)
+        {
+            bool has_selection = active_document.has_selection;
+            foreach (string selection_action in selection_actions)
+            {
+                Action action = action_group.get_action (selection_action);
+                action.set_sensitive (has_selection);
+            }
         }
     }
 
@@ -470,21 +495,31 @@ public class MainWindow : Window
 
     public void on_edit_cut ()
     {
+        return_if_fail (active_tab != null);
+        active_view.cut_selection ();
     }
 
     public void on_edit_copy ()
     {
+        return_if_fail (active_tab != null);
+        active_view.copy_selection ();
     }
 
     public void on_edit_paste ()
     {
+        return_if_fail (active_tab != null);
+        active_view.my_paste_clipboard ();
     }
 
     public void on_edit_delete ()
     {
+        return_if_fail (active_tab != null);
+        active_view.delete_selection ();
     }
 
     public void on_edit_select_all ()
     {
+        return_if_fail (active_tab != null);
+        active_view.my_select_all ();
     }
 }

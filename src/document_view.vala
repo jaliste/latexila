@@ -21,14 +21,63 @@ using Gtk;
 
 public class DocumentView : Gtk.SourceView
 {
+    public bool readonly { get; set; default = false; }
+    public const double SCROLL_MARGIN = 0.02;
+
     public DocumentView (Document doc)
     {
         set_buffer (doc);
         show_line_numbers = true;
     }
 
-    public void scroll_to_cursor ()
+    public void scroll_to_cursor (double margin = 0.25)
     {
-        scroll_to_mark (this.buffer.get_insert (), 0.25, false, 0, 0);
+        scroll_to_mark (this.buffer.get_insert (), margin, false, 0, 0);
+    }
+
+    public void cut_selection ()
+    {
+        TextBuffer buffer = get_buffer ();
+        return_if_fail (buffer != null);
+        var clipboard = get_clipboard (Gdk.SELECTION_CLIPBOARD);
+        buffer.cut_clipboard (clipboard, ! readonly);
+        scroll_to_cursor (SCROLL_MARGIN);
+        grab_focus ();
+    }
+
+    public void copy_selection ()
+    {
+        TextBuffer buffer = get_buffer ();
+        return_if_fail (buffer != null);
+        var clipboard = get_clipboard (Gdk.SELECTION_CLIPBOARD);
+        buffer.copy_clipboard (clipboard);
+        grab_focus ();
+    }
+
+    public void my_paste_clipboard ()
+    {
+        TextBuffer buffer = get_buffer ();
+        return_if_fail (buffer != null);
+        var clipboard = get_clipboard (Gdk.SELECTION_CLIPBOARD);
+        buffer.paste_clipboard (clipboard, null, ! readonly);
+        scroll_to_cursor (SCROLL_MARGIN);
+        grab_focus ();
+    }
+
+    public void delete_selection ()
+    {
+        TextBuffer buffer = get_buffer ();
+        return_if_fail (buffer != null);
+        buffer.delete_selection (true, ! readonly);
+        scroll_to_cursor (SCROLL_MARGIN);
+    }
+
+    public void my_select_all ()
+    {
+        TextBuffer buffer = get_buffer ();
+        return_if_fail (buffer != null);
+        TextIter start, end;
+        buffer.get_bounds (out start, out end);
+        buffer.select_range (start, end);
     }
 }
