@@ -25,15 +25,41 @@ public class MainWindow : Window
     // name, stock_id, label, accelerator, tooltip, callback
     private const ActionEntry[] action_entries =
     {
+        // File
         { "File", null, N_("_File") },
-        { "FileNew", STOCK_NEW, null, null, null, on_new },
+        { "FileNew", STOCK_NEW, null, null,
+            N_("New file"), on_file_new },
         { "FileNewWindow", null, N_("New _Window"), null,
             N_("Create a new window"), on_new_window },
-        { "FileOpen", STOCK_OPEN, null, null, null, on_open },
-        { "FileSave", STOCK_SAVE, null, null, null, on_save },
-        { "FileSaveAs", STOCK_SAVE_AS, null, null, null, on_save_as },
-        { "FileClose", STOCK_CLOSE, null, null, null, on_close },
-        { "FileQuit", STOCK_QUIT, null, null, null, on_quit }
+        { "FileOpen", STOCK_OPEN, null, null,
+            N_("Open a file"), on_file_open },
+        { "FileSave", STOCK_SAVE, null, null,
+            N_("Save the current file"), on_file_save },
+        { "FileSaveAs", STOCK_SAVE_AS, null, null,
+            N_("Save the current file with a different name"), on_file_save_as },
+        { "FileClose", STOCK_CLOSE, null, null,
+            N_("Close the current file"), on_file_close },
+        { "FileQuit", STOCK_QUIT, null, null,
+            N_("Quit the program"), on_quit },
+
+        // Edit
+        { "Edit", null, N_("_Edit") },
+        { "EditUndo", STOCK_UNDO, null, null,
+            N_("Undo the last action"), on_edit_undo },
+        { "EditRedo", STOCK_REDO, null, null,
+            N_("Redo the last undone action"), on_edit_redo },
+        { "EditCut", STOCK_CUT, null, null,
+            N_("Cut the selection"), on_edit_cut },
+        { "EditCopy", STOCK_COPY, null, null,
+            N_("Copy the selection"), on_edit_copy },
+        { "EditPaste", STOCK_PASTE, null, null,
+            N_("Paste the clipboard"), on_edit_paste },
+        { "EditDelete", STOCK_DELETE, null, null,
+            N_("Delete the selected text"), on_edit_delete },
+        { "EditSelectAll", STOCK_SELECT_ALL, null, null,
+            N_("Select the entire document"), on_edit_select_all },
+        { "EditPreferences", STOCK_PREFERENCES, null, null,
+            N_("Configure the application"), null }
     };
 
     private string file_chooser_current_folder = Environment.get_home_dir ();
@@ -41,16 +67,19 @@ public class MainWindow : Window
     private ActionGroup action_group;
 
     // actions that must be insensitive if the notebook is empty
-    private const string[] file_actions = { "FileSave", "FileSaveAs", "FileClose" };
+    private const string[] file_actions =
+    {
+        "FileSave", "FileSaveAs", "FileClose", "EditUndo", "EditRedo", "EditCut",
+        "EditCopy", "EditPaste", "EditDelete", "EditSelectAll"
+    };
 
     public DocumentTab? active_tab
     {
         get
         {
-            int n = documents_panel.get_current_page ();
-            if (n == -1)
+            if (documents_panel.get_n_pages () == 0)
                 return null;
-            return (DocumentTab) documents_panel.get_nth_page (n);
+            return documents_panel.active_tab;
         }
 
         set
@@ -107,6 +136,11 @@ public class MainWindow : Window
         documents_panel = new DocumentsPanel ();
         documents_panel.page_added.connect (set_file_actions_sensitive);
         documents_panel.page_removed.connect (set_file_actions_insensitive);
+        documents_panel.switch_page.connect (() =>
+        {
+            set_undo_sensitivity ();
+            set_redo_sensitivity ();
+        });
         set_file_actions_insensitive ();
 
         var menu = ui_manager.get_widget ("/MainMenu");
@@ -189,10 +223,30 @@ public class MainWindow : Window
             return null;
 
         tab.close_document.connect (() => { close_tab (tab); });
+
+        /* sensitivity of undo and redo */
+        tab.document.notify["can-undo"].connect (() =>
+        {
+
+            if (tab != active_tab)
+                return;
+            set_undo_sensitivity ();
+        });
+
+        tab.document.notify["can-redo"].connect (() =>
+        {
+            if (tab != active_tab)
+                return;
+            set_redo_sensitivity ();
+        });
+
         tab.show ();
 
         // add the tab at the end of the notebook
         documents_panel.add_tab (tab, -1, jump_to);
+
+        set_undo_sensitivity ();
+        set_redo_sensitivity ();
 
         if (! this.get_visible ())
             this.present ();
@@ -264,12 +318,32 @@ public class MainWindow : Window
         }
     }
 
+    private void set_undo_sensitivity ()
+    {
+        if (active_tab != null)
+        {
+            Action action = action_group.get_action ("EditUndo");
+            action.set_sensitive (active_document.can_undo);
+        }
+    }
+
+    private void set_redo_sensitivity ()
+    {
+        if (active_tab != null)
+        {
+            Action action = action_group.get_action ("EditRedo");
+            action.set_sensitive (active_document.can_redo);
+        }
+    }
+
 
     /*******************
      *    CALLBACKS
      ******************/
 
-    public void on_new ()
+    /* File menu */
+
+    public void on_file_new ()
     {
         create_tab (true);
     }
@@ -280,7 +354,7 @@ public class MainWindow : Window
     }
 
     // TODO improve this (see Gedit code)
-    public void on_open ()
+    public void on_file_open ()
     {
         var file_chooser = new FileChooserDialog (_("Open File"), this,
             FileChooserAction.OPEN,
@@ -298,16 +372,16 @@ public class MainWindow : Window
         file_chooser.destroy ();
     }
 
-    public void on_save ()
+    public void on_file_save ()
     {
 
         if (active_document.location == null)
-            this.on_save_as ();
+            this.on_file_save_as ();
         else
             active_document.save ();
     }
 
-    public void on_save_as ()
+    public void on_file_save_as ()
     {
         return_if_fail (active_document != null);
 
@@ -360,13 +434,57 @@ public class MainWindow : Window
             active_document.save ();
     }
 
-    public void on_close ()
+    public void on_file_close ()
     {
         return_if_fail (active_tab != null);
         close_tab (active_tab);
     }
 
     public void on_quit ()
+    {
+    }
+
+    /* Edit menu */
+
+    public void on_edit_undo ()
+    {
+        return_if_fail (active_tab != null);
+        if (active_document.can_undo)
+        {
+            active_document.undo ();
+            active_view.scroll_to_cursor ();
+            active_view.grab_focus ();
+        }
+    }
+
+    public void on_edit_redo ()
+    {
+        return_if_fail (active_tab != null);
+        if (active_document.can_redo)
+        {
+            active_document.redo ();
+            active_view.scroll_to_cursor ();
+            active_view.grab_focus ();
+        }
+    }
+
+    public void on_edit_cut ()
+    {
+    }
+
+    public void on_edit_copy ()
+    {
+    }
+
+    public void on_edit_paste ()
+    {
+    }
+
+    public void on_edit_delete ()
+    {
+    }
+
+    public void on_edit_select_all ()
     {
     }
 }

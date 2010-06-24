@@ -21,9 +21,15 @@ using Gtk;
 
 public class DocumentsPanel : Notebook
 {
+    public DocumentTab active_tab { get; private set; }
+
     public DocumentsPanel ()
     {
         this.set_scrollable (true);
+        switch_page.connect ((page, page_num) =>
+        {
+            active_tab = (DocumentTab) get_nth_page ((int) page_num);
+        });
     }
 
     public void add_tab (DocumentTab tab, int position, bool jump_to)

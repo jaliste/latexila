@@ -28,6 +28,7 @@ public class Document : Gtk.SourceBuffer
     public Document ()
     {
         changed.connect (() => { saved = false; });
+        modified_changed.connect (() => { saved = ! get_modified (); });
     }
 
     public void load (File location)
@@ -42,7 +43,7 @@ public class Document : Gtk.SourceBuffer
             set_text (text, -1);
             end_not_undoable_action ();
             Utils.flush_queue ();
-            saved = true;
+            set_modified (false);
 
             // move the cursor at the first line
             TextIter iter;
@@ -69,7 +70,7 @@ public class Document : Gtk.SourceBuffer
         {
             // TODO avoid get_path(), use GIO
             FileUtils.set_contents (location.get_path (), text);
-            saved = true;
+            set_modified (false);
         }
         catch (FileError e)
         {

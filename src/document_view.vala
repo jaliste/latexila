@@ -26,4 +26,9 @@ public class DocumentView : Gtk.SourceView
         set_buffer (doc);
         show_line_numbers = true;
     }
+
+    public void scroll_to_cursor ()
+    {
+        scroll_to_mark (this.buffer.get_insert (), 0.25, false, 0, 0);
+    }
 }

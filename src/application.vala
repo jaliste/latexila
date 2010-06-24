@@ -145,7 +145,7 @@ public class Application : GLib.Object
 
     public void create_document ()
     {
-        active_window.on_new ();
+        active_window.on_file_new ();
     }
 
     public void open_documents (string[] uris)

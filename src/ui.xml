@@ -30,11 +30,32 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <menuitem action="FileClose" />
       <menuitem action="FileQuit" />
     </menu>
+
+    <menu action="Edit">
+      <menuitem action="EditUndo" />
+      <menuitem action="EditRedo" />
+      <separator />
+      <menuitem action="EditCut" />
+      <menuitem action="EditCopy" />
+      <menuitem action="EditPaste" />
+      <menuitem action="EditDelete" />
+      <separator />
+      <menuitem action="EditSelectAll" />
+      <separator />
+      <menuitem action="EditPreferences" />
+    </menu>
   </menubar>
 
   <toolbar name="MainToolbar">
     <toolitem action="FileNew" />
     <toolitem action="FileOpen" />
     <toolitem action="FileSave" />
+    <separator />
+    <toolitem action="EditUndo" />
+    <toolitem action="EditRedo" />
+    <separator />
+    <toolitem action="EditCut" />
+    <toolitem action="EditCopy" />
+    <toolitem action="EditPaste" />
   </toolbar>
 </ui>
