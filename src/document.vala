@@ -22,13 +22,12 @@ using Gtk;
 public class Document : Gtk.SourceBuffer
 {
     public File location { get; set; }
-    public bool saved { get; private set; }
     public DocumentTab tab;
+
+    public static const string doc_name_without_location = N_("New document");
 
     public Document ()
     {
-        changed.connect (() => { saved = false; });
-        modified_changed.connect (() => { saved = ! get_modified (); });
     }
 
     public void load (File location)

@@ -138,11 +138,16 @@ public class MainWindow : Window
         /* documents panel (notebook) */
         documents_panel = new DocumentsPanel ();
         documents_panel.page_added.connect (set_file_actions_sensitive);
-        documents_panel.page_removed.connect (set_file_actions_insensitive);
+        documents_panel.page_removed.connect (() =>
+        {
+            set_file_actions_insensitive ();
+            my_set_title ();
+        });
         documents_panel.switch_page.connect (() =>
         {
             set_undo_sensitivity ();
             set_redo_sensitivity ();
+            my_set_title ();
         });
         set_file_actions_insensitive ();
 
@@ -249,6 +254,21 @@ public class MainWindow : Window
             if (tab != active_tab)
                 return;
             selection_changed ();
+        });
+
+        /* set window title */
+        tab.document.notify["location"].connect (() =>
+        {
+            if (tab != active_tab)
+                return;
+            my_set_title ();
+        });
+
+        tab.document.modified_changed.connect (() =>
+        {
+            if (tab != active_tab)
+                return;
+            my_set_title ();
         });
 
         tab.show ();
@@ -358,6 +378,55 @@ public class MainWindow : Window
                 Action action = action_group.get_action (selection_action);
                 action.set_sensitive (has_selection);
             }
+        }
+    }
+
+    private void my_set_title ()
+    {
+        if (active_tab == null)
+        {
+            set_title ("LaTeXila");
+            return;
+        }
+
+        uint max_title_length = 100;
+        string title = null;
+        string dirname = null;
+
+        File loc = active_document.location;
+        if (loc == null)
+            title = Document.doc_name_without_location;
+        else
+        {
+            string basename = loc.get_basename ();
+            if (basename.length > max_title_length)
+                title = Utils.str_middle_truncate (basename, max_title_length);
+            else
+            {
+                title = basename;
+                dirname = Utils.str_middle_truncate (
+                    Utils.get_dirname_for_display (loc),
+                    (uint) long.max (20, max_title_length - basename.length));
+            }
+        }
+
+        if (active_document.get_modified ())
+            title = "*" + title;
+
+        if (active_view.readonly)
+        {
+            if (dirname != null)
+                set_title (title + " [" + _("Read-Only") + "] (" + dirname
+                    + ") - LaTeXila");
+            else
+                set_title (title + " [" + _("Read-Only") + "] - LaTeXila");
+        }
+        else
+        {
+            if (dirname != null)
+                set_title (title + " (" + dirname + ") - LaTeXila");
+            else
+                set_title (title + " - LaTeXila");
         }
     }
 

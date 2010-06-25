@@ -46,12 +46,12 @@ public class DocumentTab : VBox
         document = new Document ();
         document.tab = this;
         document.notify["location"].connect (update_label_text);
-        document.notify["saved"].connect ((s) =>
+        document.modified_changed.connect ((s) =>
         {
-            if (document.saved)
-                _label_mark.label = "";
-            else
+            if (document.get_modified ())
                 _label_mark.label = "*";
+            else
+                _label_mark.label = "";
         });
 
         view = new DocumentView (document);
@@ -88,16 +88,12 @@ public class DocumentTab : VBox
     private void update_label_text ()
     {
         if (document.location == null)
-            label_text = _("New document");
+            label_text = Document.doc_name_without_location;
         else
         {
             string basename = document.location.get_basename ();
-            var n = basename.length;
             // if the basename is too long, we show only the begin and the end
-            if (n >= 42)
-                label_text = basename[0:19] + "..." + basename[n-19:n];
-            else
-                label_text = basename;
+            label_text = Utils.str_middle_truncate (basename, 42);
         }
     }
 }
