@@ -28,6 +28,11 @@ public class Document : Gtk.SourceBuffer
 
     public Document ()
     {
+        // syntax highlighting: LaTeX by default
+        var lm = Gtk.SourceLanguageManager.get_default ();
+        set_language (lm.get_language ("latex"));
+
+        notify["location"].connect (update_syntax_highlighting);
     }
 
     public void load (File location)
@@ -48,6 +53,8 @@ public class Document : Gtk.SourceBuffer
             TextIter iter;
             get_start_iter (out iter);
             place_cursor (iter);
+
+            update_syntax_highlighting ();
         }
         catch (Error e)
         {
@@ -76,5 +83,21 @@ public class Document : Gtk.SourceBuffer
             // TODO show an error message in an infobar
             stderr.printf ("Error: %s\n", e.message);
         }
+    }
+
+    private void update_syntax_highlighting ()
+    {
+        Gtk.SourceLanguageManager lm = Gtk.SourceLanguageManager.get_default ();
+        string content_type = null;
+        try
+        {
+            FileInfo info = location.query_info (FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+                FileQueryInfoFlags.NONE, null);
+            content_type = info.get_content_type ();
+        }
+        catch (Error e) {}
+
+        var lang = lm.guess_language (location.get_parse_name (), content_type);
+        set_language (lang);
     }
 }
