@@ -5,8 +5,9 @@ Mon June 21 -> Sun June 27
 	- open document:
 		- if file is already opened in an other window, open the file in read-only mode,
 		  show a warning to the user so he can choose to edit anyway
-	- tooltip on the tab label with the full path
-	- syntax highlighting (with a menu for choosing the highlight mode)
+	- syntax highlighting:
+		- detect automatically the language
+		- a menu for choosing the highlight mode
 	- source view preferences:
 		- display line numbers
 		- tab width

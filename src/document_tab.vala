@@ -45,7 +45,11 @@ public class DocumentTab : VBox
     {
         document = new Document ();
         document.tab = this;
-        document.notify["location"].connect (update_label_text);
+        document.notify["location"].connect (() =>
+        {
+            update_label_text ();
+            update_label_tooltip ();
+        });
         document.modified_changed.connect ((s) =>
         {
             if (document.get_modified ())
@@ -69,6 +73,7 @@ public class DocumentTab : VBox
         close_button.relief = ReliefStyle.NONE;
         close_button.focus_on_click = false;
         close_button.name = "my-close-button";
+        close_button.tooltip_text = _("Close document");
         close_button.add (new Image.from_stock (STOCK_CLOSE, IconSize.MENU));
         close_button.clicked.connect (() => { this.close_document (); });
 
@@ -76,6 +81,7 @@ public class DocumentTab : VBox
         _label.pack_start (_label_mark, false, false, 0);
         _label.pack_start (_label_text, false, false, 0);
         _label.pack_start (close_button, false, false, 2);
+        update_label_tooltip ();
         _label.show_all ();
     }
 
@@ -95,5 +101,14 @@ public class DocumentTab : VBox
             // if the basename is too long, we show only the begin and the end
             label_text = Utils.str_middle_truncate (basename, 42);
         }
+    }
+
+    private void update_label_tooltip ()
+    {
+        if (document.location == null)
+            _label.tooltip_text = "";
+        else
+            _label.tooltip_text = Utils.replace_home_dir_with_tilde (
+                document.location.get_parse_name ());
     }
 }
