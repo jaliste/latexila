@@ -4,10 +4,7 @@ TODO
 	- open document:
 		- if file is already opened in an other window, open the file in read-only mode,
 		  show a warning to the user so he can choose to edit anyway
-	x close document:
-		x if file not saved, ask the user to close without saving, save the file or cancel
 	- quit:
-		- document without location: Unsaved Document 1, Unsaved Document 2, ...
 		- if file(s) not saved, ask the user which files to save (checkboxes), or quit without saving, or cancel
 	- source view preferences:
 		- display line numbers

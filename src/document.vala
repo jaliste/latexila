@@ -23,8 +23,7 @@ public class Document : Gtk.SourceBuffer
 {
     public File location { get; set; }
     public DocumentTab tab;
-
-    public static const string doc_name_without_location = N_("New document");
+    public uint unsaved_document_n { get; set; }
 
     public Document ()
     {
@@ -99,5 +98,10 @@ public class Document : Gtk.SourceBuffer
 
         var lang = lm.guess_language (location.get_parse_name (), content_type);
         set_language (lang);
+    }
+
+    public string get_unsaved_document_name ()
+    {
+        return _("Unsaved Document") + " %u".printf (unsaved_document_n);
     }
 }

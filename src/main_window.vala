@@ -216,6 +216,19 @@ public class MainWindow : Window
     public DocumentTab? create_tab (bool jump_to)
     {
         var tab = new DocumentTab ();
+
+        /* get unsaved document number */
+        uint[] all_nums = {};
+        foreach (Document doc in Application.get_default ().get_documents ())
+        {
+            if (doc.location == null)
+                all_nums += doc.unsaved_document_n;
+        }
+
+        uint num;
+        for (num = 1 ; num in all_nums ; num++);
+        tab.document.unsaved_document_n = num;
+
         return process_create_tab (tab, jump_to);
     }
 
@@ -441,7 +454,7 @@ public class MainWindow : Window
 
         File loc = active_document.location;
         if (loc == null)
-            title = Document.doc_name_without_location;
+            title = active_document.get_unsaved_document_name ();
         else
         {
             string basename = loc.get_basename ();

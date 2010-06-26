@@ -45,11 +45,15 @@ public class DocumentTab : VBox
     {
         document = new Document ();
         document.tab = this;
+
         document.notify["location"].connect (() =>
         {
             update_label_text ();
             update_label_tooltip ();
         });
+
+        document.notify["unsaved-document-n"].connect (update_label_text);
+
         document.modified_changed.connect ((s) =>
         {
             if (document.get_modified ())
@@ -94,7 +98,7 @@ public class DocumentTab : VBox
     private void update_label_text ()
     {
         if (document.location == null)
-            label_text = Document.doc_name_without_location;
+            label_text = document.get_unsaved_document_name ();
         else
         {
             string basename = document.location.get_basename ();
