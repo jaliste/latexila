@@ -288,6 +288,52 @@ public class MainWindow : Window
 
     public void close_tab (DocumentTab tab)
     {
+        /* If document not saved
+         * Ask the user if he wants to save the file, or close without saving, or cancel
+         */
+        if (tab.document.get_modified ())
+        {
+            var dialog = new MessageDialog (this,
+                DialogFlags.DESTROY_WITH_PARENT,
+                MessageType.QUESTION,
+                ButtonsType.NONE,
+                _("Save changes to document \"%s\" before closing?"),
+                tab.label_text);
+
+            dialog.add_buttons (_("Close without Saving"), ResponseType.CLOSE,
+                STOCK_CANCEL, ResponseType.CANCEL);
+
+            if (tab.document.location == null)
+                dialog.add_button (STOCK_SAVE_AS, ResponseType.ACCEPT);
+            else
+                dialog.add_button (STOCK_SAVE, ResponseType.ACCEPT);
+
+            while (true)
+            {
+                int res = dialog.run ();
+                // Close without Saving
+                if (res == ResponseType.CLOSE)
+                    break;
+
+                // Save or Save As
+                else if (res == ResponseType.ACCEPT)
+                {
+                    if (save_document (tab.document, false))
+                        break;
+                    continue;
+                }
+
+                // Cancel
+                else
+                {
+                    dialog.destroy ();
+                    return;
+                }
+            }
+
+            dialog.destroy ();
+        }
+
         documents_panel.remove_tab (tab);
     }
 
@@ -430,54 +476,14 @@ public class MainWindow : Window
         }
     }
 
-
-    /*******************
-     *    CALLBACKS
-     ******************/
-
-    /* File menu */
-
-    public void on_file_new ()
+    // return true if the document has been saved
+    private bool save_document (Document doc, bool force_save_as)
     {
-        create_tab (true);
-    }
-
-    public void on_new_window ()
-    {
-        Application.get_default ().create_window ();
-    }
-
-    // TODO improve this (see Gedit code)
-    public void on_file_open ()
-    {
-        var file_chooser = new FileChooserDialog (_("Open File"), this,
-            FileChooserAction.OPEN,
-            STOCK_CANCEL, ResponseType.CANCEL,
-            STOCK_OPEN, ResponseType.ACCEPT,
-            null);
-
-        if (this.file_chooser_current_folder != null)
-            file_chooser.set_current_folder (this.file_chooser_current_folder);
-
-        if (file_chooser.run () == ResponseType.ACCEPT)
-            open_document (file_chooser.get_file ());
-
-        this.file_chooser_current_folder = file_chooser.get_current_folder ();
-        file_chooser.destroy ();
-    }
-
-    public void on_file_save ()
-    {
-
-        if (active_document.location == null)
-            this.on_file_save_as ();
-        else
-            active_document.save ();
-    }
-
-    public void on_file_save_as ()
-    {
-        return_if_fail (active_document != null);
+        if (! force_save_as && doc.location != null)
+        {
+            doc.save ();
+            return true;
+        }
 
         var file_chooser = new FileChooserDialog (_("Save File"), this,
             FileChooserAction.SAVE,
@@ -517,15 +523,67 @@ public class MainWindow : Window
                     continue;
             }
 
-            active_document.location = file;
+            doc.location = file;
             break;
         }
 
         this.file_chooser_current_folder = file_chooser.get_current_folder ();
         file_chooser.destroy ();
 
-        if (active_document.location != null)
-            active_document.save ();
+        if (doc.location != null)
+        {
+            doc.save ();
+            return true;
+        }
+        return false;
+    }
+
+
+    /*******************
+     *    CALLBACKS
+     ******************/
+
+    /* File menu */
+
+    public void on_file_new ()
+    {
+        create_tab (true);
+    }
+
+    public void on_new_window ()
+    {
+        Application.get_default ().create_window ();
+    }
+
+    // TODO improve this (see Gedit code)
+    public void on_file_open ()
+    {
+        var file_chooser = new FileChooserDialog (_("Open File"), this,
+            FileChooserAction.OPEN,
+            STOCK_CANCEL, ResponseType.CANCEL,
+            STOCK_OPEN, ResponseType.ACCEPT,
+            null);
+
+        if (this.file_chooser_current_folder != null)
+            file_chooser.set_current_folder (this.file_chooser_current_folder);
+
+        if (file_chooser.run () == ResponseType.ACCEPT)
+            open_document (file_chooser.get_file ());
+
+        this.file_chooser_current_folder = file_chooser.get_current_folder ();
+        file_chooser.destroy ();
+    }
+
+    public void on_file_save ()
+    {
+        return_if_fail (active_tab != null);
+        save_document (active_document, false);
+    }
+
+    public void on_file_save_as ()
+    {
+        return_if_fail (active_tab != null);
+        save_document (active_document, true);
     }
 
     public void on_file_close ()
