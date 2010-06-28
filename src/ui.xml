@@ -44,6 +44,10 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <separator />
       <menuitem action="EditPreferences" />
     </menu>
+
+    <menu action="Documents">
+      <menuitem action="DocumentsCloseAll" />
+    </menu>
   </menubar>
 
   <toolbar name="MainToolbar">

@@ -83,8 +83,8 @@ public class DocumentTab : VBox
 
         _label = new HBox (false, 0);
         _label.pack_start (_label_mark, false, false, 0);
-        _label.pack_start (_label_text, false, false, 0);
-        _label.pack_start (close_button, false, false, 2);
+        _label.pack_start (_label_text, true, false, 0);
+        _label.pack_start (close_button, false, false, 0);
         update_label_tooltip ();
         _label.show_all ();
     }

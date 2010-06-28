@@ -125,7 +125,6 @@ public class Application : GLib.Object
 
         window.destroy.connect (() =>
         {
-            window.on_quit ();
             windows.remove (window);
             if (windows.length () == 0)
                 Gtk.main_quit ();

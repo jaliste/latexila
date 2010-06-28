@@ -45,4 +45,15 @@ public class DocumentsPanel : Notebook
         int pos = page_num (tab);
         remove_page (pos);
     }
+
+    public void remove_all_tabs ()
+    {
+        while (true)
+        {
+            int n = get_current_page ();
+            if (n == -1)
+                break;
+            remove_page (n);
+        }
+    }
 }

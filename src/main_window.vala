@@ -59,7 +59,12 @@ public class MainWindow : Window
         { "EditSelectAll", STOCK_SELECT_ALL, null, "<Control>A",
             N_("Select the entire document"), on_edit_select_all },
         { "EditPreferences", STOCK_PREFERENCES, null, null,
-            N_("Configure the application"), null }
+            N_("Configure the application"), null },
+
+        // Documents
+        { "Documents", null, N_("_Documents") },
+        { "DocumentsCloseAll", STOCK_CLOSE, N_("_Close All"), "<Shift><Control>W",
+            N_("Close all open files"), on_documents_close_all }
     };
 
     private string file_chooser_current_folder = Environment.get_home_dir ();
@@ -117,6 +122,13 @@ public class MainWindow : Window
     {
         this.title = "LaTeXila";
         set_default_size (700, 600);
+        delete_event.connect (() =>
+        {
+            on_quit ();
+
+            // the destroy signal is not emitted
+            return true;
+        });
 
         /* menu and toolbar */
         action_group = new ActionGroup ("ActionGroup");
@@ -299,12 +311,13 @@ public class MainWindow : Window
         return tab;
     }
 
-    public void close_tab (DocumentTab tab)
+    // return true if the tab was closed
+    public bool close_tab (DocumentTab tab, bool force_close = false)
     {
         /* If document not saved
          * Ask the user if he wants to save the file, or close without saving, or cancel
          */
-        if (tab.document.get_modified ())
+        if (! force_close && tab.document.get_modified ())
         {
             var dialog = new MessageDialog (this,
                 DialogFlags.DESTROY_WITH_PARENT,
@@ -340,7 +353,7 @@ public class MainWindow : Window
                 else
                 {
                     dialog.destroy ();
-                    return;
+                    return false;
                 }
             }
 
@@ -348,6 +361,7 @@ public class MainWindow : Window
         }
 
         documents_panel.remove_tab (tab);
+        return true;
     }
 
     public DocumentTab? get_tab_from_location (File location)
@@ -490,7 +504,7 @@ public class MainWindow : Window
     }
 
     // return true if the document has been saved
-    private bool save_document (Document doc, bool force_save_as)
+    public bool save_document (Document doc, bool force_save_as)
     {
         if (! force_save_as && doc.location != null)
         {
@@ -504,8 +518,19 @@ public class MainWindow : Window
             STOCK_SAVE, ResponseType.ACCEPT,
             null);
 
+        file_chooser.set_current_name (doc.tab.label_text);
         if (this.file_chooser_current_folder != null)
             file_chooser.set_current_folder (this.file_chooser_current_folder);
+
+        if (doc.location != null)
+        {
+            try
+            {
+                // override the current name and current folder
+                file_chooser.set_file (doc.location);
+            }
+            catch (Error e) {}
+        }
 
         while (file_chooser.run () == ResponseType.ACCEPT)
         {
@@ -549,6 +574,52 @@ public class MainWindow : Window
             return true;
         }
         return false;
+    }
+
+    private void close_all_documents (bool quit)
+    {
+        /* get unsaved documents */
+        List<Document> unsaved_documents = null;
+
+        foreach (Document doc in get_documents ())
+        {
+            if (doc.get_modified ())
+                unsaved_documents.append (doc);
+        }
+
+        /* no unsaved document */
+        if (unsaved_documents == null)
+        {
+            documents_panel.remove_all_tabs ();
+            if (quit)
+                destroy ();
+        }
+
+        /* only one unsaved document */
+        else if (unsaved_documents.next == null)
+        {
+            Document doc = unsaved_documents.data;
+            active_tab = doc.tab;
+            if (close_tab (doc.tab))
+            {
+                documents_panel.remove_all_tabs ();
+                if (quit)
+                    destroy ();
+            }
+        }
+
+        /* more than one unsaved document */
+        else
+        {
+            Dialogs.close_several_unsaved_documents (this, unsaved_documents);
+            if (documents_panel.get_n_pages () == 0 && quit)
+                destroy ();
+        }
+    }
+
+    public void remove_all_tabs ()
+    {
+        documents_panel.remove_all_tabs ();
     }
 
 
@@ -607,6 +678,7 @@ public class MainWindow : Window
 
     public void on_quit ()
     {
+        close_all_documents (true);
     }
 
     /* Edit menu */
@@ -661,5 +733,12 @@ public class MainWindow : Window
     {
         return_if_fail (active_tab != null);
         active_view.my_select_all ();
+    }
+
+    /* Documents */
+
+    public void on_documents_close_all ()
+    {
+        close_all_documents (false);
     }
 }
