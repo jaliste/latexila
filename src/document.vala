@@ -57,8 +57,11 @@ public class Document : Gtk.SourceBuffer
         }
         catch (Error e)
         {
-            // TODO show an error message in an infobar
             stderr.printf ("Error: %s\n", e.message);
+
+            string primary_msg = _("Impossible to load the file '%s'.")
+                .printf (location.get_parse_name ());
+            tab.add_message (primary_msg, e.message, MessageType.ERROR);
         }
     }
 
@@ -79,8 +82,11 @@ public class Document : Gtk.SourceBuffer
         }
         catch (FileError e)
         {
-            // TODO show an error message in an infobar
             stderr.printf ("Error: %s\n", e.message);
+
+            string primary_msg = _("Impossible to save the file.");
+            var infobar = tab.add_message (primary_msg, e.message, MessageType.ERROR);
+            DocumentTab.infobar_add_ok_button (infobar);
         }
     }
 

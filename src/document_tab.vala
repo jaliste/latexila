@@ -69,7 +69,9 @@ public class DocumentTab : VBox
         sw.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
         sw.add (view);
         sw.show_all ();
-        pack_start (sw, true, true, 0);
+
+        // pack at the end so we can display message above
+        pack_end (sw, true, true, 0);
 
         update_label_text ();
 
@@ -93,6 +95,68 @@ public class DocumentTab : VBox
     {
         this ();
         document.load (location);
+    }
+
+    public InfoBar add_message (string primary_msg, string secondary_msg,
+        MessageType msg_type)
+    {
+        InfoBar infobar = new InfoBar ();
+        HBox content_area = (HBox) infobar.get_content_area ();
+
+        // icon
+        string stock_id;
+        switch (msg_type)
+        {
+            case MessageType.ERROR:
+                stock_id = STOCK_DIALOG_ERROR;
+                break;
+            case MessageType.QUESTION:
+                stock_id = STOCK_DIALOG_QUESTION;
+                break;
+            case MessageType.WARNING:
+                stock_id = STOCK_DIALOG_WARNING;
+                break;
+            case MessageType.INFO:
+            default:
+                stock_id = STOCK_DIALOG_INFO;
+                break;
+        }
+
+        Widget image = new Image.from_stock (stock_id, IconSize.DIALOG);
+        ((Misc) image).set_alignment ((float) 0.5, (float) 0.0);
+        content_area.pack_start (image, false, false, 0);
+
+        // text
+        VBox vbox = new VBox (false, 10);
+        content_area.pack_start (vbox, true, true, 10);
+
+        Label primary_label = new Label (null);
+        vbox.pack_start (primary_label, false, false, 0);
+        primary_label.set_alignment ((float) 0.0, (float) 0.5);
+        primary_label.set_selectable (true);
+        primary_label.set_line_wrap (true);
+        primary_label.set_use_markup (true);
+        primary_label.set_markup ("<b>" + primary_msg + "</b>");
+
+        Label secondary_label = new Label (null);
+        vbox.pack_start (secondary_label, false, false, 0);
+        secondary_label.set_alignment ((float) 0.0, (float) 0.5);
+        secondary_label.set_selectable (true);
+        secondary_label.set_line_wrap (true);
+        secondary_label.set_use_markup (true);
+        secondary_label.set_markup ("<small>" + secondary_msg + "</small>");
+
+        infobar.set_message_type (msg_type);
+        pack_start (infobar, false, false, 0);
+        infobar.show_all ();
+
+        return infobar;
+    }
+
+    public static void infobar_add_ok_button (InfoBar infobar)
+    {
+        infobar.add_button (STOCK_OK, ResponseType.OK);
+        infobar.response.connect (() => { infobar.destroy (); });
     }
 
     private void update_label_text ()
