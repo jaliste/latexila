@@ -76,11 +76,11 @@ public class Document : Gtk.SourceBuffer
 
         try
         {
-            // TODO avoid get_path(), use GIO
-            FileUtils.set_contents (location.get_path (), text);
+            location.replace_contents (text, text.length, null, false,
+                FileCreateFlags.NONE, null, null);
             set_modified (false);
         }
-        catch (FileError e)
+        catch (Error e)
         {
             stderr.printf ("Error: %s\n", e.message);
 
