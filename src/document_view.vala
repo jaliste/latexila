@@ -28,6 +28,7 @@ public class DocumentView : Gtk.SourceView
     {
         set_buffer (doc);
         show_line_numbers = true;
+        notify["readonly"].connect (() => { set_editable (! readonly); });
     }
 
     public void scroll_to_cursor (double margin = 0.25)

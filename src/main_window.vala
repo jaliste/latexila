@@ -208,15 +208,32 @@ public class MainWindow : Window
             {
                 if (doc.location != null && location.equal (doc.location))
                 {
-                    // if the document is already opened in this window
+                    /* the document is already opened in this window */
                     if (this == w)
+                    {
                         active_tab = doc.tab;
+                        return;
+                    }
 
-                    // if the document is already opened in an other window
-                    else
-                        stdout.printf ("'%s' already opened in an other window\n",
-                            location.get_path ());
+                    /* the document is already opened in another window */
+                    stdout.printf ("'%s' already opened in an other window\n",
+                        location.get_parse_name ());
 
+                    DocumentTab tab = create_tab_from_location (location, true);
+                    tab.view.readonly = true;
+                    string primary_msg = _("This file (%s) is already opened in another LaTeXila window.")
+                        .printf (location.get_parse_name ());
+                    string secondary_msg = _("LaTeXila opened this instance of the file in a non-editable way. Do you want to edit it anyway?");
+                    InfoBar infobar = tab.add_message (primary_msg, secondary_msg,
+                        MessageType.WARNING);
+                    infobar.add_button (_("Edit Anyway"), ResponseType.YES);
+                    infobar.add_button (_("Don't Edit"), ResponseType.NO);
+                    infobar.response.connect ((response_id) =>
+                    {
+                        if (response_id == ResponseType.YES)
+                            tab.view.readonly = false;
+                        infobar.destroy ();
+                    });
                     return;
                 }
             }
