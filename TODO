@@ -9,8 +9,7 @@ TODO
 		- highlight matching brackets
 		- font
 		- color scheme
-	- the file changed on disk:
-		- when saving: "If you save it, all the external changes could be lost. Save it anyway?"
+	- open multiple files
 
 - open recent
 	- in the menu: same as in LaTeXila 0.2

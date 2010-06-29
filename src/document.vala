@@ -71,9 +71,28 @@ public class Document : Gtk.SourceBuffer
         }
     }
 
-    public void save ()
+    public void save (bool check_file_changed_on_disk = true)
     {
         assert (location != null);
+
+        if (check_file_changed_on_disk && is_externally_modified ())
+        {
+            string primary_msg = _("The file %s has been modified since reading it.")
+                .printf (location.get_parse_name ());
+            string secondary_msg = _("If you save it, all the external changes could be lost. Save it anyway?");
+            TabInfoBar infobar = tab.add_message (primary_msg, secondary_msg,
+                MessageType.WARNING);
+            infobar.add_stock_button_with_text (_("Save Anyway"), STOCK_SAVE,
+                ResponseType.YES);
+            infobar.add_button (_("Don't Save"), ResponseType.CANCEL);
+            infobar.response.connect ((response_id) =>
+            {
+                if (response_id == ResponseType.YES)
+                    save (false);
+                infobar.destroy ();
+            });
+            return;
+        }
 
         // we use get_text () to exclude undisplayed text
         TextIter start, end;

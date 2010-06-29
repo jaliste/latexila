@@ -585,7 +585,7 @@ public class MainWindow : Window
 
         if (doc.location != null)
         {
-            doc.save ();
+            doc.save (false);
             return true;
         }
         return false;
@@ -654,7 +654,6 @@ public class MainWindow : Window
         Application.get_default ().create_window ();
     }
 
-    // TODO improve this (see Gedit code)
     public void on_file_open ()
     {
         var file_chooser = new FileChooserDialog (_("Open File"), this,
