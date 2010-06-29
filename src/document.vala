@@ -24,6 +24,7 @@ public class Document : Gtk.SourceBuffer
     public File location { get; set; }
     public DocumentTab tab;
     public uint unsaved_document_n { get; set; }
+    private TimeVal mtime;
 
     public Document ()
     {
@@ -32,6 +33,8 @@ public class Document : Gtk.SourceBuffer
         set_language (lm.get_language ("latex"));
 
         notify["location"].connect (update_syntax_highlighting);
+
+        mtime = { 0, 0 };
     }
 
     public void load (File location)
@@ -42,11 +45,14 @@ public class Document : Gtk.SourceBuffer
         {
             string text;
             location.load_contents (null, out text, null, null);
+
+            mtime = get_modification_time ();
+
             begin_not_undoable_action ();
             set_text (text, -1);
-            end_not_undoable_action ();
             Utils.flush_queue ();
             set_modified (false);
+            end_not_undoable_action ();
 
             // move the cursor at the first line
             TextIter iter;
@@ -78,6 +84,7 @@ public class Document : Gtk.SourceBuffer
         {
             location.replace_contents (text, text.length, null, false,
                 FileCreateFlags.NONE, null, null);
+            mtime = get_modification_time ();
             set_modified (false);
         }
         catch (Error e)
@@ -85,8 +92,8 @@ public class Document : Gtk.SourceBuffer
             stderr.printf ("Error: %s\n", e.message);
 
             string primary_msg = _("Impossible to save the file.");
-            var infobar = tab.add_message (primary_msg, e.message, MessageType.ERROR);
-            DocumentTab.infobar_add_ok_button (infobar);
+            TabInfoBar infobar = tab.add_message (primary_msg, e.message, MessageType.ERROR);
+            infobar.add_ok_button ();
         }
     }
 
@@ -109,5 +116,40 @@ public class Document : Gtk.SourceBuffer
     public string get_unsaved_document_name ()
     {
         return _("Unsaved Document") + " %u".printf (unsaved_document_n);
+    }
+
+    public bool is_local ()
+    {
+        if (location == null)
+            return false;
+        return location.has_uri_scheme ("file");
+    }
+
+    public bool is_externally_modified ()
+    {
+        if (location == null)
+            return false;
+
+        TimeVal timeval = get_modification_time ();
+
+        return (timeval.tv_sec > mtime.tv_sec) ||
+            (timeval.tv_sec == mtime.tv_sec && timeval.tv_usec > mtime.tv_usec);
+    }
+
+    private TimeVal get_modification_time ()
+    {
+        TimeVal timeval = { 0, 0 };
+        try
+        {
+            FileInfo info = location.query_info (FILE_ATTRIBUTE_TIME_MODIFIED,
+                FileQueryInfoFlags.NONE, null);
+            if (info.has_attribute (FILE_ATTRIBUTE_TIME_MODIFIED))
+            {
+                info.get_modification_time (out timeval);
+                return timeval;
+            }
+        }
+        catch (Error e) {}
+        return timeval;
     }
 }

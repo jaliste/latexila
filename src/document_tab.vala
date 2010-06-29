@@ -24,6 +24,8 @@ public class DocumentTab : VBox
     public DocumentView view { get; private set; }
     public Document document { get; private set; }
 
+    private bool ask_if_externally_modified = false;
+
     private HBox _label;
     private Label _label_text = new Label (null);
     private Label _label_mark = new Label (null);
@@ -64,6 +66,8 @@ public class DocumentTab : VBox
 
         view = new DocumentView (document);
 
+        view.focus_in_event.connect (view_focused_in);
+
         // with a scrollbar
         var sw = new ScrolledWindow (null, null);
         sw.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
@@ -97,66 +101,12 @@ public class DocumentTab : VBox
         document.load (location);
     }
 
-    public InfoBar add_message (string primary_msg, string secondary_msg,
+    public TabInfoBar add_message (string primary_msg, string secondary_msg,
         MessageType msg_type)
     {
-        InfoBar infobar = new InfoBar ();
-        HBox content_area = (HBox) infobar.get_content_area ();
-
-        // icon
-        string stock_id;
-        switch (msg_type)
-        {
-            case MessageType.ERROR:
-                stock_id = STOCK_DIALOG_ERROR;
-                break;
-            case MessageType.QUESTION:
-                stock_id = STOCK_DIALOG_QUESTION;
-                break;
-            case MessageType.WARNING:
-                stock_id = STOCK_DIALOG_WARNING;
-                break;
-            case MessageType.INFO:
-            default:
-                stock_id = STOCK_DIALOG_INFO;
-                break;
-        }
-
-        Widget image = new Image.from_stock (stock_id, IconSize.DIALOG);
-        ((Misc) image).set_alignment ((float) 0.5, (float) 0.0);
-        content_area.pack_start (image, false, false, 0);
-
-        // text
-        VBox vbox = new VBox (false, 10);
-        content_area.pack_start (vbox, true, true, 10);
-
-        Label primary_label = new Label (null);
-        vbox.pack_start (primary_label, false, false, 0);
-        primary_label.set_alignment ((float) 0.0, (float) 0.5);
-        primary_label.set_selectable (true);
-        primary_label.set_line_wrap (true);
-        primary_label.set_use_markup (true);
-        primary_label.set_markup ("<b>" + primary_msg + "</b>");
-
-        Label secondary_label = new Label (null);
-        vbox.pack_start (secondary_label, false, false, 0);
-        secondary_label.set_alignment ((float) 0.0, (float) 0.5);
-        secondary_label.set_selectable (true);
-        secondary_label.set_line_wrap (true);
-        secondary_label.set_use_markup (true);
-        secondary_label.set_markup ("<small>" + secondary_msg + "</small>");
-
-        infobar.set_message_type (msg_type);
+        TabInfoBar infobar = new TabInfoBar (primary_msg, secondary_msg, msg_type);
         pack_start (infobar, false, false, 0);
-        infobar.show_all ();
-
         return infobar;
-    }
-
-    public static void infobar_add_ok_button (InfoBar infobar)
-    {
-        infobar.add_button (STOCK_OK, ResponseType.OK);
-        infobar.response.connect (() => { infobar.destroy (); });
     }
 
     private void update_label_text ()
@@ -178,5 +128,52 @@ public class DocumentTab : VBox
         else
             _label.tooltip_text = Utils.replace_home_dir_with_tilde (
                 document.location.get_parse_name ());
+    }
+
+    private bool view_focused_in ()
+    {
+        /* check if the document has been externally modified */
+
+        // we already asked the user
+        if (ask_if_externally_modified)
+            return false;
+
+        // if file was never saved or is remote we do not check
+        if (! document.is_local ())
+            return false;
+
+        if (document.is_externally_modified ())
+        {
+            ask_if_externally_modified = true;
+
+            string primary_msg = _("The file %s changed on disk.")
+                .printf (document.location.get_parse_name ());
+
+            string secondary_msg;
+            if (document.get_modified ())
+                secondary_msg = _("Do you want to drop your changes and reload the file?");
+            else
+                secondary_msg = _("Do you want to reload the file?");
+
+            TabInfoBar infobar = add_message (primary_msg, secondary_msg,
+                MessageType.WARNING);
+            infobar.add_stock_button_with_text (_("Reload"), STOCK_REFRESH,
+                ResponseType.OK);
+            infobar.add_button (STOCK_CANCEL, ResponseType.CANCEL);
+
+            infobar.response.connect ((response_id) =>
+            {
+                if (response_id == ResponseType.OK)
+                {
+                    document.load (document.location);
+                    ask_if_externally_modified = false;
+                }
+
+                infobar.destroy ();
+                view.grab_focus ();
+            });
+        }
+
+        return false;
     }
 }

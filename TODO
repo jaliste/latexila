@@ -10,7 +10,6 @@ TODO
 		- font
 		- color scheme
 	- the file changed on disk:
-		- show a warning message to the user: reload or cancel
 		- when saving: "If you save it, all the external changes could be lost. Save it anyway?"
 
 - open recent

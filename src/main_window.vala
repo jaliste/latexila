@@ -216,9 +216,6 @@ public class MainWindow : Window
                     }
 
                     /* the document is already opened in another window */
-                    stdout.printf ("'%s' already opened in an other window\n",
-                        location.get_parse_name ());
-
                     DocumentTab tab = create_tab_from_location (location, true);
                     tab.view.readonly = true;
                     string primary_msg = _("This file (%s) is already opened in another LaTeXila window.")
@@ -233,6 +230,7 @@ public class MainWindow : Window
                         if (response_id == ResponseType.YES)
                             tab.view.readonly = false;
                         infobar.destroy ();
+                        tab.view.grab_focus ();
                     });
                     return;
                 }
