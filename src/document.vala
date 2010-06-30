@@ -69,6 +69,8 @@ public class Document : Gtk.SourceBuffer
             place_cursor (iter);
 
             update_syntax_highlighting ();
+
+            RecentManager.get_default ().add_item (location.get_uri ());
         }
         catch (Error e)
         {
@@ -114,6 +116,8 @@ public class Document : Gtk.SourceBuffer
                 FileCreateFlags.NONE, null, null);
             mtime = get_modification_time ();
             set_modified (false);
+
+            RecentManager.get_default ().add_item (location.get_uri ());
         }
         catch (Error e)
         {

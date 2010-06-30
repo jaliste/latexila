@@ -12,9 +12,4 @@ TODO
 	- open multiple files
 
 - open recent
-	- in the menu: same as in LaTeXila 0.2
 	- in the toolbar: _one_ open button with a bottom arrow to select recent files
-
-- statusbar
-	- left: some messages
-	x right: line and column numbers

@@ -23,6 +23,7 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <menuitem action="FileNew" />
       <menuitem action="FileNewWindow" />
       <menuitem action="FileOpen" />
+      <menuitem action="FileOpenRecent" />
       <separator />
       <menuitem action="FileSave" />
       <menuitem action="FileSaveAs" />

@@ -122,9 +122,26 @@ public class MainWindow : Window
         });
 
         /* menu and toolbar */
+
+        // recent documents
+        Action recent_action = new RecentAction ("FileOpenRecent", _("Open _Recent"),
+            _("Open recently used files"), "");
+        RecentFilter filter = new RecentFilter ();
+        filter.add_application ("latexila");
+        RecentChooser recent_chooser = (RecentChooser) recent_action;
+        recent_chooser.add_filter (filter);
+        recent_chooser.set_sort_type (RecentSortType.MRU);
+
+        recent_chooser.item_activated.connect ((chooser) =>
+        {
+            string uri = chooser.get_current_uri ();
+            open_document (File.new_for_uri (uri));
+        });
+
         action_group = new ActionGroup ("ActionGroup");
         action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
         action_group.add_actions (action_entries, this);
+        action_group.add_action (recent_action);
 
         var ui_manager = new UIManager ();
         ui_manager.insert_action_group (action_group, 0);
