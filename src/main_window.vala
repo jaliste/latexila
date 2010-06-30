@@ -70,16 +70,7 @@ public class MainWindow : Window
     private string file_chooser_current_folder = Environment.get_home_dir ();
     private DocumentsPanel documents_panel;
     private ActionGroup action_group;
-
-    // actions that must be insensitive if the notebook is empty
-    private const string[] file_actions =
-    {
-        "FileSave", "FileSaveAs", "FileClose", "EditUndo", "EditRedo", "EditCut",
-        "EditCopy", "EditPaste", "EditDelete", "EditSelectAll"
-    };
-
-    // actions that must be insensitive if there is no selection
-    private const string[] selection_actions = { "EditCut", "EditCopy", "EditDelete" };
+    private CustomStatusbar statusbar;
 
     public DocumentTab? active_tab
     {
@@ -147,30 +138,45 @@ public class MainWindow : Window
             error ("%s", err.message);
         }
 
-        /* documents panel (notebook) */
+        /* components */
         documents_panel = new DocumentsPanel ();
-        documents_panel.page_added.connect (set_file_actions_sensitive);
+        var menu = ui_manager.get_widget ("/MainMenu");
+        var toolbar = ui_manager.get_widget ("/MainToolbar");
+        statusbar = new CustomStatusbar ();
+
+        /* signal handlers */
+        documents_panel.page_added.connect (() =>
+        {
+            if (documents_panel.get_n_pages () == 1)
+                set_file_actions_sensitivity (true);
+        });
+
         documents_panel.page_removed.connect (() =>
         {
-            set_file_actions_insensitive ();
+            if (documents_panel.get_n_pages () == 0)
+            {
+                statusbar.set_cursor_position (-1, -1);
+                set_file_actions_sensitivity (false);
+            }
             my_set_title ();
         });
+
         documents_panel.switch_page.connect (() =>
         {
             set_undo_sensitivity ();
             set_redo_sensitivity ();
             my_set_title ();
+            update_cursor_position_statusbar ();
         });
-        set_file_actions_insensitive ();
 
-        var menu = ui_manager.get_widget ("/MainMenu");
-        var toolbar = ui_manager.get_widget ("/MainToolbar");
+        set_file_actions_sensitivity (false);
 
-        // packing widgets
+        /* packing widgets */
         var main_vbox = new VBox (false, 0);
         main_vbox.pack_start (menu, false, false, 0);
         main_vbox.pack_start (toolbar, false, false, 0);
         main_vbox.pack_start (documents_panel, true, true, 0);
+        main_vbox.pack_end (statusbar, false, false, 0);
 
         add (main_vbox);
     }
@@ -311,6 +317,8 @@ public class MainWindow : Window
             my_set_title ();
         });
 
+        tab.document.cursor_moved.connect (update_cursor_position_statusbar);
+
         tab.show ();
 
         // add the tab at the end of the notebook
@@ -412,29 +420,19 @@ public class MainWindow : Window
         return ws == workspace || ws == Gedit.Utils.Workspace.ALL_WORKSPACES;
     }
 
-    private void set_file_actions_sensitive ()
+    private void set_file_actions_sensitivity (bool sensitive)
     {
-        // the notebook was empty and one page is added
-        // after, when other pages are added, we do nothing
-        if (documents_panel.get_n_pages () == 1)
+        // actions that must be insensitive if the notebook is empty
+        string[] file_actions =
         {
-            foreach (string file_action in file_actions)
-            {
-                Action action = action_group.get_action (file_action);
-                action.set_sensitive (true);
-            }
-        }
-    }
+            "FileSave", "FileSaveAs", "FileClose", "EditUndo", "EditRedo", "EditCut",
+            "EditCopy", "EditPaste", "EditDelete", "EditSelectAll"
+        };
 
-    private void set_file_actions_insensitive ()
-    {
-        if (documents_panel.get_n_pages () == 0)
+        foreach (string file_action in file_actions)
         {
-            foreach (string file_action in file_actions)
-            {
-                Action action = action_group.get_action (file_action);
-                action.set_sensitive (false);
-            }
+            Action action = action_group.get_action (file_action);
+            action.set_sensitive (sensitive);
         }
     }
 
@@ -461,6 +459,10 @@ public class MainWindow : Window
         if (active_tab != null)
         {
             bool has_selection = active_document.has_selection;
+
+            // actions that must be insensitive if there is no selection
+            string[] selection_actions = { "EditCut", "EditCopy", "EditDelete" };
+
             foreach (string selection_action in selection_actions)
             {
                 Action action = action_group.get_action (selection_action);
@@ -635,6 +637,15 @@ public class MainWindow : Window
     public void remove_all_tabs ()
     {
         documents_panel.remove_all_tabs ();
+    }
+
+    private void update_cursor_position_statusbar ()
+    {
+        TextIter iter;
+        active_document.get_iter_at_mark (out iter, active_document.get_insert ());
+        int row = (int) iter.get_line ();
+        int col = (int) active_view.my_get_visual_column (iter);
+        statusbar.set_cursor_position (row + 1, col + 1);
     }
 
 

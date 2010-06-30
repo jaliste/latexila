@@ -81,4 +81,27 @@ public class DocumentView : Gtk.SourceView
         buffer.get_bounds (out start, out end);
         buffer.select_range (start, end);
     }
+
+    // TODO when GtkSourceView 3.0 is released we can delete this function
+    public uint my_get_visual_column (TextIter iter)
+    {
+        uint column = 0;
+        uint tab_width = get_tab_width ();
+
+        TextIter position = iter;
+        position.set_visible_line_offset (0);
+
+        while (! iter.equal (position))
+        {
+            if (position.get_char () == '\t')
+                column += (tab_width - (column % tab_width));
+            else
+                column++;
+
+            if (! position.forward_visible_cursor_position ())
+                break;
+        }
+
+        return column;
+    }
 }

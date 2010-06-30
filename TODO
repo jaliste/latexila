@@ -16,3 +16,5 @@ TODO
 	- in the toolbar: _one_ open button with a bottom arrow to select recent files
 
 - statusbar
+	- left: some messages
+	x right: line and column numbers

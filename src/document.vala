@@ -26,6 +26,9 @@ public class Document : Gtk.SourceBuffer
     public uint unsaved_document_n { get; set; }
     private TimeVal mtime;
 
+    private bool stop_cursor_moved_emission = false;
+    public signal void cursor_moved ();
+
     public Document ()
     {
         // syntax highlighting: LaTeX by default
@@ -33,6 +36,12 @@ public class Document : Gtk.SourceBuffer
         set_language (lm.get_language ("latex"));
 
         notify["location"].connect (update_syntax_highlighting);
+        mark_set.connect ((location, mark) =>
+        {
+            if (mark == get_insert ())
+                emit_cursor_moved ();
+        });
+        changed.connect (emit_cursor_moved);
 
         mtime = { 0, 0 };
     }
@@ -170,5 +179,11 @@ public class Document : Gtk.SourceBuffer
         }
         catch (Error e) {}
         return timeval;
+    }
+
+    private void emit_cursor_moved ()
+    {
+        if (! stop_cursor_moved_emission)
+            cursor_moved ();
     }
 }
