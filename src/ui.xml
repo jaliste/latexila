@@ -53,7 +53,6 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
 
   <toolbar name="MainToolbar">
     <toolitem action="FileNew" />
-    <toolitem action="FileOpen" />
     <toolitem action="FileSave" />
     <separator />
     <toolitem action="EditUndo" />

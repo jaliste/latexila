@@ -126,17 +126,7 @@ public class MainWindow : Window
         // recent documents
         Action recent_action = new RecentAction ("FileOpenRecent", _("Open _Recent"),
             _("Open recently used files"), "");
-        RecentFilter filter = new RecentFilter ();
-        filter.add_application ("latexila");
-        RecentChooser recent_chooser = (RecentChooser) recent_action;
-        recent_chooser.add_filter (filter);
-        recent_chooser.set_sort_type (RecentSortType.MRU);
-
-        recent_chooser.item_activated.connect ((chooser) =>
-        {
-            string uri = chooser.get_current_uri ();
-            open_document (File.new_for_uri (uri));
-        });
+        configure_recent_chooser ((RecentChooser) recent_action);
 
         action_group = new ActionGroup ("ActionGroup");
         action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
@@ -158,7 +148,10 @@ public class MainWindow : Window
         /* components */
         documents_panel = new DocumentsPanel ();
         var menu = ui_manager.get_widget ("/MainMenu");
-        var toolbar = ui_manager.get_widget ("/MainToolbar");
+        Toolbar toolbar = (Toolbar) ui_manager.get_widget ("/MainToolbar");
+        toolbar.set_style (ToolbarStyle.ICONS);
+        setup_toolbar_open_button (toolbar);
+
         statusbar = new CustomStatusbar ();
 
         /* signal handlers */
@@ -663,6 +656,39 @@ public class MainWindow : Window
         int row = (int) iter.get_line ();
         int col = (int) active_view.my_get_visual_column (iter);
         statusbar.set_cursor_position (row + 1, col + 1);
+    }
+
+    private void setup_toolbar_open_button (Toolbar toolbar)
+    {
+        RecentManager recent_manager = RecentManager.get_default ();
+        Widget toolbar_recent_menu = new RecentChooserMenu.for_manager (recent_manager);
+        configure_recent_chooser ((RecentChooser) toolbar_recent_menu);
+
+        MenuToolButton open_button = new MenuToolButton.from_stock (STOCK_OPEN);
+        open_button.set_menu (toolbar_recent_menu);
+        open_button.set_tooltip_text (_("Open a file"));
+        open_button.set_arrow_tooltip_text (_("Open a recently used file"));
+
+        Action action = action_group.get_action ("FileOpen");
+        open_button.set_related_action (action);
+
+        toolbar.insert (open_button, 1);
+    }
+
+    private void configure_recent_chooser (RecentChooser recent_chooser)
+    {
+        recent_chooser.set_local_only (false);
+        recent_chooser.set_sort_type (RecentSortType.MRU);
+
+        RecentFilter filter = new RecentFilter ();
+        filter.add_application ("latexila");
+        recent_chooser.set_filter (filter);
+
+        recent_chooser.item_activated.connect ((chooser) =>
+        {
+            string uri = chooser.get_current_uri ();
+            open_document (File.new_for_uri (uri));
+        });
     }
 
 
