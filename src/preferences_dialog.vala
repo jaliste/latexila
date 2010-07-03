@@ -45,20 +45,29 @@ public class PreferencesDialog : Dialog
 
             // get objects
             Widget notebook = (Widget) builder.get_object ("notebook");
-            GLib.Object display_line_nb_checkbutton =
+            var display_line_nb_checkbutton =
                 builder.get_object ("display_line_nb_checkbutton");
-            GLib.Object tab_width_spinbutton = builder.get_object ("tab_width_spinbutton");
-            GLib.Object insert_spaces_checkbutton =
+            var tab_width_spinbutton = builder.get_object ("tab_width_spinbutton");
+            var insert_spaces_checkbutton =
                 builder.get_object ("insert_spaces_checkbutton");
-            GLib.Object hl_current_line_checkbutton =
+            var hl_current_line_checkbutton =
                 builder.get_object ("hl_current_line_checkbutton");
-            GLib.Object bracket_matching_checkbutton =
+            var bracket_matching_checkbutton =
                 builder.get_object ("bracket_matching_checkbutton");
+
+            Button default_font_checkbutton =
+                (Button) builder.get_object ("default_font_checkbutton");
+            var font_button = builder.get_object ("font_button");
+            Widget font_hbox = (Widget) builder.get_object ("font_hbox");
 
             // bind settings
             GLib.Settings settings =
                 new GLib.Settings ("org.gnome.latexila.preferences.editor");
 
+            settings.bind ("use-default-font", default_font_checkbutton, "active",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            settings.bind ("editor-font", font_button, "font-name",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
             settings.bind ("tabs-size", tab_width_spinbutton, "value",
                 SettingsBindFlags.GET | SettingsBindFlags.SET);
             settings.bind ("insert-spaces", insert_spaces_checkbutton, "active",
@@ -74,6 +83,20 @@ public class PreferencesDialog : Dialog
             Box content_area = (Box) get_content_area ();
             content_area.pack_start (notebook, false, false, 0);
             ((Container) notebook).border_width = 5;
+
+            // font hbox sensitivity
+            bool use_default_font = settings.get_boolean ("use-default-font");
+            font_hbox.set_sensitive (! use_default_font);
+            settings.changed["use-default-font"].connect ((setting, key) =>
+            {
+                bool val = setting.get_boolean (key);
+                font_hbox.set_sensitive (! val);
+            });
+
+            // default font checkbutton label
+            string label = _("Use the system fixed width font (%s)")
+                .printf (Application.get_default ().settings.get_system_font ());
+            default_font_checkbutton.set_label (label);
         }
         catch (Error e)
         {

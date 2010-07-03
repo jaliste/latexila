@@ -39,8 +39,12 @@ public class DocumentView : Gtk.SourceView
             new GLib.Settings ("org.gnome.latexila.preferences.editor");
 
         // font
-        var font_desc = Pango.FontDescription.from_string ("Monospace 10");
-        modify_font (font_desc);
+        string font;
+        if (settings.get_boolean ("use-default-font"))
+            font = Application.get_default ().settings.get_system_font ();
+        else
+            font = settings.get_string ("editor-font");
+        set_font (font);
 
         // tab width
         Variant variant = settings.get_value ("tabs-size");
@@ -124,5 +128,11 @@ public class DocumentView : Gtk.SourceView
         }
 
         return column;
+    }
+
+    public void set_font (string font)
+    {
+        Pango.FontDescription font_desc = Pango.FontDescription.from_string (font);
+        modify_font (font_desc);
     }
 }

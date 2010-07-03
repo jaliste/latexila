@@ -34,6 +34,25 @@ public class AppSettings : GLib.Settings
         editor = prefs.get_child ("editor");
         //desktop_interface = new Settings ("org.gnome.Desktop.Interface");
 
+        editor.changed["use-default-font"].connect ((setting, key) =>
+        {
+            bool val = setting.get_boolean (key);
+            string font;
+            if (val)
+                font = get_system_font ();
+            else
+                font = editor.get_string ("editor-font");
+            set_font (font);
+        });
+
+        editor.changed["editor-font"].connect ((setting, key) =>
+        {
+            if (editor.get_boolean ("use-default-font"))
+                return;
+            string font = setting.get_string (key);
+            set_font (font);
+        });
+
         editor.changed["tabs-size"].connect ((setting, key) =>
         {
             Variant variant = setting.get_value (key);
@@ -80,5 +99,18 @@ public class AppSettings : GLib.Settings
             foreach (Document doc in docs)
                 doc.highlight_matching_brackets = val;
         });
+    }
+
+    public string get_system_font ()
+    {
+        //return desktop_interface.get_string ("monospace-font-name");
+        return "Monospace 10";
+    }
+
+    private void set_font (string font)
+    {
+        List<DocumentView> views = Application.get_default ().get_views ();
+        foreach (DocumentView view in views)
+            view.set_font (font);
     }
 }
