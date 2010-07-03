@@ -17,8 +17,8 @@
  * along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- namespace Utils
- {
+namespace Utils
+{
     public static void flush_queue ()
     {
         while (Gtk.events_pending ())
@@ -88,4 +88,4 @@
             return uri_get_dirname (path);
         }
     }
- }
+}

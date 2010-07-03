@@ -19,23 +19,22 @@ find_package (Gettext REQUIRED)
 file (GLOB latexila_PO_FILES ${latexila_SOURCE_DIR}/po/*.po)
 gettext_create_translations (po/latexila.pot ALL ${latexila_PO_FILES})
 
+set (SCHEMA_DIR "${CMAKE_INSTALL_PREFIX}/share")
 configure_file (${latexila_SOURCE_DIR}/src/config.h.in
 	${latexila_BINARY_DIR}/src/config.h)
 add_definitions (-include config.h)
 
 list (APPEND CMAKE_MODULE_PATH "${latexila_SOURCE_DIR}/cmake/vala")
 include (ValaPrecompile)
+include (ValaVersion)
 find_package (Vala REQUIRED)
-
-# TODO which minimum version of vala is required for latexila?
-#include (ValaVersion)
-#ensure_vala_version ("0.8.1" MINIMUM)
+ensure_vala_version ("0.9.2" MINIMUM)
 
 find_package (PkgConfig)
 pkg_check_modules (GTK REQUIRED "gtk+-2.0 >= 2.16")
 pkg_check_modules (GTKSOURCEVIEW REQUIRED "gtksourceview-2.0 >= 2.4")
 #pkg_check_modules (GEE REQUIRED "gee-1.0")
-pkg_check_modules (GIO REQUIRED "gio-2.0")
+pkg_check_modules (GIO REQUIRED "gio-2.0 >= 2.25.10")
 pkg_check_modules (UNIQUE REQUIRED "unique-1.0")
 pkg_check_modules (GDK-X11 REQUIRED "gdk-x11-2.0")
 pkg_check_modules (X11 REQUIRED "x11")
@@ -62,3 +61,4 @@ link_libraries (
 
 include_directories (vapi src)
 add_subdirectory (src)
+add_subdirectory (data)

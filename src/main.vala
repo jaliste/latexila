@@ -43,6 +43,10 @@ const OptionEntry[] options =
 
 int main (string[] args)
 {
+    // for GSettings
+    Environment.set_variable ("XDG_DATA_DIRS",
+        "/usr/share:/usr/local/share:" + Config.SCHEMA_DIR, true);
+
     /* internationalisation */
     Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
     Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");

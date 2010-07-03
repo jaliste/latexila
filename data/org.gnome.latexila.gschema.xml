@@ -1,0 +1,53 @@
+<schemalist>
+  <schema id="org.gnome.latexila" path="/apps/latexila/">
+    <child name="preferences" schema="org.gnome.latexila.preferences" />
+    <child name="state" schema="org.gnome.latexila.state" />
+  </schema>
+
+  <schema id="org.gnome.latexila.preferences" path="/apps/latexila/preferences/">
+    <child name="editor" schema="org.gnome.latexila.preferences.editor" />
+  </schema>
+
+  <schema id="org.gnome.latexila.preferences.editor" path="/apps/latexila/preferences/editor/">
+    <key name="use-default-font" type="b">
+      <default>true</default>
+      <summary>Use Default Font</summary>
+      <description>Whether to use the system's default fixed width font for editing text instead of a font specific to LaTeXila. If this option is turned off, then the font named in the "Editor Font" option will be used instead of the system font.</description>
+    </key>
+    <key name="editor-font" type="s">
+      <default>'Monospace 10'</default>
+      <summary>Editor Font</summary>
+      <description>A custom font that will be used for the editing area. This will only take effect if the "Use Default Font" option is turned off.</description>
+    </key>
+    <key name="scheme" type="s">
+      <default>'classic'</default>
+      <summary>Style Scheme</summary>
+      <description>The ID of a GtkSourceView Style Scheme used to color the text.</description>
+    </key>
+    <key name="tabs-size" type="u">
+      <default>2</default>
+      <summary>Tab Size</summary>
+      <description>Specifies the number of spaces that should be displayed instead of Tab characters.</description>
+    </key>
+    <key name="insert-spaces" type="b">
+      <default>true</default>
+      <summary>Insert spaces</summary>
+      <description>Whether LaTeXila should insert spaces instead of tabs.</description>
+    </key>
+    <key name="display-line-numbers" type="b">
+      <default>false</default>
+      <summary>Display Line Numbers</summary>
+      <description>Whether LaTeXila should display line numbers in the editing area.</description>
+    </key>
+    <key name="highlight-current-line" type="b">
+      <default>true</default>
+      <summary>Highlight Current Line</summary>
+      <description>Whether LaTeXila should highlight the current line.</description>
+    </key>
+    <key name="bracket-matching" type="b">
+      <default>true</default>
+      <summary>Highlight Matching Brackets</summary>
+      <description>Whether LaTeXila should highlight matching brackets.</description>
+    </key>
+  </schema>
+</schemalist>

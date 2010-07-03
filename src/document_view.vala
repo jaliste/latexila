@@ -27,8 +27,29 @@ public class DocumentView : Gtk.SourceView
     public DocumentView (Document doc)
     {
         set_buffer (doc);
-        show_line_numbers = true;
+
         notify["readonly"].connect (() => { set_editable (! readonly); });
+
+        wrap_mode = WrapMode.WORD;
+        auto_indent = true;
+        indent_width = -1;
+
+        /* settings */
+        GLib.Settings settings =
+            new GLib.Settings ("org.gnome.latexila.preferences.editor");
+
+        // font
+        var font_desc = Pango.FontDescription.from_string ("Monospace 10");
+        modify_font (font_desc);
+
+        // tab width
+        Variant variant = settings.get_value ("tabs-size");
+        tab_width = variant.get_uint32 ();
+
+        insert_spaces_instead_of_tabs = settings.get_boolean ("insert-spaces");
+        show_line_numbers = settings.get_boolean ("display-line-numbers");
+        highlight_current_line = settings.get_boolean ("highlight-current-line");
+        doc.highlight_matching_brackets = settings.get_boolean ("bracket-matching");
     }
 
     public void scroll_to_cursor (double margin = 0.25)

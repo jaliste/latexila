@@ -2,11 +2,6 @@ TODO
 
 - documents:
 	- source view preferences:
-		- display line numbers
-		- tab width
-		- spaces instead of tabs
-		- highlight current line
-		- highlight matching brackets
 		- font
 		- color scheme
 	- open multiple files

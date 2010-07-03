@@ -59,7 +59,7 @@ public class MainWindow : Window
         { "EditSelectAll", STOCK_SELECT_ALL, null, "<Control>A",
             N_("Select the entire document"), on_edit_select_all },
         { "EditPreferences", STOCK_PREFERENCES, null, null,
-            N_("Configure the application"), null },
+            N_("Configure the application"), on_open_preferences },
 
         // Documents
         { "Documents", null, N_("_Documents") },
@@ -801,6 +801,11 @@ public class MainWindow : Window
     {
         return_if_fail (active_tab != null);
         active_view.my_select_all ();
+    }
+
+    public void on_open_preferences ()
+    {
+        PreferencesDialog.show_me (this);
     }
 
     /* Documents */
