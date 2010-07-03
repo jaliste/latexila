@@ -89,7 +89,8 @@ public class PreferencesDialog : Dialog
                 SettingsBindFlags.GET | SettingsBindFlags.SET);
 
             // schemes treeview
-            initialize_schemes_treeview (schemes_treeview);
+            string current_scheme_id = settings.get_string ("scheme");
+            initialize_schemes_treeview (schemes_treeview, current_scheme_id);
             schemes_treeview.cursor_changed.connect ((treeview) =>
             {
                 TreePath tree_path;
@@ -156,7 +157,7 @@ public class PreferencesDialog : Dialog
         preferences_dialog.present ();
     }
 
-    private void initialize_schemes_treeview (TreeView treeview)
+    private void initialize_schemes_treeview (TreeView treeview, string current_id)
     {
         ListStore list_store = new ListStore (StyleSchemes.N_COLUMNS, typeof (string),
             typeof (string));
@@ -184,6 +185,9 @@ public class PreferencesDialog : Dialog
                 StyleSchemes.ID, scheme.id,
                 StyleSchemes.DESC, desc,
                 -1);
+
+            if (id == current_id)
+                select.select_iter (iter);
         }
     }
 }

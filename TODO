@@ -1,4 +1,25 @@
 TODO
 
-- documents:
-	- open multiple files
+- open multiple files
+
+- Edit:
+	- comment code
+	- uncomment code
+
+- View:
+	- Zoom In/Out
+	- Reset zoom
+
+- Search:
+	- search
+	- replace
+	- go to line
+
+- Documents:
+	- Save all
+	- Previous/Next document
+	- Move to new window
+	- list of documents (Alt + N)
+
+- Help:
+	- About
