@@ -53,6 +53,21 @@ public class AppSettings : GLib.Settings
             set_font (font);
         });
 
+        editor.changed["scheme"].connect ((setting, key) =>
+        {
+            string scheme_id = setting.get_string (key);
+
+            Gtk.SourceStyleSchemeManager manager =
+                Gtk.SourceStyleSchemeManager.get_default ();
+            Gtk.SourceStyleScheme scheme = manager.get_scheme (scheme_id);
+
+            List<Document> docs = Application.get_default ().get_documents ();
+            foreach (Document doc in docs)
+                doc.style_scheme = scheme;
+
+            // we don't use doc.set_style_scheme_from_string() for performance reason
+        });
+
         editor.changed["tabs-size"].connect ((setting, key) =>
         {
             Variant variant = setting.get_value (key);

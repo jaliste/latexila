@@ -64,7 +64,8 @@ public class Dialogs : GLib.Object
         primary_label.set_alignment ((float) 0.0, (float) 0.5);
         primary_label.set_selectable (true);
         primary_label.set_markup ("<span weight=\"bold\" size=\"larger\">"
-            + _("There are %d documents with unsaved changes. Save changes before closing?").printf (unsaved_docs.length ())
+            + _("There are %d documents with unsaved changes. Save changes before closing?")
+            .printf (unsaved_docs.length ())
             + "</span>");
 
         vbox.pack_start (primary_label, false, false, 0);

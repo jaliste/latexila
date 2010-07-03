@@ -23,6 +23,13 @@ public class PreferencesDialog : Dialog
 {
     private static PreferencesDialog preferences_dialog = null;
 
+    private enum StyleSchemes
+    {
+        ID,
+        DESC,
+        N_COLUMNS
+    }
+
     private PreferencesDialog ()
     {
         add_button (STOCK_CLOSE, ResponseType.CLOSE);
@@ -59,6 +66,8 @@ public class PreferencesDialog : Dialog
                 (Button) builder.get_object ("default_font_checkbutton");
             var font_button = builder.get_object ("font_button");
             Widget font_hbox = (Widget) builder.get_object ("font_hbox");
+            TreeView schemes_treeview =
+                (TreeView) builder.get_object ("schemes_treeview");
 
             // bind settings
             GLib.Settings settings =
@@ -79,10 +88,22 @@ public class PreferencesDialog : Dialog
             settings.bind ("bracket-matching", bracket_matching_checkbutton, "active",
                 SettingsBindFlags.GET | SettingsBindFlags.SET);
 
-            // pack notebook
-            Box content_area = (Box) get_content_area ();
-            content_area.pack_start (notebook, false, false, 0);
-            ((Container) notebook).border_width = 5;
+            // schemes treeview
+            initialize_schemes_treeview (schemes_treeview);
+            schemes_treeview.cursor_changed.connect ((treeview) =>
+            {
+                TreePath tree_path;
+                TreeIter iter;
+                schemes_treeview.get_cursor (out tree_path, null);
+
+                TreeModel model = treeview.model;
+                model.get_iter (out iter, tree_path);
+
+                string id;
+                model.get (iter, StyleSchemes.ID, out id, -1);
+
+                settings.set_string ("scheme", id);
+            });
 
             // font hbox sensitivity
             bool use_default_font = settings.get_boolean ("use-default-font");
@@ -97,6 +118,11 @@ public class PreferencesDialog : Dialog
             string label = _("Use the system fixed width font (%s)")
                 .printf (Application.get_default ().settings.get_system_font ());
             default_font_checkbutton.set_label (label);
+
+            // pack notebook
+            Box content_area = (Box) get_content_area ();
+            content_area.pack_start (notebook, true, true, 0);
+            ((Container) notebook).border_width = 5;
         }
         catch (Error e)
         {
@@ -128,5 +154,36 @@ public class PreferencesDialog : Dialog
             preferences_dialog.set_transient_for (parent);
 
         preferences_dialog.present ();
+    }
+
+    private void initialize_schemes_treeview (TreeView treeview)
+    {
+        ListStore list_store = new ListStore (StyleSchemes.N_COLUMNS, typeof (string),
+            typeof (string));
+        list_store.set_sort_column_id (StyleSchemes.ID, SortType.ASCENDING);
+        treeview.set_model (list_store);
+
+        CellRenderer renderer = new CellRendererText ();
+        TreeViewColumn column = new TreeViewColumn.with_attributes (
+            "Name and description", renderer,
+            "markup", StyleSchemes.DESC, null);
+        treeview.append_column (column);
+
+        TreeSelection select = treeview.get_selection ();
+        select.set_mode (SelectionMode.SINGLE);
+
+        /* fill style scheme list store */
+        SourceStyleSchemeManager manager = SourceStyleSchemeManager.get_default ();
+        foreach (string id in manager.get_scheme_ids ())
+        {
+            SourceStyleScheme scheme = manager.get_scheme (id);
+            string desc = "<b>%s</b> - %s".printf (scheme.name, scheme.description);
+            TreeIter iter;
+            list_store.append (out iter);
+            list_store.set (iter,
+                StyleSchemes.ID, scheme.id,
+                StyleSchemes.DESC, desc,
+                -1);
+        }
     }
 }

@@ -54,6 +54,7 @@ public class DocumentView : Gtk.SourceView
         show_line_numbers = settings.get_boolean ("display-line-numbers");
         highlight_current_line = settings.get_boolean ("highlight-current-line");
         doc.highlight_matching_brackets = settings.get_boolean ("bracket-matching");
+        doc.set_style_scheme_from_string (settings.get_string ("scheme"));
     }
 
     public void scroll_to_cursor (double margin = 0.25)

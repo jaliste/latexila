@@ -168,6 +168,12 @@ public class Document : Gtk.SourceBuffer
             (timeval.tv_sec == mtime.tv_sec && timeval.tv_usec > mtime.tv_usec);
     }
 
+    public void set_style_scheme_from_string (string scheme_id)
+    {
+        SourceStyleSchemeManager manager = SourceStyleSchemeManager.get_default ();
+        style_scheme = manager.get_scheme (scheme_id);
+    }
+
     private TimeVal get_modification_time ()
     {
         TimeVal timeval = { 0, 0 };
