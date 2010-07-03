@@ -24,9 +24,7 @@ public class Application : GLib.Object
     public unowned List<MainWindow> windows { get; private set; }
     public MainWindow active_window { get; private set; }
 
-    // we must keep the settings accessible
-    // without that, the code for the changed signals are not executed
-    private GLib.Settings settings;
+    public AppSettings settings { get; private set; }
 
     /* Application is a singleton
      * We must use Application.get_default ()
@@ -48,7 +46,7 @@ public class Application : GLib.Object
             widget "*.my-close-button" style "my-button-style"
         """);
 
-        init_settings ();
+        settings = new AppSettings ();
         create_window ();
     }
 
@@ -159,61 +157,5 @@ public class Application : GLib.Object
             var location = File.new_for_uri (uris[i]);
             active_window.open_document (location);
         }
-    }
-
-    private void init_settings ()
-    {
-        settings = new GLib.Settings ("org.gnome.latexila.preferences.editor");
-
-        /*
-        settings.changed["use-default-font"].connect ((setting, key) =>
-        {
-        });
-
-        settings.changed["editor-font"].connect ((setting, key) =>
-        {
-        });
-
-        settings.changed["scheme"].connect ((setting, key) =>
-        {
-        });
-        */
-
-        settings.changed["tabs-size"].connect ((setting, key) =>
-        {
-            Variant variant = setting.get_value (key);
-            uint val = variant.get_uint32 ();
-            val = val.clamp (1, 24);
-            foreach (DocumentView view in get_views ())
-                view.tab_width = val;
-        });
-
-        settings.changed["insert-spaces"].connect ((setting, key) =>
-        {
-            bool val = setting.get_boolean (key);
-            foreach (DocumentView view in get_views ())
-                view.insert_spaces_instead_of_tabs = val;
-        });
-
-        settings.changed["display-line-numbers"].connect ((setting, key) =>
-        {
-            bool val = setting.get_boolean (key);
-            foreach (DocumentView view in get_views ())
-                view.show_line_numbers = val;
-        });
-
-        settings.changed["highlight-current-line"].connect ((setting, key) =>
-        {
-            bool val = setting.get_boolean (key);
-            foreach (DocumentView view in get_views ())
-                view.highlight_current_line = val;
-        });
-
-        settings.changed["bracket-matching"].connect ((setting, key) =>
-        {
-            bool val = setting.get_boolean (key);
-            foreach (Document doc in get_documents ())
-                doc.highlight_matching_brackets = val;
-        });
     }
 }

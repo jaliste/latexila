@@ -93,13 +93,12 @@ public class PreferencesDialog : Dialog
         {
             preferences_dialog = new PreferencesDialog ();
 
-            // FIXME how to do that better?
-            /*
+            // FIXME how to connect Widget.destroyed?
             preferences_dialog.destroy.connect (() =>
             {
-                preferences_dialog.destroyed (out (Widget) preferences_dialog);
+                if (preferences_dialog != null)
+                    preferences_dialog = null;
             });
-            */
         }
 
         if (parent != preferences_dialog.get_transient_for ())
