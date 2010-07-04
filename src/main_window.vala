@@ -710,7 +710,7 @@ public class MainWindow : Window
 
     public void on_file_open ()
     {
-        var file_chooser = new FileChooserDialog (_("Open File"), this,
+        FileChooserDialog file_chooser = new FileChooserDialog (_("Open Files"), this,
             FileChooserAction.OPEN,
             STOCK_CANCEL, ResponseType.CANCEL,
             STOCK_OPEN, ResponseType.ACCEPT,
@@ -719,11 +719,19 @@ public class MainWindow : Window
         if (this.file_chooser_current_folder != null)
             file_chooser.set_current_folder (this.file_chooser_current_folder);
 
+        file_chooser.select_multiple = true;
+
+        SList<File> files_to_open = null;
         if (file_chooser.run () == ResponseType.ACCEPT)
-            open_document (file_chooser.get_file ());
+            files_to_open = file_chooser.get_files ();
 
         this.file_chooser_current_folder = file_chooser.get_current_folder ();
         file_chooser.destroy ();
+
+        // We open the files after closing the dialog, because open a lot of documents can
+        // take some time (this is not async).
+        foreach (File file in files_to_open)
+            open_document (file);
     }
 
     public void on_file_save ()
