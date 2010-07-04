@@ -70,6 +70,7 @@ public class AppSettings : GLib.Settings
 
         editor.changed["tabs-size"].connect ((setting, key) =>
         {
+            // FIXME use directly settings.get() when the vapi file is fixed upstream
             Variant variant = setting.get_value (key);
             uint val = variant.get_uint32 ();
             val = val.clamp (1, 24);

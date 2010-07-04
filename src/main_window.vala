@@ -112,14 +112,26 @@ public class MainWindow : Window
     public MainWindow ()
     {
         this.title = "LaTeXila";
-        set_default_size (700, 600);
-        delete_event.connect (() =>
-        {
-            on_quit ();
 
-            // the destroy signal is not emitted
-            return true;
-        });
+        /* restore window state */
+        GLib.Settings settings = new GLib.Settings ("org.gnome.latexila.state.window");
+
+        int w, h;
+        // FIXME use directly settings.get() when the vapi file is fixed upstream
+        Variant variant = settings.get_value ("size");
+        variant.get ("(ii)", out w, out h);
+        set_default_size (w, h);
+
+        Gdk.WindowState state = (Gdk.WindowState) settings.get_int ("state");
+        if ((state & Gdk.WindowState.MAXIMIZED) != 0)
+            maximize ();
+        else
+            unmaximize ();
+
+        if ((state & Gdk.WindowState.STICKY) != 0)
+            stick ();
+        else
+            unstick ();
 
         /* menu and toolbar */
 
@@ -155,6 +167,15 @@ public class MainWindow : Window
         statusbar = new CustomStatusbar ();
 
         /* signal handlers */
+
+        delete_event.connect (() =>
+        {
+            on_quit ();
+
+            // the destroy signal is not emitted
+            return true;
+        });
+
         documents_panel.page_added.connect (() =>
         {
             if (documents_panel.get_n_pages () == 1)
@@ -603,7 +624,8 @@ public class MainWindow : Window
         return false;
     }
 
-    private void close_all_documents (bool quit)
+    // return true if all the documents are closed
+    private bool close_all_documents ()
     {
         /* get unsaved documents */
         List<Document> unsaved_documents = null;
@@ -618,8 +640,7 @@ public class MainWindow : Window
         if (unsaved_documents == null)
         {
             documents_panel.remove_all_tabs ();
-            if (quit)
-                destroy ();
+            return true;
         }
 
         /* only one unsaved document */
@@ -630,8 +651,7 @@ public class MainWindow : Window
             if (close_tab (doc.tab))
             {
                 documents_panel.remove_all_tabs ();
-                if (quit)
-                    destroy ();
+                return true;
             }
         }
 
@@ -639,9 +659,11 @@ public class MainWindow : Window
         else
         {
             Dialogs.close_several_unsaved_documents (this, unsaved_documents);
-            if (documents_panel.get_n_pages () == 0 && quit)
-                destroy ();
+            if (documents_panel.get_n_pages () == 0)
+                return true;
         }
+
+        return false;
     }
 
     public void remove_all_tabs ()
@@ -689,6 +711,34 @@ public class MainWindow : Window
             string uri = chooser.get_current_uri ();
             open_document (File.new_for_uri (uri));
         });
+    }
+
+    public void save_state (bool sync = false)
+    {
+        GLib.Settings settings = new GLib.Settings ("org.gnome.latexila.state.window");
+
+        // state of the window
+        Gdk.WindowState state = get_window ().get_state ();
+        settings.set_int ("state", state);
+
+        // get width and height of the window
+        int w, h;
+        get_size (out w, out h);
+
+        // If window is maximized, store sizes that are a bit smaller than full screen,
+        // else making window non-maximized the next time will have no effect.
+        if ((state & Gdk.WindowState.MAXIMIZED) != 0)
+        {
+            w -= 100;
+            h -= 100;
+        }
+
+        // FIXME use directly settings.set() when the vapi file is fixed upstream
+        Variant size = new Variant ("(ii)", w, h);
+        settings.set_value ("size", size);
+
+        if (sync)
+            settings.sync ();
     }
 
 
@@ -754,7 +804,11 @@ public class MainWindow : Window
 
     public void on_quit ()
     {
-        close_all_documents (true);
+        if (close_all_documents ())
+        {
+            save_state ();
+            destroy ();
+        }
     }
 
     /* Edit menu */
@@ -820,6 +874,6 @@ public class MainWindow : Window
 
     public void on_documents_close_all ()
     {
-        close_all_documents (false);
+        close_all_documents ();
     }
 }

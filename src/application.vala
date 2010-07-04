@@ -120,6 +120,9 @@ public class Application : GLib.Object
 
     public void create_window (Gdk.Screen? screen = null)
     {
+        if (active_window != null)
+            active_window.save_state (true);
+
         var window = new MainWindow ();
         active_window = window;
 

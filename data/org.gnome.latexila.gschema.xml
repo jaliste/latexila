@@ -50,4 +50,17 @@
       <description>Whether LaTeXila should highlight matching brackets.</description>
     </key>
   </schema>
+
+  <schema id="org.gnome.latexila.state" path="/apps/latexila/state/">
+    <child name="window" schema="org.gnome.latexila.state.window"/>
+  </schema>
+
+  <schema id="org.gnome.latexila.state.window" path="/apps/latexila/state/window/">
+    <key name="state" type="i">
+      <default>0</default>
+    </key>
+    <key name="size" type="(ii)">
+      <default>(800, 600)</default>
+    </key>
+  </schema>
 </schemalist>
