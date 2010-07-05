@@ -49,6 +49,12 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <menuitem action="EditPreferences" />
     </menu>
 
+    <menu action="View">
+      <menuitem action="ViewZoomIn" />
+      <menuitem action="ViewZoomOut" />
+      <menuitem action="ViewZoomReset" />
+    </menu>
+
     <menu action="Documents">
       <menuitem action="DocumentsCloseAll" />
     </menu>

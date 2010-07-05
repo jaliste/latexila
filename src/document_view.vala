@@ -24,6 +24,9 @@ public class DocumentView : Gtk.SourceView
     public bool readonly { get; set; default = false; }
     public const double SCROLL_MARGIN = 0.02;
 
+    private GLib.Settings editor_settings;
+    private Pango.FontDescription font_desc;
+
     public DocumentView (Document doc)
     {
         set_buffer (doc);
@@ -35,27 +38,21 @@ public class DocumentView : Gtk.SourceView
         indent_width = -1;
 
         /* settings */
-        GLib.Settings settings =
-            new GLib.Settings ("org.gnome.latexila.preferences.editor");
+        editor_settings = new GLib.Settings ("org.gnome.latexila.preferences.editor");
 
-        // font
-        string font;
-        if (settings.get_boolean ("use-default-font"))
-            font = Application.get_default ().settings.get_system_font ();
-        else
-            font = settings.get_string ("editor-font");
-        set_font (font);
+        set_font_from_settings ();
 
         // tab width
         // FIXME use directly settings.get() when the vapi file is fixed upstream
-        Variant variant = settings.get_value ("tabs-size");
+        Variant variant = editor_settings.get_value ("tabs-size");
         tab_width = variant.get_uint32 ();
 
-        insert_spaces_instead_of_tabs = settings.get_boolean ("insert-spaces");
-        show_line_numbers = settings.get_boolean ("display-line-numbers");
-        highlight_current_line = settings.get_boolean ("highlight-current-line");
-        doc.highlight_matching_brackets = settings.get_boolean ("bracket-matching");
-        doc.set_style_scheme_from_string (settings.get_string ("scheme"));
+        insert_spaces_instead_of_tabs = editor_settings.get_boolean ("insert-spaces");
+        show_line_numbers = editor_settings.get_boolean ("display-line-numbers");
+        highlight_current_line = editor_settings.get_boolean ("highlight-current-line");
+        doc.highlight_matching_brackets =
+            editor_settings.get_boolean ("bracket-matching");
+        doc.set_style_scheme_from_string (editor_settings.get_string ("scheme"));
     }
 
     public void scroll_to_cursor (double margin = 0.25)
@@ -132,9 +129,34 @@ public class DocumentView : Gtk.SourceView
         return column;
     }
 
-    public void set_font (string font)
+    public void set_font_from_settings ()
     {
-        Pango.FontDescription font_desc = Pango.FontDescription.from_string (font);
+        string font;
+        if (editor_settings.get_boolean ("use-default-font"))
+            font = Application.get_default ().settings.get_system_font ();
+        else
+            font = editor_settings.get_string ("editor-font");
+
+        set_font_from_string (font);
+    }
+
+    public void set_font_from_string (string font)
+    {
+        font_desc = Pango.FontDescription.from_string (font);
+        modify_font (font_desc);
+    }
+
+    public void enlarge_font ()
+    {
+        // this is not saved in the settings
+        font_desc.set_size (font_desc.get_size () + Pango.SCALE);
+        modify_font (font_desc);
+    }
+
+    public void shrink_font ()
+    {
+        // this is not saved in the settings
+        font_desc.set_size (font_desc.get_size () - Pango.SCALE);
         modify_font (font_desc);
     }
 }

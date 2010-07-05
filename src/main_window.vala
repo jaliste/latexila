@@ -67,6 +67,15 @@ public class MainWindow : Window
         { "EditPreferences", STOCK_PREFERENCES, null, null,
             N_("Configure the application"), on_open_preferences },
 
+        // View
+        { "View", null, N_("_View") },
+        { "ViewZoomIn", STOCK_ZOOM_IN, N_("Zoom _In"), "<Control>plus",
+            N_("Enlarge the font"), on_view_zoom_in },
+        { "ViewZoomOut", STOCK_ZOOM_OUT, N_("Zoom _Out"), "<Control>minus",
+            N_("Shrink the font"), on_view_zoom_out },
+        { "ViewZoomReset", STOCK_ZOOM_100, N_("_Reset Zoom"), "<Control>0",
+            N_("Reset the size of the font"), on_view_zoom_reset },
+
         // Documents
         { "Documents", null, N_("_Documents") },
         { "DocumentsCloseAll", STOCK_CLOSE, N_("_Close All"), "<Shift><Control>W",
@@ -167,6 +176,8 @@ public class MainWindow : Window
         {
             error ("%s", err.message);
         }
+
+        add_accel_group (ui_manager.get_accel_group ());
 
         /* components */
         documents_panel = new DocumentsPanel ();
@@ -469,7 +480,7 @@ public class MainWindow : Window
         {
             "FileSave", "FileSaveAs", "FileClose", "EditUndo", "EditRedo", "EditCut",
             "EditCopy", "EditPaste", "EditDelete", "EditSelectAll", "EditComment",
-            "EditUncomment"
+            "EditUncomment", "ViewZoomIn", "ViewZoomOut", "ViewZoomReset"
         };
 
         foreach (string file_action in file_actions)
@@ -892,6 +903,26 @@ public class MainWindow : Window
     public void on_open_preferences ()
     {
         PreferencesDialog.show_me (this);
+    }
+
+    /* View */
+
+    public void on_view_zoom_in ()
+    {
+        return_if_fail (active_tab != null);
+        active_view.enlarge_font ();
+    }
+
+    public void on_view_zoom_out ()
+    {
+        return_if_fail (active_tab != null);
+        active_view.shrink_font ();
+    }
+
+    public void on_view_zoom_reset ()
+    {
+        return_if_fail (active_tab != null);
+        active_view.set_font_from_settings ();
     }
 
     /* Documents */

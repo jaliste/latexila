@@ -127,6 +127,6 @@ public class AppSettings : GLib.Settings
     {
         List<DocumentView> views = Application.get_default ().get_views ();
         foreach (DocumentView view in views)
-            view.set_font (font);
+            view.set_font_from_string (font);
     }
 }
