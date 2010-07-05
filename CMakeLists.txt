@@ -3,14 +3,12 @@ cmake_minimum_required (VERSION 2.6.4)
 project ("latexila" C)
 
 set (APP_NAME "latexila")
-set (APP_VERSION "1.99.0")
+set (APP_VERSION "1.98.0")
 
-message (STATUS "*** Building LaTeXila ${VERSION} ***")
+message (STATUS "*** Building LaTeXila ${APP_VERSION} ***")
 
-if (NOT DATA_DIR)
-	set (DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${APP_NAME}"
-		CACHE PATH "The directory where the data is")
-endif (NOT DATA_DIR)
+set (DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${APP_NAME}"
+	CACHE PATH "The directory where the data is")
 
 # Native Language Support
 set (GETTEXT_PACKAGE ${APP_NAME})
@@ -20,6 +18,7 @@ file (GLOB latexila_PO_FILES ${latexila_SOURCE_DIR}/po/*.po)
 gettext_create_translations (po/latexila.pot ALL ${latexila_PO_FILES})
 
 set (SCHEMA_DIR "${CMAKE_INSTALL_PREFIX}/share")
+set (ICONS_DIR "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor")
 configure_file (${latexila_SOURCE_DIR}/src/config.h.in
 	${latexila_BINARY_DIR}/src/config.h)
 add_definitions (-include config.h)

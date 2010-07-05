@@ -46,6 +46,33 @@ public class Application : GLib.Object
             widget "*.my-close-button" style "my-button-style"
         """);
 
+        /* application icons */
+        string[] filenames =
+        {
+            Config.ICONS_DIR + "/16x16/latexila.png",
+            Config.ICONS_DIR + "/22x22/latexila.png",
+            Config.ICONS_DIR + "/24x24/latexila.png",
+            Config.ICONS_DIR + "/32x32/latexila.png",
+            Config.ICONS_DIR + "/48x48/latexila.png"
+        };
+
+        List<Gdk.Pixbuf> list = null;
+        foreach (string filename in filenames)
+        {
+            try
+            {
+                Gdk.Pixbuf pixbuf = new Gdk.Pixbuf.from_file (filename);
+                list.append (pixbuf);
+            }
+            catch (Error e)
+            {
+                stderr.printf ("Error with an icon: %s\n", e.message);
+            }
+        }
+
+        Gtk.Window.set_default_icon_list (list);
+
+
         settings = new AppSettings ();
         create_window ();
     }

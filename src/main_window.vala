@@ -64,7 +64,12 @@ public class MainWindow : Window
         // Documents
         { "Documents", null, N_("_Documents") },
         { "DocumentsCloseAll", STOCK_CLOSE, N_("_Close All"), "<Shift><Control>W",
-            N_("Close all open files"), on_documents_close_all }
+            N_("Close all open files"), on_documents_close_all },
+
+        // Help
+        { "Help", null, N_("_Help") },
+        { "HelpAbout", STOCK_ABOUT, null, null,
+            N_("About LaTeXila"), on_about_dialog }
     };
 
     private string file_chooser_current_folder = Environment.get_home_dir ();
@@ -875,5 +880,68 @@ public class MainWindow : Window
     public void on_documents_close_all ()
     {
         close_all_documents ();
+    }
+
+    /* Help */
+
+    public void on_about_dialog ()
+    {
+        string comments =
+            _("LaTeXila is an Integrated LaTeX Environment for the GNOME desktop");
+        string copyright = "Copyright (C) 2009, 2010 Sébastien Wilmet";
+        string licence =
+"""LaTeXila is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+LaTeXila is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.""";
+
+		string website = "http://latexila.sourceforge.net/";
+
+		string[] authors =
+		{
+		    "Sébastien Wilmet <sebastien.wilmet@gmail.com>",
+		    null
+		};
+
+		string[] artists =
+		{
+		    "Eric Forgeot <e.forgeot@laposte.net>",
+		    "Sébastien Wilmet <sebastien.wilmet@gmail.com>",
+		    "The Kile Team: http://kile.sourceforge.net/",
+		    "Gedit LaTeX Plugin: http://www.michaels-website.de/gedit-latex-plugin/",
+		    null
+		};
+
+        Gdk.Pixbuf logo = null;
+        try
+        {
+		    logo = new Gdk.Pixbuf.from_file (Config.DATA_DIR + "/images/app/logo.png");
+		}
+		catch (Error e)
+		{
+		    stderr.printf ("Error with the logo: %s\n", e.message);
+		}
+
+		show_about_dialog (this,
+		    "program-name", "LaTeXila",
+		    "version", Config.APP_VERSION,
+		    "authors", authors,
+		    "artists", artists,
+		    "comments", comments,
+		    "copyright", copyright,
+		    "license", licence,
+		    "title", _("About LaTeXila"),
+		    "translator-credits", _("translator-credits"),
+		    "website", website,
+		    "logo", logo,
+		    null);
     }
 }

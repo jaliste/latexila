@@ -26,5 +26,6 @@
 #define LOCALE_DIR "${LOCALE_DIR}"
 #define GETTEXT_PACKAGE "${GETTEXT_PACKAGE}"
 #define SCHEMA_DIR "${SCHEMA_DIR}"
+#define ICONS_DIR "${ICONS_DIR}"
 
 #endif /* LATEXILA_CONFIG_H */
