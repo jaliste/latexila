@@ -56,7 +56,11 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
     </menu>
 
     <menu action="Documents">
+      <menuitem action="DocumentsSaveAll" />
       <menuitem action="DocumentsCloseAll" />
+      <separator />
+      <menuitem action="DocumentsPrevious" />
+      <menuitem action="DocumentsNext" />
     </menu>
 
     <menu action="Help">

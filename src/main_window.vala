@@ -78,8 +78,16 @@ public class MainWindow : Window
 
         // Documents
         { "Documents", null, N_("_Documents") },
+        { "DocumentsSaveAll", STOCK_SAVE, N_("_Save All"), "<Shift><Control>L",
+            N_("Save all open files"), on_documents_save_all },
         { "DocumentsCloseAll", STOCK_CLOSE, N_("_Close All"), "<Shift><Control>W",
             N_("Close all open files"), on_documents_close_all },
+        { "DocumentsPrevious", STOCK_GO_BACK, N_("_Previous Document"),
+            "<Control><Alt>Page_Up", N_("Activate previous document"),
+            on_documents_previous },
+        { "DocumentsNext", STOCK_GO_FORWARD, N_("_Next Document"),
+            "<Control><Alt>Page_Down", N_("Activate next document"),
+            on_documents_next },
 
         // Help
         { "Help", null, N_("_Help") },
@@ -218,6 +226,7 @@ public class MainWindow : Window
         {
             set_undo_sensitivity ();
             set_redo_sensitivity ();
+            update_next_prev_doc_sensitivity ();
             my_set_title ();
             update_cursor_position_statusbar ();
         });
@@ -244,6 +253,17 @@ public class MainWindow : Window
             res.append (tab.document);
         }
         return res;
+    }
+
+    public List<Document> get_unsaved_documents ()
+    {
+        List<Document> list = null;
+        foreach (Document doc in get_documents ())
+        {
+            if (doc.get_modified ())
+                list.append (doc);
+        }
+        return list;
     }
 
     public List<DocumentView> get_views ()
@@ -480,7 +500,8 @@ public class MainWindow : Window
         {
             "FileSave", "FileSaveAs", "FileClose", "EditUndo", "EditRedo", "EditCut",
             "EditCopy", "EditPaste", "EditDelete", "EditSelectAll", "EditComment",
-            "EditUncomment", "ViewZoomIn", "ViewZoomOut", "ViewZoomReset"
+            "EditUncomment", "ViewZoomIn", "ViewZoomOut", "ViewZoomReset",
+            "DocumentsSaveAll", "DocumentsCloseAll", "DocumentsPrevious", "DocumentsNext"
         };
 
         foreach (string file_action in file_actions)
@@ -505,6 +526,21 @@ public class MainWindow : Window
         {
             Action action = action_group.get_action ("EditRedo");
             action.set_sensitive (active_document.can_redo);
+        }
+    }
+
+    private void update_next_prev_doc_sensitivity ()
+    {
+        if (active_tab != null)
+        {
+            Action action_previous = action_group.get_action ("DocumentsPrevious");
+            Action action_next = action_group.get_action ("DocumentsNext");
+
+            int current_page = documents_panel.page_num (active_tab);
+            action_previous.set_sensitive (current_page > 0);
+
+            int nb_pages = documents_panel.get_n_pages ();
+            action_next.set_sensitive (current_page < nb_pages - 1);
         }
     }
 
@@ -650,14 +686,7 @@ public class MainWindow : Window
     // return true if all the documents are closed
     private bool close_all_documents ()
     {
-        /* get unsaved documents */
-        List<Document> unsaved_documents = null;
-
-        foreach (Document doc in get_documents ())
-        {
-            if (doc.get_modified ())
-                unsaved_documents.append (doc);
-        }
+        List<Document> unsaved_documents = get_unsaved_documents ();
 
         /* no unsaved document */
         if (unsaved_documents == null)
@@ -927,9 +956,32 @@ public class MainWindow : Window
 
     /* Documents */
 
+    public void on_documents_save_all ()
+    {
+        return_if_fail (active_tab != null);
+        foreach (Document doc in get_unsaved_documents ())
+        {
+            active_tab = doc.tab;
+            doc.save ();
+        }
+    }
+
     public void on_documents_close_all ()
     {
+        return_if_fail (active_tab != null);
         close_all_documents ();
+    }
+
+    public void on_documents_previous ()
+    {
+        return_if_fail (active_tab != null);
+        documents_panel.prev_page ();
+    }
+
+    public void on_documents_next ()
+    {
+        return_if_fail (active_tab != null);
+        documents_panel.next_page ();
     }
 
     /* Help */
