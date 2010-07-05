@@ -58,6 +58,12 @@ public class MainWindow : Window
             N_("Delete the selected text"), on_edit_delete },
         { "EditSelectAll", STOCK_SELECT_ALL, null, "<Control>A",
             N_("Select the entire document"), on_edit_select_all },
+        { "EditComment", null, N_("_Comment"), "<Control>D",
+            N_("Comment the selected lines (add the character \"%\")"),
+            on_edit_comment },
+        { "EditUncomment", null, N_("_Uncomment"), "<Shift><Control>D",
+            N_("Uncomment the selected lines (remove the character \"%\")"),
+            on_edit_uncomment },
         { "EditPreferences", STOCK_PREFERENCES, null, null,
             N_("Configure the application"), on_open_preferences },
 
@@ -462,7 +468,8 @@ public class MainWindow : Window
         string[] file_actions =
         {
             "FileSave", "FileSaveAs", "FileClose", "EditUndo", "EditRedo", "EditCut",
-            "EditCopy", "EditPaste", "EditDelete", "EditSelectAll"
+            "EditCopy", "EditPaste", "EditDelete", "EditSelectAll", "EditComment",
+            "EditUncomment"
         };
 
         foreach (string file_action in file_actions)
@@ -868,6 +875,18 @@ public class MainWindow : Window
     {
         return_if_fail (active_tab != null);
         active_view.my_select_all ();
+    }
+
+    public void on_edit_comment ()
+    {
+        return_if_fail (active_tab != null);
+        active_document.comment_selected_lines ();
+    }
+
+    public void on_edit_uncomment ()
+    {
+        return_if_fail (active_tab != null);
+        active_document.uncomment_selected_lines ();
     }
 
     public void on_open_preferences ()

@@ -196,4 +196,82 @@ public class Document : Gtk.SourceBuffer
         if (! stop_cursor_moved_emission)
             cursor_moved ();
     }
+
+    private void insert_text_at_beginning_of_selected_lines (string text)
+    {
+        TextIter start, end;
+        get_selection_bounds (out start, out end);
+
+        int start_line = start.get_line ();
+        int end_line = end.get_line ();
+
+        begin_user_action ();
+        for (int i = start_line ; i <= end_line ; i++)
+        {
+            TextIter iter;
+            get_iter_at_line (out iter, i);
+            insert (iter, text, -1);
+        }
+        end_user_action ();
+    }
+
+    public void comment_selected_lines ()
+    {
+        insert_text_at_beginning_of_selected_lines ("% ");
+    }
+
+    public void uncomment_selected_lines ()
+    {
+        TextIter start, end;
+        get_selection_bounds (out start, out end);
+
+        int start_line = start.get_line ();
+        int end_line = end.get_line ();
+        int line_count = get_line_count ();
+
+        begin_user_action ();
+
+        for (int i = start_line ; i <= end_line ; i++)
+        {
+            get_iter_at_line (out start, i);
+
+            // if last line
+            if (i == line_count - 1)
+                get_end_iter (out end);
+            else
+                get_iter_at_line (out end, i + 1);
+
+            string line = get_text (start, end, false);
+
+            /* find the first '%' character */
+            int j = 0;
+		    int start_delete = -1;
+		    int stop_delete = -1;
+		    while (line[j] != '\0')
+		    {
+			    if (line[j] == '%')
+			    {
+				    start_delete = j;
+				    stop_delete = j + 1;
+				    if (line[j + 1] == ' ')
+					    stop_delete++;
+				    break;
+			    }
+
+			    else if (line[j] != ' ' && line[j] != '\t')
+				    break;
+
+			    j++;
+		    }
+
+		    if (start_delete == -1)
+			    continue;
+
+            get_iter_at_line_offset (out start, i, start_delete);
+            get_iter_at_line_offset (out end, i, stop_delete);
+            this.delete (start, end);
+        }
+
+        end_user_action ();
+    }
 }

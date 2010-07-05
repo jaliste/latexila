@@ -43,6 +43,9 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <separator />
       <menuitem action="EditSelectAll" />
       <separator />
+      <menuitem action="EditComment" />
+      <menuitem action="EditUncomment" />
+      <separator />
       <menuitem action="EditPreferences" />
     </menu>
 
