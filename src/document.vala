@@ -112,8 +112,12 @@ public class Document : Gtk.SourceBuffer
 
         try
         {
-            location.replace_contents (text, text.length, null, false,
+            // Attention, the second parameter named "length" in the API is the size in
+            // bytes, not the number of characters, so we must use text.size() and not
+            // text.length.
+            location.replace_contents (text, text.size (), null, false,
                 FileCreateFlags.NONE, null, null);
+
             mtime = get_modification_time ();
             set_modified (false);
 
