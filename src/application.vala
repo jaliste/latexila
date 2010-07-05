@@ -145,7 +145,7 @@ public class Application : GLib.Object
         return Unique.Response.OK;
     }
 
-    public void create_window (Gdk.Screen? screen = null)
+    public MainWindow create_window (Gdk.Screen? screen = null)
     {
         if (active_window != null)
             active_window.save_state (true);
@@ -173,6 +173,7 @@ public class Application : GLib.Object
 
         windows.append (window);
         window.show_all ();
+        return window;
     }
 
     public void create_document ()

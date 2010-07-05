@@ -61,6 +61,8 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <separator />
       <menuitem action="DocumentsPrevious" />
       <menuitem action="DocumentsNext" />
+      <separator />
+      <menuitem action="DocumentsMoveToNewWindow" />
     </menu>
 
     <menu action="Help">

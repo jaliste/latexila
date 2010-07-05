@@ -88,6 +88,9 @@ public class MainWindow : Window
         { "DocumentsNext", STOCK_GO_FORWARD, N_("_Next Document"),
             "<Control><Alt>Page_Down", N_("Activate next document"),
             on_documents_next },
+        { "DocumentsMoveToNewWindow", null, N_("_Move to New Window"), null,
+            N_("Move the current document to a new window"),
+            on_documents_move_to_new_window },
 
         // Help
         { "Help", null, N_("_Help") },
@@ -208,17 +211,33 @@ public class MainWindow : Window
 
         documents_panel.page_added.connect (() =>
         {
-            if (documents_panel.get_n_pages () == 1)
+            int nb_pages = documents_panel.get_n_pages ();
+
+            // actions for which there must be 1 document minimum
+            if (nb_pages == 1)
                 set_file_actions_sensitivity (true);
+
+            // actions for which there must be 2 documents minimum
+            else if (nb_pages == 2)
+                set_documents_move_to_new_window_sensitivity (true);
+
         });
 
         documents_panel.page_removed.connect (() =>
         {
-            if (documents_panel.get_n_pages () == 0)
+            int nb_pages = documents_panel.get_n_pages ();
+
+            // actions for which there must be 1 document minimum
+            if (nb_pages == 0)
             {
                 statusbar.set_cursor_position (-1, -1);
                 set_file_actions_sensitivity (false);
             }
+
+            // actions for which there must be 2 documents minimum
+            else if (nb_pages == 1)
+                set_documents_move_to_new_window_sensitivity (false);
+
             my_set_title ();
         });
 
@@ -232,6 +251,7 @@ public class MainWindow : Window
         });
 
         set_file_actions_sensitivity (false);
+        set_documents_move_to_new_window_sensitivity (false);
 
         /* packing widgets */
         var main_vbox = new VBox (false, 0);
@@ -342,6 +362,12 @@ public class MainWindow : Window
     {
         var tab = new DocumentTab.from_location (location);
         return process_create_tab (tab, jump_to);
+    }
+
+    public void create_tab_with_view (DocumentView view)
+    {
+        var tab = new DocumentTab.with_view (view);
+        process_create_tab (tab, true);
     }
 
     private DocumentTab? process_create_tab (DocumentTab? tab, bool jump_to)
@@ -493,6 +519,11 @@ public class MainWindow : Window
         return ws == workspace || ws == Gedit.Utils.Workspace.ALL_WORKSPACES;
     }
 
+
+    /****************************
+     *    ACTIONS SENSITIVITY
+     ****************************/
+
     private void set_file_actions_sensitivity (bool sensitive)
     {
         // actions that must be insensitive if the notebook is empty
@@ -529,6 +560,12 @@ public class MainWindow : Window
         }
     }
 
+    private void set_documents_move_to_new_window_sensitivity (bool sensitive)
+    {
+        Action action = action_group.get_action ("DocumentsMoveToNewWindow");
+        action.set_sensitive (sensitive);
+    }
+
     private void update_next_prev_doc_sensitivity ()
     {
         if (active_tab != null)
@@ -560,6 +597,7 @@ public class MainWindow : Window
             }
         }
     }
+
 
     private void my_set_title ()
     {
@@ -793,6 +831,17 @@ public class MainWindow : Window
             settings.sync ();
     }
 
+    private void move_tab_to_new_window (DocumentTab tab)
+    {
+        MainWindow new_window = Application.get_default ().create_window ();
+        DocumentView view = tab.view;
+        documents_panel.remove_tab (tab);
+
+        // we create a new tab with the same view, so we avoid headache with signals
+        // the user see nothing, muahahaha
+        new_window.create_tab_with_view (view);
+    }
+
 
     /*******************
      *    CALLBACKS
@@ -982,6 +1031,12 @@ public class MainWindow : Window
     {
         return_if_fail (active_tab != null);
         documents_panel.next_page ();
+    }
+
+    public void on_documents_move_to_new_window ()
+    {
+        return_if_fail (active_tab != null);
+        move_tab_to_new_window (active_tab);
     }
 
     /* Help */

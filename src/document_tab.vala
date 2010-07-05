@@ -46,6 +46,28 @@ public class DocumentTab : VBox
     public DocumentTab ()
     {
         document = new Document ();
+        view = new DocumentView (document);
+        initialize ();
+    }
+
+    public DocumentTab.from_location (File location)
+    {
+        this ();
+        document.load (location);
+    }
+
+    public DocumentTab.with_view (DocumentView view)
+    {
+        this.view = view;
+        document = (Document) view.buffer;
+        initialize ();
+    }
+
+    private void initialize ()
+    {
+        // usefull when moving a tab to a new window
+        bool reparent = document.tab != null;
+
         document.tab = this;
 
         document.notify["location"].connect (() =>
@@ -64,14 +86,17 @@ public class DocumentTab : VBox
                 _label_mark.label = "";
         });
 
-        view = new DocumentView (document);
-
         view.focus_in_event.connect (view_focused_in);
 
         // with a scrollbar
         var sw = new ScrolledWindow (null, null);
         sw.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
-        sw.add (view);
+
+        if (reparent)
+            view.reparent (sw);
+        else
+            sw.add (view);
+
         sw.show_all ();
 
         // pack at the end so we can display message above
@@ -93,12 +118,6 @@ public class DocumentTab : VBox
         _label.pack_start (close_button, false, false, 0);
         update_label_tooltip ();
         _label.show_all ();
-    }
-
-    public DocumentTab.from_location (File location)
-    {
-        this ();
-        document.load (location);
     }
 
     public TabInfoBar add_message (string primary_msg, string secondary_msg,
