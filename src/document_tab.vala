@@ -130,14 +130,8 @@ public class DocumentTab : VBox
 
     private void update_label_text ()
     {
-        if (document.location == null)
-            label_text = document.get_unsaved_document_name ();
-        else
-        {
-            string basename = document.location.get_basename ();
-            // if the basename is too long, we show only the begin and the end
-            label_text = Utils.str_middle_truncate (basename, 42);
-        }
+        label_text = Utils.str_middle_truncate (
+            document.get_short_name_for_display (), 42);
     }
 
     private void update_label_tooltip ()
@@ -145,8 +139,18 @@ public class DocumentTab : VBox
         if (document.location == null)
             _label.tooltip_text = "";
         else
-            _label.tooltip_text = Utils.replace_home_dir_with_tilde (
-                document.location.get_parse_name ());
+            _label.tooltip_text = document.get_uri_for_display ();
+    }
+
+    public string get_name ()
+    {
+        return _label_mark.label + label_text;
+    }
+
+    public string get_menu_tip ()
+    {
+        string uri = document.get_uri_for_display ();
+        return _("Activate '%s'").printf (uri);
     }
 
     private bool view_focused_in ()

@@ -107,6 +107,9 @@ public class MainWindow : Window
     private ActionGroup documents_list_action_group;
     private uint documents_list_menu_ui_id;
 
+    // context id for the statusbar
+    private uint tip_message_cid;
+
     public DocumentTab? active_tab
     {
         get
@@ -168,45 +171,18 @@ public class MainWindow : Window
         else
             unstick ();
 
-        /* menu and toolbar */
-
-        // recent documents
-        Action recent_action = new RecentAction ("FileOpenRecent", _("Open _Recent"),
-            _("Open recently used files"), "");
-        configure_recent_chooser ((RecentChooser) recent_action);
-
-        action_group = new ActionGroup ("ActionGroup");
-        action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
-        action_group.add_actions (action_entries, this);
-        action_group.add_action (recent_action);
-
-        ui_manager = new UIManager ();
-        ui_manager.insert_action_group (action_group, 0);
-
-        try
-        {
-            var path = Path.build_filename (Config.DATA_DIR, "ui", "ui.xml");
-            ui_manager.add_ui_from_file (path);
-        }
-        catch (GLib.Error err)
-        {
-            error ("%s", err.message);
-        }
-
-        add_accel_group (ui_manager.get_accel_group ());
-
-        // list of open documents menu
-        documents_list_action_group = new ActionGroup ("DocumentsListActions");
-        ui_manager.insert_action_group (documents_list_action_group, 0);
-
         /* components */
-        documents_panel = new DocumentsPanel ();
+        initialize_menubar_and_toolbar ();
         var menu = ui_manager.get_widget ("/MainMenu");
+
         Toolbar toolbar = (Toolbar) ui_manager.get_widget ("/MainToolbar");
         toolbar.set_style (ToolbarStyle.ICONS);
         setup_toolbar_open_button (toolbar);
 
+        documents_panel = new DocumentsPanel ();
+
         statusbar = new CustomStatusbar ();
+        tip_message_cid = statusbar.get_context_id ("tip_message");
 
         /* signal handlers */
 
@@ -325,6 +301,72 @@ public class MainWindow : Window
         return res;
     }
 
+    private void initialize_menubar_and_toolbar ()
+    {
+        // recent documents
+        Action recent_action = new RecentAction ("FileOpenRecent", _("Open _Recent"),
+            _("Open recently used files"), "");
+        configure_recent_chooser ((RecentChooser) recent_action);
+
+        action_group = new ActionGroup ("ActionGroup");
+        action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
+        action_group.add_actions (action_entries, this);
+        action_group.add_action (recent_action);
+
+        ui_manager = new UIManager ();
+        ui_manager.insert_action_group (action_group, 0);
+
+        try
+        {
+            var path = Path.build_filename (Config.DATA_DIR, "ui", "ui.xml");
+            ui_manager.add_ui_from_file (path);
+        }
+        catch (GLib.Error err)
+        {
+            error ("%s", err.message);
+        }
+
+        add_accel_group (ui_manager.get_accel_group ());
+
+        // show tooltips in the statusbar
+        ui_manager.connect_proxy.connect ((action, p) =>
+        {
+            if (p is MenuItem)
+            {
+                MenuItem proxy = (MenuItem) p;
+                proxy.select.connect (on_menu_item_select);
+                proxy.deselect.connect (on_menu_item_deselect);
+            }
+        });
+
+        ui_manager.disconnect_proxy.connect ((action, p) =>
+        {
+            if (p is MenuItem)
+            {
+                MenuItem proxy = (MenuItem) p;
+                proxy.select.disconnect (on_menu_item_select);
+                proxy.deselect.disconnect (on_menu_item_deselect);
+            }
+        });
+
+        // list of open documents menu
+        documents_list_action_group = new ActionGroup ("DocumentsListActions");
+        ui_manager.insert_action_group (documents_list_action_group, 0);
+    }
+
+    private void on_menu_item_select (Item proxy)
+    {
+        Action action = ((MenuItem) proxy).get_related_action ();
+        return_if_fail (action != null);
+        if (action.tooltip != null)
+            statusbar.push (tip_message_cid, action.tooltip);
+    }
+
+    private void on_menu_item_deselect (Item proxy)
+    {
+        statusbar.pop (tip_message_cid);
+    }
+
     public void open_document (File location)
     {
         /* check if the document is already opened */
@@ -428,21 +470,8 @@ public class MainWindow : Window
             selection_changed ();
         });
 
-        /* set window title */
-        tab.document.notify["location"].connect (() =>
-        {
-            if (tab != active_tab)
-                return;
-            my_set_title ();
-        });
-
-        tab.document.modified_changed.connect (() =>
-        {
-            if (tab != active_tab)
-                return;
-            my_set_title ();
-        });
-
+        tab.document.notify["location"].connect (() => { sync_name (tab); });
+        tab.document.modified_changed.connect (() => { sync_name (tab); });
         tab.document.cursor_moved.connect (update_cursor_position_statusbar);
 
         tab.show ();
@@ -626,6 +655,20 @@ public class MainWindow : Window
     }
 
 
+    private void sync_name (DocumentTab tab)
+    {
+        if (tab == active_tab)
+            my_set_title ();
+
+        // sync the item in the documents list menu
+        int page_num = documents_panel.page_num (tab);
+        string action_name = "Tab_%d".printf (page_num);
+        Action action = documents_list_action_group.get_action (action_name);
+        return_if_fail (action != null);
+        action.label = tab.get_name ().replace ("_", "__");
+        action.tooltip = tab.get_menu_tip ();
+    }
+
     private void my_set_title ()
     {
         if (active_tab == null)
@@ -640,7 +683,7 @@ public class MainWindow : Window
 
         File loc = active_document.location;
         if (loc == null)
-            title = active_document.get_unsaved_document_name ();
+            title = active_document.get_short_name_for_display ();
         else
         {
             string basename = loc.get_basename ();
@@ -891,10 +934,11 @@ public class MainWindow : Window
         {
             DocumentTab tab = (DocumentTab) documents_panel.get_nth_page (i);
             string action_name = "Tab_%d".printf (i);
-            string name = tab.label_text.replace ("_", "__");
+            string name = tab.get_name ().replace ("_", "__");
+            string tip = tab.get_menu_tip ();
             string accel = i < 10 ? "<alt>%d".printf ((i + 1) % 10) : null;
 
-            RadioAction action = new RadioAction (action_name, name, null, null, i);
+            RadioAction action = new RadioAction (action_name, name, tip, null, i);
             if (group != null)
                 action.set_group (group);
 

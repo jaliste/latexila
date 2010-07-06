@@ -149,7 +149,23 @@ public class Document : Gtk.SourceBuffer
         set_language (lang);
     }
 
-    public string get_unsaved_document_name ()
+    public string get_uri_for_display ()
+    {
+        if (location == null)
+            return get_unsaved_document_name ();
+
+        return Utils.replace_home_dir_with_tilde (location.get_parse_name ());
+    }
+
+    public string get_short_name_for_display ()
+    {
+        if (location == null)
+            return get_unsaved_document_name ();
+
+        return location.get_basename ();
+    }
+
+    private string get_unsaved_document_name ()
     {
         return _("Unsaved Document") + " %u".printf (unsaved_document_n);
     }
