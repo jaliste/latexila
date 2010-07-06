@@ -84,4 +84,13 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
     <toolitem action="EditCopy" />
     <toolitem action="EditPaste" />
   </toolbar>
+
+  <popup name="NotebookPopup">
+    <menuitem action="DocumentsMoveToNewWindow" />
+    <separator />
+    <menuitem action="FileSave" />
+    <menuitem action="FileSaveAs" />
+    <separator />
+    <menuitem action="FileClose" />
+  </popup>
 </ui>

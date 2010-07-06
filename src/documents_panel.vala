@@ -22,6 +22,7 @@ using Gtk;
 public class DocumentsPanel : Notebook
 {
     public DocumentTab active_tab { get; private set; }
+    public signal void right_click (Gdk.EventButton event);
 
     public DocumentsPanel ()
     {
@@ -34,7 +35,23 @@ public class DocumentsPanel : Notebook
 
     public void add_tab (DocumentTab tab, int position, bool jump_to)
     {
-        int i = this.insert_page (tab, tab.label, position);
+        EventBox event_box = new EventBox ();
+        event_box.add (tab.label);
+        event_box.button_press_event.connect ((event) =>
+        {
+            // right click
+            if (event.button == 3)
+            {
+                set_current_page (page_num (tab));
+
+                // show popup menu
+                right_click (event);
+            }
+
+            return false;
+        });
+
+        int i = this.insert_page (tab, event_box, position);
         this.set_tab_reorderable (tab, true);
         if (jump_to)
             this.set_current_page (i);

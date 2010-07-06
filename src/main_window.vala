@@ -180,6 +180,11 @@ public class MainWindow : Window
         setup_toolbar_open_button (toolbar);
 
         documents_panel = new DocumentsPanel ();
+        documents_panel.right_click.connect ((event) =>
+        {
+            Menu popup_menu = (Menu) ui_manager.get_widget ("/NotebookPopup");
+            popup_menu.popup (null, null, null, event.button, event.time);
+        });
 
         statusbar = new CustomStatusbar ();
         tip_message_cid = statusbar.get_context_id ("tip_message");
