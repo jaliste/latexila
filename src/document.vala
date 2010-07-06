@@ -249,27 +249,27 @@ public class Document : Gtk.SourceBuffer
 
             /* find the first '%' character */
             int j = 0;
-		    int start_delete = -1;
-		    int stop_delete = -1;
-		    while (line[j] != '\0')
-		    {
-			    if (line[j] == '%')
-			    {
-				    start_delete = j;
-				    stop_delete = j + 1;
-				    if (line[j + 1] == ' ')
-					    stop_delete++;
-				    break;
-			    }
+            int start_delete = -1;
+            int stop_delete = -1;
+            while (line[j] != '\0')
+            {
+                if (line[j] == '%')
+                {
+                    start_delete = j;
+                    stop_delete = j + 1;
+                    if (line[j + 1] == ' ')
+                        stop_delete++;
+                    break;
+                }
 
-			    else if (line[j] != ' ' && line[j] != '\t')
-				    break;
+                else if (line[j] != ' ' && line[j] != '\t')
+                    break;
 
-			    j++;
-		    }
+                j++;
+            }
 
-		    if (start_delete == -1)
-			    continue;
+            if (start_delete == -1)
+                continue;
 
             get_iter_at_line_offset (out start, i, start_delete);
             get_iter_at_line_offset (out end, i, stop_delete);

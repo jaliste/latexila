@@ -55,7 +55,7 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <menuitem action="ViewZoomReset" />
     </menu>
 
-    <menu action="Documents">
+    <menu action="Documents" name="DocumentsMenu">
       <menuitem action="DocumentsSaveAll" />
       <menuitem action="DocumentsCloseAll" />
       <separator />
@@ -63,6 +63,9 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <menuitem action="DocumentsNext" />
       <separator />
       <menuitem action="DocumentsMoveToNewWindow" />
+      <placeholder name="DocumentsListPlaceholder">
+      <separator />
+      </placeholder>
     </menu>
 
     <menu action="Help">

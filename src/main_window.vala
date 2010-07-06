@@ -100,8 +100,12 @@ public class MainWindow : Window
 
     private string file_chooser_current_folder = Environment.get_home_dir ();
     private DocumentsPanel documents_panel;
-    private ActionGroup action_group;
     private CustomStatusbar statusbar;
+
+    private UIManager ui_manager;
+    private ActionGroup action_group;
+    private ActionGroup documents_list_action_group;
+    private uint documents_list_menu_ui_id;
 
     public DocumentTab? active_tab
     {
@@ -176,8 +180,9 @@ public class MainWindow : Window
         action_group.add_actions (action_entries, this);
         action_group.add_action (recent_action);
 
-        var ui_manager = new UIManager ();
+        ui_manager = new UIManager ();
         ui_manager.insert_action_group (action_group, 0);
+
         try
         {
             var path = Path.build_filename (Config.DATA_DIR, "ui", "ui.xml");
@@ -189,6 +194,10 @@ public class MainWindow : Window
         }
 
         add_accel_group (ui_manager.get_accel_group ());
+
+        // list of open documents menu
+        documents_list_action_group = new ActionGroup ("DocumentsListActions");
+        ui_manager.insert_action_group (documents_list_action_group, 0);
 
         /* components */
         documents_panel = new DocumentsPanel ();
@@ -221,6 +230,7 @@ public class MainWindow : Window
             else if (nb_pages == 2)
                 set_documents_move_to_new_window_sensitivity (true);
 
+            update_documents_list_menu ();
         });
 
         documents_panel.page_removed.connect (() =>
@@ -239,15 +249,32 @@ public class MainWindow : Window
                 set_documents_move_to_new_window_sensitivity (false);
 
             my_set_title ();
+            update_documents_list_menu ();
         });
 
-        documents_panel.switch_page.connect (() =>
+        documents_panel.switch_page.connect ((pg, page_num) =>
         {
             set_undo_sensitivity ();
             set_redo_sensitivity ();
             update_next_prev_doc_sensitivity ();
             my_set_title ();
             update_cursor_position_statusbar ();
+
+            /* activate the right item in the documents menu */
+            string action_name = "Tab_%u".printf (page_num);
+            RadioAction action =
+                (RadioAction) documents_list_action_group.get_action (action_name);
+
+            // sometimes the action doesn't exist yet, and the proper action is set
+            // active during the documents list menu creation
+            if (action != null)
+                action.set_active (true);
+        });
+
+        documents_panel.page_reordered.connect (() =>
+        {
+            update_next_prev_doc_sensitivity ();
+            update_documents_list_menu ();
         });
 
         set_file_actions_sensitivity (false);
@@ -840,6 +867,61 @@ public class MainWindow : Window
         // we create a new tab with the same view, so we avoid headache with signals
         // the user see nothing, muahahaha
         new_window.create_tab_with_view (view);
+    }
+
+    private void update_documents_list_menu ()
+    {
+        return_if_fail (documents_list_action_group != null);
+
+        if (documents_list_menu_ui_id != 0)
+            ui_manager.remove_ui (documents_list_menu_ui_id);
+
+        foreach (Action action in documents_list_action_group.list_actions ())
+        {
+            action.activate.disconnect (documents_list_menu_activate);
+            documents_list_action_group.remove_action (action);
+        }
+
+        int n = documents_panel.get_n_pages ();
+        uint id = n > 0 ? ui_manager.new_merge_id () : 0;
+
+        unowned SList<RadioAction> group = null;
+
+        for (int i = 0 ; i < n ; i++)
+        {
+            DocumentTab tab = (DocumentTab) documents_panel.get_nth_page (i);
+            string action_name = "Tab_%d".printf (i);
+            string name = tab.label_text.replace ("_", "__");
+            string accel = i < 10 ? "<alt>%d".printf ((i + 1) % 10) : null;
+
+            RadioAction action = new RadioAction (action_name, name, null, null, i);
+            if (group != null)
+                action.set_group (group);
+
+            /* group changes each time we add an action, so it must be updated */
+            group = action.get_group ();
+
+            documents_list_action_group.add_action_with_accel (action, accel);
+
+            action.activate.connect (documents_list_menu_activate);
+
+            ui_manager.add_ui (id, "/MainMenu/DocumentsMenu/DocumentsListPlaceholder",
+                action_name, action_name, UIManagerItemType.MENUITEM, false);
+
+            if (tab == active_tab)
+                action.set_active (true);
+        }
+
+        documents_list_menu_ui_id = id;
+    }
+
+    private void documents_list_menu_activate (Action action)
+    {
+        RadioAction radio_action = (RadioAction) action;
+        if (! radio_action.get_active ())
+            return;
+
+        documents_panel.set_current_page (radio_action.get_current_value ());
     }
 
 
