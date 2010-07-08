@@ -76,6 +76,11 @@ public class MainWindow : Window
         { "ViewZoomReset", STOCK_ZOOM_100, N_("_Reset Zoom"), "<Control>0",
             N_("Reset the size of the font"), on_view_zoom_reset },
 
+        // Search
+        { "Search", null, N_("_Search") },
+        { "SearchGoToLine", STOCK_JUMP_TO, N_("_Go to Line..."), "<Control>G",
+            N_("Go to a specific line"), on_search_goto_line },
+
         // Documents
         { "Documents", null, N_("_Documents") },
         { "DocumentsSaveAll", STOCK_SAVE, N_("_Save All"), "<Shift><Control>L",
@@ -101,6 +106,7 @@ public class MainWindow : Window
     private string file_chooser_current_folder = Environment.get_home_dir ();
     private DocumentsPanel documents_panel;
     private CustomStatusbar statusbar;
+    private GotoLine goto_line;
 
     private UIManager ui_manager;
     private ActionGroup action_group;
@@ -188,6 +194,7 @@ public class MainWindow : Window
 
         statusbar = new CustomStatusbar ();
         tip_message_cid = statusbar.get_context_id ("tip_message");
+        goto_line = new GotoLine (this);
 
         /* signal handlers */
 
@@ -266,9 +273,12 @@ public class MainWindow : Window
         main_vbox.pack_start (menu, false, false, 0);
         main_vbox.pack_start (toolbar, false, false, 0);
         main_vbox.pack_start (documents_panel, true, true, 0);
+        main_vbox.pack_start (goto_line, false, false, 1);
         main_vbox.pack_end (statusbar, false, false, 0);
 
         add (main_vbox);
+        show_all ();
+        goto_line.hide ();
     }
 
     public List<Document> get_documents ()
@@ -593,7 +603,8 @@ public class MainWindow : Window
             "FileSave", "FileSaveAs", "FileClose", "EditUndo", "EditRedo", "EditCut",
             "EditCopy", "EditPaste", "EditDelete", "EditSelectAll", "EditComment",
             "EditUncomment", "ViewZoomIn", "ViewZoomOut", "ViewZoomReset",
-            "DocumentsSaveAll", "DocumentsCloseAll", "DocumentsPrevious", "DocumentsNext"
+            "DocumentsSaveAll", "DocumentsCloseAll", "DocumentsPrevious", "DocumentsNext",
+            "SearchGoToLine"
         };
 
         foreach (string file_action in file_actions)
@@ -1132,6 +1143,14 @@ public class MainWindow : Window
     {
         return_if_fail (active_tab != null);
         active_view.set_font_from_settings ();
+    }
+
+    /* Search */
+
+    public void on_search_goto_line ()
+    {
+        return_if_fail (active_tab != null);
+        goto_line.show ();
     }
 
     /* Documents */

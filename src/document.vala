@@ -294,4 +294,25 @@ public class Document : Gtk.SourceBuffer
 
         end_user_action ();
     }
+
+    // If line is bigger than the number of lines of the document, the cursor is moved
+    // to the last line and false is returned.
+    public bool goto_line (int line)
+    {
+        return_val_if_fail (line >= -1, false);
+
+        bool ret = true;
+        TextIter iter;
+
+        if (line >= get_line_count ())
+        {
+            ret = false;
+            get_end_iter (out iter);
+        }
+        else
+            get_iter_at_line (out iter, line);
+
+        place_cursor (iter);
+        return ret;
+    }
 }

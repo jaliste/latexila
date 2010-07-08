@@ -55,6 +55,10 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <menuitem action="ViewZoomReset" />
     </menu>
 
+    <menu action="Search">
+      <menuitem action="SearchGoToLine" />
+    </menu>
+
     <menu action="Documents" name="DocumentsMenu">
       <menuitem action="DocumentsSaveAll" />
       <menuitem action="DocumentsCloseAll" />

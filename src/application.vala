@@ -172,7 +172,7 @@ public class Application : GLib.Object
         });
 
         windows.append (window);
-        window.show_all ();
+        window.show ();
         return window;
     }
 
