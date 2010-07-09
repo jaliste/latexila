@@ -1,0 +1,9 @@
+*.cmake
+*.gmo
+*.h
+*.c
+CMakeCache.txt
+CMakeFiles
+Makefile
+src/latexila
+install_manifest.txt
