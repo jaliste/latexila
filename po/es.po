@@ -1,35 +1,33 @@
-# French translations for latexila package.
-# Copyright (C) 2010 Sébastien Wilmet
+# Spanish translations for latexila package.
+# Copyright (C) 2010 Matias De la Puente
 # This file is distributed under the same license as the latexila package.
-# Sébastien Wilmet <sebastien.wilmet@gmail.com>, 2010.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: latexila 1.98.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-07-09 18:13+0200\n"
-"PO-Revision-Date: 2010-06-19 13:16+0100\n"
-"Last-Translator: Sébastien Wilmet <sebastien.wilmet@gmail.com>\n"
-"Language-Team: French\n"
-"Language: fr\n"
+"PO-Revision-Date: 2010-07-09 18:23+0200\n"
+"Last-Translator: Matias De la Puente <mfpuente.ar@gmail.com>\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: src/main.vala:62
 msgid "- Integrated LaTeX Environment for GNOME"
-msgstr "- Environnement LaTeX intégré pour GNOME"
+msgstr ""
 
 #: src/main_window.vala:787
 #, c-format
 msgid "A file named \"%s\" already exists. Do you want to replace it?"
-msgstr "Un fichier nommé \"%s\" existe déjà. Voulez-vous le remplacer ?"
+msgstr ""
 
 #: src/main_window.vala:107 src/main_window.vala:1270
-#, fuzzy
 msgid "About LaTeXila"
-msgstr "Bienvenue sur LaTeXila !"
+msgstr ""
 
 #: src/document_tab.vala:153
 #, c-format
@@ -37,17 +35,11 @@ msgid "Activate '%s'"
 msgstr ""
 
 #: src/main_window.vala:98
-#, fuzzy
 msgid "Activate next document"
-msgstr "Crée un nouveau document"
+msgstr ""
 
 #: src/main_window.vala:95
-#, fuzzy
 msgid "Activate previous document"
-msgstr "Crée un nouveau document"
-
-#: src/search_and_replace.ui:174
-msgid "All"
 msgstr ""
 
 #: src/main_window.vala:93
@@ -55,9 +47,8 @@ msgid "Close all open files"
 msgstr ""
 
 #: src/document_tab.vala:111
-#, fuzzy
 msgid "Close document"
-msgstr "Nouveau document"
+msgstr ""
 
 #: src/main_window.vala:41
 msgid "Close the current file"
@@ -67,18 +58,13 @@ msgstr ""
 msgid "Close without Saving"
 msgstr ""
 
-#: src/preferences_dialog.ui:229
-msgid "Color Scheme"
-msgstr ""
-
 #: src/main_window.vala:62
 msgid "Comment the selected lines (add the character \"%\")"
 msgstr ""
 
 #: src/main_window.vala:68
-#, fuzzy
 msgid "Configure the application"
-msgstr "Affiche la version de l'application"
+msgstr ""
 
 #: src/main_window.vala:54
 msgid "Copy the selection"
@@ -89,13 +75,12 @@ msgid "Create a new top-level window in an existing instance of LaTeXila"
 msgstr ""
 
 #: src/main_window.vala:33
-#, fuzzy
 msgid "Create a new window"
-msgstr "Crée un nouveau document"
+msgstr ""
 
 #: src/main.vala:33
 msgid "Create new document"
-msgstr "Crée un nouveau document"
+msgstr ""
 
 #: src/main_window.vala:52
 msgid "Cut the selection"
@@ -103,10 +88,6 @@ msgstr ""
 
 #: src/main_window.vala:58
 msgid "Delete the selected text"
-msgstr ""
-
-#: src/preferences_dialog.ui:17
-msgid "Display line numbers"
 msgstr ""
 
 #: src/document_tab.vala:177
@@ -129,24 +110,8 @@ msgstr ""
 msgid "Edit Anyway"
 msgstr ""
 
-#: src/preferences_dialog.ui:111
-msgid "Editor"
-msgstr ""
-
-#: src/preferences_dialog.ui:175
-msgid "Editor _font: "
-msgstr ""
-
 #: src/main_window.vala:73
 msgid "Enlarge the font"
-msgstr ""
-
-#: src/preferences_dialog.ui:132
-msgid "Font"
-msgstr ""
-
-#: src/preferences_dialog.ui:280
-msgid "Font & Colors"
 msgstr ""
 
 #: src/search.vala:56
@@ -155,14 +120,6 @@ msgstr ""
 
 #: src/main_window.vala:86
 msgid "Go to a specific line"
-msgstr ""
-
-#: src/preferences_dialog.ui:80
-msgid "Highlight current line"
-msgstr ""
-
-#: src/preferences_dialog.ui:94
-msgid "Highlight matching brackets"
 msgstr ""
 
 #: src/dialogs.vala:133
@@ -182,14 +139,9 @@ msgstr ""
 msgid "Impossible to save the file."
 msgstr ""
 
-#: src/preferences_dialog.ui:66
-msgid "Insert spaces instead of tabs"
-msgstr ""
-
 #: src/main_window.vala:1219
-#, fuzzy
 msgid "LaTeXila is an Integrated LaTeX Environment for the GNOME desktop"
-msgstr "- Environnement LaTeX intégré pour GNOME"
+msgstr ""
 
 #: src/main_window.vala:416
 msgid ""
@@ -206,10 +158,6 @@ msgstr ""
 msgid "Ln %d, Col %d"
 msgstr ""
 
-#: src/search_and_replace.ui:91
-msgid "Match case"
-msgstr ""
-
 #: src/main_window.vala:101
 msgid "Move the current document to a new window"
 msgstr ""
@@ -223,18 +171,16 @@ msgid "New file"
 msgstr ""
 
 #: src/main_window.vala:1016
-#, fuzzy
 msgid "Open Files"
-msgstr "Ouvrir un fichier"
+msgstr ""
 
 #: src/main_window.vala:332
 msgid "Open _Recent"
 msgstr ""
 
 #: src/main_window.vala:35 src/main_window.vala:877
-#, fuzzy
 msgid "Open a file"
-msgstr "Ouvrir un fichier"
+msgstr ""
 
 #: src/main_window.vala:878
 msgid "Open a recently used file"
@@ -246,10 +192,6 @@ msgstr ""
 
 #: src/main_window.vala:56
 msgid "Paste the clipboard"
-msgstr ""
-
-#: src/preferences_dialog.ui:191
-msgid "Pick the editor font"
 msgstr ""
 
 #: src/preferences_dialog.vala:36
@@ -274,7 +216,7 @@ msgstr ""
 
 #: src/main_window.vala:792
 msgid "Replace"
-msgstr "Remplacer"
+msgstr ""
 
 #: src/main_window.vala:77
 msgid "Reset the size of the font"
@@ -284,8 +226,6 @@ msgstr ""
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options.\n"
 msgstr ""
-"Lancez « %s --help » pour voir la liste complète des options en ligne de "
-"commande disponibles.\n"
 
 #: src/document.vala:96
 msgid "Save Anyway"
@@ -293,7 +233,7 @@ msgstr ""
 
 #: src/main_window.vala:756
 msgid "Save File"
-msgstr "Enregistrer le fichier"
+msgstr ""
 
 #: src/main_window.vala:91
 msgid "Save all open files"
@@ -325,20 +265,15 @@ msgid "Select the documents you want to save:"
 msgstr ""
 
 #: src/main_window.vala:60
-#, fuzzy
 msgid "Select the entire document"
-msgstr "Crée un nouveau document"
+msgstr ""
 
 #: src/main.vala:30
 msgid "Show the application's version"
-msgstr "Affiche la version de l'application"
+msgstr ""
 
 #: src/main_window.vala:75
 msgid "Shrink the font"
-msgstr ""
-
-#: src/preferences_dialog.ui:36
-msgid "Tab width:"
 msgstr ""
 
 #: src/document_tab.vala:172
@@ -371,9 +306,8 @@ msgid "Undo the last action"
 msgstr ""
 
 #: src/document.vala:170
-#, fuzzy
 msgid "Unsaved Document"
-msgstr "Nouveau document"
+msgstr ""
 
 #: src/preferences_dialog.vala:119
 #, c-format
@@ -397,9 +331,8 @@ msgid "_Comment"
 msgstr ""
 
 #: src/main_window.vala:89
-#, fuzzy
 msgid "_Documents"
-msgstr "Nouveau document"
+msgstr ""
 
 #: src/main_window.vala:46
 msgid "_Edit"
@@ -407,7 +340,7 @@ msgstr ""
 
 #: src/main_window.vala:29
 msgid "_File"
-msgstr "_Fichier"
+msgstr ""
 
 #: src/main_window.vala:85
 msgid "_Go to Line..."
@@ -422,23 +355,20 @@ msgid "_Move to New Window"
 msgstr ""
 
 #: src/main_window.vala:97
-#, fuzzy
 msgid "_Next Document"
-msgstr "Nouveau document"
+msgstr ""
 
 #: src/main_window.vala:94
-#, fuzzy
 msgid "_Previous Document"
-msgstr "Nouveau document"
+msgstr ""
 
 #: src/main_window.vala:76
 msgid "_Reset Zoom"
 msgstr ""
 
 #: src/main_window.vala:90
-#, fuzzy
 msgid "_Save All"
-msgstr "Enregistrer le fichier"
+msgstr ""
 
 #: src/main_window.vala:80
 msgid "_Search"
@@ -456,5 +386,54 @@ msgstr ""
 msgid "translator-credits"
 msgstr ""
 
-#~ msgid "Show version information and exit"
-#~ msgstr "Affiche la version de l'application"
+#: src/preferences_dialog.ui:17
+msgid "Display line numbers"
+msgstr ""
+
+#: src/preferences_dialog.ui:36
+msgid "Tab width:"
+msgstr ""
+
+#: src/preferences_dialog.ui:66
+msgid "Insert spaces instead of tabs"
+msgstr ""
+
+#: src/preferences_dialog.ui:80
+msgid "Highlight current line"
+msgstr ""
+
+#: src/preferences_dialog.ui:94
+msgid "Highlight matching brackets"
+msgstr ""
+
+#: src/preferences_dialog.ui:111
+msgid "Editor"
+msgstr ""
+
+#: src/preferences_dialog.ui:132
+msgid "Font"
+msgstr ""
+
+#: src/preferences_dialog.ui:175
+msgid "Editor _font: "
+msgstr ""
+
+#: src/preferences_dialog.ui:191
+msgid "Pick the editor font"
+msgstr ""
+
+#: src/preferences_dialog.ui:229
+msgid "Color Scheme"
+msgstr ""
+
+#: src/preferences_dialog.ui:280
+msgid "Font & Colors"
+msgstr ""
+
+#: src/search_and_replace.ui:91
+msgid "Match case"
+msgstr ""
+
+#: src/search_and_replace.ui:174
+msgid "All"
+msgstr ""

@@ -32,3 +32,22 @@ There are some rules to follow when coding:
     - indentation: 4 spaces
     - lines: 90 characters maximum (in some cases it can be a little more)
     - same coding style everywhere
+
+
+Translations
+------------
+
+How to generate latexila.pot?
+
+$ xgettext -k_ -kN_ -d latexila -s -o po/sources.pot src/*.vala
+$ xgettext -o glade.pot --language=Glade --omit-header src/*.ui
+$ cd po/ ; msgcat -o latexila.pot --use-first sources.pot glade.pot
+
+How to create a new *.po for a new language?
+
+$ cd po/ ; msginit -l xx -o xx.po -i latexila.pot
+
+How to update the *.po files with latexila.pot file?
+
+$ cd build/ ; cmake ../
+$ make

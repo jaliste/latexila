@@ -236,6 +236,8 @@ public class MainWindow : Window
             {
                 statusbar.set_cursor_position (-1, -1);
                 set_file_actions_sensitivity (false);
+                goto_line.hide ();
+                search_and_replace.hide ();
             }
 
             // actions for which there must be 2 documents minimum
