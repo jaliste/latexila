@@ -99,3 +99,80 @@ public class GotoLine : HBox
         main_window.active_view.scroll_to_cursor ();
     }
 }
+
+public class SearchAndReplace : GLib.Object
+{
+    private MainWindow main_window;
+
+    public Widget search_and_replace;
+    private Button button_arrow;
+    private Arrow arrow;
+    private Entry entry_find;
+    private Entry entry_replace;
+    private HBox hbox_replace;
+
+    public SearchAndReplace (MainWindow main_window)
+    {
+        this.main_window = main_window;
+
+        var path = Path.build_filename (Config.DATA_DIR, "ui", "search_and_replace.ui");
+
+        try
+        {
+            Builder builder = new Builder ();
+            builder.add_from_file (path);
+            search_and_replace = (Widget) builder.get_object ("search_and_replace");
+
+            // we unparent the main widget because the ui file contains a window
+            search_and_replace.unparent ();
+
+            button_arrow = (Button) builder.get_object ("button_arrow");
+            arrow = (Arrow) builder.get_object ("arrow");
+            entry_find = (Entry) builder.get_object ("entry_find");
+            entry_replace = (Entry) builder.get_object ("entry_replace");
+            hbox_replace = (HBox) builder.get_object ("hbox_replace");
+            Button button_close = (Button) builder.get_object ("button_close");
+
+            button_arrow.clicked.connect (() =>
+            {
+                // search -> search and replace
+                if (arrow.arrow_type == ArrowType.DOWN)
+                    show_search_and_replace ();
+
+                // search and replace -> search
+                else
+                    show_search ();
+            });
+
+            button_close.clicked.connect (hide);
+        }
+        catch (Error e)
+        {
+            stderr.printf ("Error search and replace: %s\n", e.message);
+            var label = new Label (e.message);
+            label.set_line_wrap (true);
+            search_and_replace = label;
+        }
+    }
+
+    public void show_search ()
+    {
+        arrow.arrow_type = ArrowType.DOWN;
+        entry_replace.hide ();
+        hbox_replace.hide ();
+        search_and_replace.show ();
+    }
+
+    public void show_search_and_replace ()
+    {
+        arrow.arrow_type = ArrowType.UP;
+        entry_replace.show ();
+        hbox_replace.show ();
+        search_and_replace.show ();
+    }
+
+    public void hide ()
+    {
+        search_and_replace.hide ();
+    }
+}

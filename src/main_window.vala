@@ -78,6 +78,10 @@ public class MainWindow : Window
 
         // Search
         { "Search", null, N_("_Search") },
+        { "SearchFind", STOCK_FIND, null, null,
+            N_("Search for text"), on_search_find },
+        { "SearchReplace", STOCK_FIND_AND_REPLACE, null, null,
+            N_("Search for and replace text"), on_search_replace },
         { "SearchGoToLine", STOCK_JUMP_TO, N_("_Go to Line..."), "<Control>G",
             N_("Go to a specific line"), on_search_goto_line },
 
@@ -107,6 +111,7 @@ public class MainWindow : Window
     private DocumentsPanel documents_panel;
     private CustomStatusbar statusbar;
     private GotoLine goto_line;
+    private SearchAndReplace search_and_replace;
 
     private UIManager ui_manager;
     private ActionGroup action_group;
@@ -195,6 +200,7 @@ public class MainWindow : Window
         statusbar = new CustomStatusbar ();
         tip_message_cid = statusbar.get_context_id ("tip_message");
         goto_line = new GotoLine (this);
+        search_and_replace = new SearchAndReplace (this);
 
         /* signal handlers */
 
@@ -274,11 +280,13 @@ public class MainWindow : Window
         main_vbox.pack_start (toolbar, false, false, 0);
         main_vbox.pack_start (documents_panel, true, true, 0);
         main_vbox.pack_start (goto_line, false, false, 1);
+        main_vbox.pack_start (search_and_replace.search_and_replace, false, false, 1);
         main_vbox.pack_end (statusbar, false, false, 0);
 
         add (main_vbox);
         show_all ();
         goto_line.hide ();
+        search_and_replace.hide ();
     }
 
     public List<Document> get_documents ()
@@ -604,7 +612,7 @@ public class MainWindow : Window
             "EditCopy", "EditPaste", "EditDelete", "EditSelectAll", "EditComment",
             "EditUncomment", "ViewZoomIn", "ViewZoomOut", "ViewZoomReset",
             "DocumentsSaveAll", "DocumentsCloseAll", "DocumentsPrevious", "DocumentsNext",
-            "SearchGoToLine"
+            "SearchFind", "SearchReplace", "SearchGoToLine"
         };
 
         foreach (string file_action in file_actions)
@@ -1146,6 +1154,18 @@ public class MainWindow : Window
     }
 
     /* Search */
+
+    public void on_search_find ()
+    {
+        return_if_fail (active_tab != null);
+        search_and_replace.show_search ();
+    }
+
+    public void on_search_replace ()
+    {
+        return_if_fail (active_tab != null);
+        search_and_replace.show_search_and_replace ();
+    }
 
     public void on_search_goto_line ()
     {

@@ -56,6 +56,9 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
     </menu>
 
     <menu action="Search">
+      <menuitem action="SearchFind" />
+      <menuitem action="SearchReplace" />
+      <separator />
       <menuitem action="SearchGoToLine" />
     </menu>
 

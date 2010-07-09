@@ -134,6 +134,7 @@ public class PreferencesDialog : Dialog
             label_error.set_line_wrap (true);
             Box content_area = (Box) get_content_area ();
             content_area.pack_start (label_error, true, true, 0);
+            content_area.show_all ();
         }
     }
 

@@ -18,4 +18,6 @@ vala_precompile (
 
 add_executable (latexila ${VALA_C} gedit-utils.c gedit-utils.h)
 install (TARGETS latexila DESTINATION "bin")
-install (FILES ui.xml preferences_dialog.ui DESTINATION ${DATA_DIR}/ui)
+
+file (GLOB UI "*.ui")
+install (FILES ui.xml ${UI} DESTINATION ${DATA_DIR}/ui)

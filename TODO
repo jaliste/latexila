@@ -3,3 +3,11 @@ TODO
 - Search:
 	- search
 	- replace
+
+- Preferences:
+	- create a backup copy of files before saving
+	- autosave files every X minutes
+	- reopen files on startup
+
+- Edit toolbar and LaTeX menu
+- Managing templates
