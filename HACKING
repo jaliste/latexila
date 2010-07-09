@@ -1,8 +1,6 @@
 Guidelines for LaTeXila
 =======================
 
-TODO open a GitHub account
-
 LaTeXila source code is maintained using the Git version control system
 and is available at the following location:
 
@@ -35,12 +33,12 @@ There are some rules to follow when coding:
 
 
 Translations
-------------
+============
 
 How to generate latexila.pot?
 
 $ xgettext -k_ -kN_ -d latexila -s -o po/sources.pot src/*.vala
-$ xgettext -o glade.pot --language=Glade --omit-header src/*.ui
+$ xgettext -o po/glade.pot --language=Glade --omit-header src/*.ui
 $ cd po/ ; msgcat -o latexila.pot --use-first sources.pot glade.pot
 
 How to create a new *.po for a new language?
