@@ -153,6 +153,9 @@ public class SearchAndReplace : GLib.Object
             frame_replace = (Frame) builder.get_object ("frame_replace");
             Button button_clear_replace =
                 (Button) builder.get_object ("button_clear_replace");
+            Button button_replace = (Button) builder.get_object ("button_replace");
+            Button button_replace_all =
+                (Button) builder.get_object ("button_replace_all");
 
             hbox_replace = (HBox) builder.get_object ("hbox_replace");
 
@@ -209,21 +212,31 @@ public class SearchAndReplace : GLib.Object
 
             button_previous.clicked.connect (() =>
             {
-                set_label_text ("42 of 77", false);
             });
 
             button_next.clicked.connect (() =>
             {
-                set_label_text (_("Not found"), true);
             });
 
             entry_find.changed.connect (() =>
             {
+                bool sensitive = entry_find.text_length > 0;
+                button_clear_find.sensitive = sensitive;
+                button_previous.sensitive = sensitive;
+                button_next.sensitive = sensitive;
+                button_replace.sensitive = sensitive;
+                button_replace_all.sensitive = sensitive;
+
                 if (entry_find.text_length == 0)
                 {
                     label_find_normal.hide ();
                     label_find_error.hide ();
                 }
+            });
+
+            entry_replace.changed.connect (() =>
+            {
+                button_clear_replace.sensitive = entry_replace.text_length > 0;
             });
         }
         catch (Error e)

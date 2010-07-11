@@ -21,6 +21,7 @@
                 <child>
                   <object class="GtkButton" id="button_clear_find">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Clear Find</property>
@@ -41,6 +42,7 @@
                 <child>
                   <object class="GtkButton" id="button_previous">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Find previous</property>
@@ -61,6 +63,7 @@
                 <child>
                   <object class="GtkButton" id="button_next">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Find next</property>
@@ -112,6 +115,7 @@
                 <child>
                   <object class="GtkButton" id="button_clear_replace">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Clear Replace</property>
@@ -132,6 +136,7 @@
                 <child>
                   <object class="GtkButton" id="button_replace">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Replace</property>
@@ -152,6 +157,7 @@
                 <child>
                   <object class="GtkButton" id="button_replace_all">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Replace All</property>
