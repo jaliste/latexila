@@ -172,12 +172,12 @@ public class MainWindow : Window
         set_default_size (w, h);
 
         Gdk.WindowState state = (Gdk.WindowState) settings.get_int ("state");
-        if ((state & Gdk.WindowState.MAXIMIZED) != 0)
+        if (Gdk.WindowState.MAXIMIZED in state)
             maximize ();
         else
             unmaximize ();
 
-        if ((state & Gdk.WindowState.STICKY) != 0)
+        if (Gdk.WindowState.STICKY in state)
             stick ();
         else
             unstick ();
@@ -913,7 +913,7 @@ public class MainWindow : Window
 
         // If window is maximized, store sizes that are a bit smaller than full screen,
         // else making window non-maximized the next time will have no effect.
-        if ((state & Gdk.WindowState.MAXIMIZED) != 0)
+        if (Gdk.WindowState.MAXIMIZED in state)
         {
             w -= 100;
             h -= 100;

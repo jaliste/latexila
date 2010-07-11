@@ -11,36 +11,6 @@
         <property name="column_spacing">3</property>
         <property name="row_spacing">2</property>
         <child>
-          <object class="GtkEntry" id="entry_find">
-            <property name="width_request">300</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="invisible_char">&#x25CF;</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="x_options"></property>
-            <property name="y_options"></property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="entry_replace">
-            <property name="width_request">300</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="invisible_char">&#x25CF;</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="top_attach">1</property>
-            <property name="bottom_attach">2</property>
-            <property name="x_options"></property>
-            <property name="y_options"></property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkVBox" id="vbox1">
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
@@ -49,14 +19,15 @@
                 <property name="visible">True</property>
                 <property name="spacing">3</property>
                 <child>
-                  <object class="GtkButton" id="button_previous">
+                  <object class="GtkButton" id="button_clear_find">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Clear Find</property>
                     <child>
-                      <object class="GtkImage" id="image1">
+                      <object class="GtkImage" id="image6">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-go-up</property>
+                        <property name="stock">gtk-clear</property>
                         <property name="icon-size">1</property>
                       </object>
                     </child>
@@ -68,14 +39,15 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="button_next">
+                  <object class="GtkButton" id="button_previous">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Find previous</property>
                     <child>
-                      <object class="GtkImage" id="image2">
+                      <object class="GtkImage" id="image1">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-go-down</property>
+                        <property name="stock">gtk-go-up</property>
                         <property name="icon-size">1</property>
                       </object>
                     </child>
@@ -87,12 +59,18 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="check_match_case">
-                    <property name="label" translatable="yes">Match case</property>
+                  <object class="GtkButton" id="button_next">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="draw_indicator">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Find next</property>
+                    <child>
+                      <object class="GtkImage" id="image2">
+                        <property name="visible">True</property>
+                        <property name="stock">gtk-go-down</property>
+                        <property name="icon-size">1</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -105,6 +83,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Close</property>
                     <child>
                       <object class="GtkImage" id="image3">
                         <property name="visible">True</property>
@@ -131,14 +110,15 @@
                 <property name="visible">True</property>
                 <property name="spacing">3</property>
                 <child>
-                  <object class="GtkButton" id="button_replace">
+                  <object class="GtkButton" id="button_clear_replace">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Clear Replace</property>
                     <child>
-                      <object class="GtkImage" id="image4">
+                      <object class="GtkImage" id="image7">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-find-and-replace</property>
+                        <property name="stock">gtk-clear</property>
                         <property name="icon-size">1</property>
                       </object>
                     </child>
@@ -150,10 +130,31 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkButton" id="button_replace">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Replace</property>
+                    <child>
+                      <object class="GtkImage" id="image4">
+                        <property name="visible">True</property>
+                        <property name="stock">gtk-find-and-replace</property>
+                        <property name="icon-size">1</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkButton" id="button_replace_all">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Replace All</property>
                     <child>
                       <object class="GtkHBox" id="hbox3">
                         <property name="visible">True</property>
@@ -183,7 +184,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -203,13 +204,11 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
           <object class="GtkButton" id="button_arrow">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Toggle between search and replace mode</property>
             <child>
               <object class="GtkArrow" id="arrow">
                 <property name="visible">True</property>
@@ -221,6 +220,108 @@
             <property name="x_options"></property>
             <property name="y_options"></property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkFrame" id="frame_find">
+            <property name="width_request">350</property>
+            <property name="visible">True</property>
+            <property name="label_xalign">0</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkHBox" id="hbox_entry_find">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkEntry" id="entry_find">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="tooltip_text" translatable="yes">Search for</property>
+                    <property name="has_frame">False</property>
+                    <property name="primary_icon_stock">gtk-properties</property>
+                    <property name="primary_icon_activatable">True</property>
+                    <property name="primary_icon_sensitive">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="eventbox_label1">
+                    <child>
+                      <object class="GtkLabel" id="label_find_normal">
+                        <property name="label" translatable="yes">label</property>
+                        <attributes>
+                          <attribute name="foreground" value="#aaaaaaaaaaaa"/>
+                          <attribute name="background" value="#ffffffffffff"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="eventbox_label2">
+                    <child>
+                      <object class="GtkLabel" id="label_find_error">
+                        <property name="label" translatable="yes">label</property>
+                        <attributes>
+                          <attribute name="foreground" value="#ffffffffffff"/>
+                          <attribute name="background" value="#cccc00000000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+            <child type="label_item">
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+            <property name="x_options"></property>
+            <property name="y_options"></property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame" id="frame_replace">
+            <property name="width_request">350</property>
+            <property name="visible">True</property>
+            <property name="label_xalign">0</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkEntry" id="entry_replace">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Replace with</property>
+                <property name="has_frame">False</property>
+              </object>
+            </child>
+            <child type="label_item">
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+            <property name="top_attach">1</property>
+            <property name="bottom_attach">2</property>
+            <property name="x_options"></property>
+            <property name="y_options"></property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>

@@ -90,6 +90,9 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
     <toolitem action="EditCut" />
     <toolitem action="EditCopy" />
     <toolitem action="EditPaste" />
+    <separator />
+    <toolitem action="SearchFind" />
+    <toolitem action="SearchReplace" />
   </toolbar>
 
   <popup name="NotebookPopup">
