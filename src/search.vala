@@ -105,6 +105,7 @@ public class GotoLine : HBox
 public class SearchAndReplace : GLib.Object
 {
     private MainWindow main_window;
+    private Document working_document;
 
     public Widget search_and_replace;
 
@@ -120,8 +121,25 @@ public class SearchAndReplace : GLib.Object
 
     private HBox hbox_replace;
 
-    private CheckMenuItem match_case;
-    private CheckMenuItem entire_word;
+    private CheckMenuItem check_case_sensitive;
+    private CheckMenuItem check_entire_word;
+
+    private int min_nb_chars_for_incremental_search = 3;
+
+    private bool search_and_replace_mode
+    {
+        get { return arrow.arrow_type == ArrowType.UP; }
+    }
+
+    private bool case_sensitive
+    {
+        get { return check_case_sensitive.get_active (); }
+    }
+
+    private bool entire_word
+    {
+        get { return check_entire_word.get_active (); }
+    }
 
     public SearchAndReplace (MainWindow main_window)
     {
@@ -172,10 +190,10 @@ public class SearchAndReplace : GLib.Object
 
             /* options menu */
             var menu = new Menu ();
-            match_case = new CheckMenuItem.with_label (_("Case sensitive"));
-            entire_word = new CheckMenuItem.with_label (_("Entire words only"));
-            menu.append (match_case);
-            menu.append (entire_word);
+            check_case_sensitive = new CheckMenuItem.with_label (_("Case sensitive"));
+            check_entire_word = new CheckMenuItem.with_label (_("Entire words only"));
+            menu.append (check_case_sensitive);
+            menu.append (check_entire_word);
             menu.show_all ();
 
             /* signal handlers */
@@ -189,13 +207,13 @@ public class SearchAndReplace : GLib.Object
 
             button_arrow.clicked.connect (() =>
             {
-                // search -> search and replace
-                if (arrow.arrow_type == ArrowType.DOWN)
-                    show_search_and_replace ();
-
                 // search and replace -> search
-                else
+                if (search_and_replace_mode)
                     show_search ();
+
+                // search -> search and replace
+                else
+                    show_search_and_replace ();
             });
 
             button_close.clicked.connect (hide);
@@ -212,11 +230,13 @@ public class SearchAndReplace : GLib.Object
 
             button_previous.clicked.connect (() =>
             {
+                set_search_text (false);
+                return_if_fail (working_document != null);
+                working_document.search_backward ();
             });
 
-            button_next.clicked.connect (() =>
-            {
-            });
+            button_next.clicked.connect (search_forward);
+            entry_find.activate.connect (search_forward);
 
             entry_find.changed.connect (() =>
             {
@@ -231,13 +251,19 @@ public class SearchAndReplace : GLib.Object
                 {
                     label_find_normal.hide ();
                     label_find_error.hide ();
+                    clear_search ();
                 }
+                else if (entry_find.text_length >= min_nb_chars_for_incremental_search)
+                    set_search_text ();
             });
 
             entry_replace.changed.connect (() =>
             {
                 button_clear_replace.sensitive = entry_replace.text_length > 0;
             });
+
+            check_case_sensitive.toggled.connect (() => { set_search_text (); });
+            check_entire_word.toggled.connect (() => { set_search_text (); });
         }
         catch (Error e)
         {
@@ -253,9 +279,7 @@ public class SearchAndReplace : GLib.Object
         arrow.arrow_type = ArrowType.DOWN;
         frame_replace.hide ();
         hbox_replace.hide ();
-        search_and_replace.show ();
-        label_find_normal.hide ();
-        label_find_error.hide ();
+        show ();
     }
 
     public void show_search_and_replace ()
@@ -263,14 +287,26 @@ public class SearchAndReplace : GLib.Object
         arrow.arrow_type = ArrowType.UP;
         frame_replace.show ();
         hbox_replace.show ();
-        search_and_replace.show ();
+        show ();
+    }
+
+    private void show ()
+    {
         label_find_normal.hide ();
         label_find_error.hide ();
+        search_and_replace.show ();
+        entry_find.grab_focus ();
+
+        main_window.notify["active-document"].connect (active_document_changed);
     }
 
     public void hide ()
     {
         search_and_replace.hide ();
+        if (working_document != null)
+            clear_search ();
+
+        main_window.notify["active-document"].disconnect (active_document_changed);
     }
 
     private void set_label_text (string text, bool error)
@@ -287,5 +323,63 @@ public class SearchAndReplace : GLib.Object
             label_find_normal.show ();
             label_find_error.hide ();
         }
+    }
+
+    private void set_search_text (bool select = true)
+    {
+        return_if_fail (main_window.active_document != null);
+
+        if (entry_find.text_length == 0)
+            return;
+
+        if (main_window.active_document != working_document)
+        {
+            if (working_document != null)
+                clear_search ();
+
+            working_document = main_window.active_document;
+            working_document.search_info_updated.connect (on_search_info_updated);
+        }
+
+        uint nb_matches, num_match;
+        working_document.set_search_text (entry_find.text, case_sensitive, entire_word,
+            out nb_matches, out num_match, select);
+
+        on_search_info_updated (nb_matches != 0, nb_matches, num_match);
+    }
+
+    private void search_forward ()
+    {
+        set_search_text (false);
+        return_if_fail (working_document != null);
+        working_document.search_forward ();
+    }
+
+    private void on_search_info_updated (bool selected, uint nb_matches, uint num_match)
+    {
+        if (selected)
+            set_label_text (_("%u of %u").printf (num_match, nb_matches), false);
+        else if (nb_matches == 0)
+            set_label_text (_("Not found"), true);
+        else if (nb_matches == 1)
+            set_label_text (_("One match"), false);
+        else
+            set_label_text (_("%u matches").printf (nb_matches), false);
+    }
+
+    private void clear_search ()
+    {
+        if (working_document != null)
+        {
+            working_document.clear_search ();
+            working_document.search_info_updated.disconnect (on_search_info_updated);
+            working_document = null;
+        }
+    }
+
+    private void active_document_changed ()
+    {
+        label_find_normal.hide ();
+        label_find_error.hide ();
     }
 }

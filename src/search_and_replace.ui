@@ -25,6 +25,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Clear Find</property>
+                    <property name="relief">none</property>
                     <child>
                       <object class="GtkImage" id="image6">
                         <property name="visible">True</property>
@@ -46,6 +47,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Find previous</property>
+                    <property name="relief">none</property>
                     <child>
                       <object class="GtkImage" id="image1">
                         <property name="visible">True</property>
@@ -67,6 +69,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Find next</property>
+                    <property name="relief">none</property>
                     <child>
                       <object class="GtkImage" id="image2">
                         <property name="visible">True</property>
@@ -87,6 +90,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Close</property>
+                    <property name="relief">none</property>
                     <child>
                       <object class="GtkImage" id="image3">
                         <property name="visible">True</property>
@@ -119,6 +123,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Clear Replace</property>
+                    <property name="relief">none</property>
                     <child>
                       <object class="GtkImage" id="image7">
                         <property name="visible">True</property>
@@ -140,6 +145,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Replace</property>
+                    <property name="relief">none</property>
                     <child>
                       <object class="GtkImage" id="image4">
                         <property name="visible">True</property>
@@ -161,6 +167,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Replace All</property>
+                    <property name="relief">none</property>
                     <child>
                       <object class="GtkHBox" id="hbox3">
                         <property name="visible">True</property>

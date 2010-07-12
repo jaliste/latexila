@@ -26,6 +26,18 @@ public class Document : Gtk.SourceBuffer
     public uint unsaved_document_n { get; set; }
     private TimeVal mtime;
 
+    private TextTag found_tag;
+    private TextTag found_tag_selected;
+    public signal void search_info_updated (bool selected, uint nb_matches,
+        uint num_match);
+    private string search_text;
+    private uint search_nb_matches;
+    private uint search_num_match;
+    private bool search_case_sensitive;
+    private bool search_entire_word;
+    //private TextMark search_delete_tag_start;
+    //private TextMark search_delete_tag_end;
+
     private bool stop_cursor_moved_emission = false;
     public signal void cursor_moved ();
 
@@ -44,6 +56,19 @@ public class Document : Gtk.SourceBuffer
         changed.connect (emit_cursor_moved);
 
         mtime = { 0, 0 };
+
+        found_tag = new TextTag ("found");
+        found_tag_selected = new TextTag ("found_selected");
+        found_tag.background = "#FF8800";
+        found_tag_selected.background = "#FFFF00";
+        TextTagTable tag_table = get_tag_table ();
+        tag_table.add (found_tag);
+        tag_table.add (found_tag_selected);
+
+        TextIter iter;
+        get_iter_at_line (out iter, 0);
+        create_mark ("search_selected_start", iter, true);
+        create_mark ("search_selected_end", iter, true);
     }
 
     public void load (File location)
@@ -314,5 +339,382 @@ public class Document : Gtk.SourceBuffer
 
         place_cursor (iter);
         return ret;
+    }
+
+
+    /***************
+     *    SEARCH
+     ***************/
+
+    public void set_search_text (string text, bool case_sensitive, bool entire_word,
+        out uint nb_matches, out uint num_match, bool select = true)
+    {
+        // connect signals
+        if (search_text == null)
+        {
+            cursor_moved.connect (search_cursor_moved_handler);
+            delete_range.connect (search_delete_range_before_handler);
+            delete_range.connect_after (search_delete_range_after_handler);
+            insert_text.connect (search_insert_text_before_handler);
+            insert_text.connect_after (search_insert_text_after_handler);
+        }
+
+        // if nothing has changed
+        if (search_text == text
+            && search_case_sensitive == case_sensitive
+            && search_entire_word == entire_word)
+        {
+            nb_matches = search_nb_matches;
+            num_match = search_num_match;
+            return;
+        }
+
+        clear_search (false);
+        search_text = text;
+        search_case_sensitive = case_sensitive;
+        search_entire_word = entire_word;
+
+        var flags = get_search_flags ();
+
+        TextIter start, match_start, match_end, insert;
+        get_start_iter (out start);
+        get_iter_at_mark (out insert, get_insert ());
+        bool next_match_after_cursor_found = ! select;
+        uint i = 0;
+
+        while (source_iter_forward_search (start, text, flags, out match_start,
+            out match_end, null))
+        {
+            i++;
+            if (! next_match_after_cursor_found && insert.compare (match_end) <= 0)
+            {
+                next_match_after_cursor_found = true;
+                search_num_match = num_match = i;
+                move_search_marks (match_start, match_end, true);
+            }
+            else
+                apply_tag (found_tag, match_start, match_end);
+
+            start = match_end;
+        }
+
+        search_nb_matches = nb_matches = i;
+    }
+
+    public void search_forward ()
+    {
+        return_if_fail (search_text != null);
+
+        if (search_nb_matches == 0)
+            return;
+
+        var flags = get_search_flags ();
+
+        TextIter start_search, start, match_start, match_end;
+        get_iter_at_mark (out start_search, get_insert ());
+        get_start_iter (out start);
+
+        bool increment = false;
+        if (start_search.has_tag (found_tag_selected))
+        {
+            get_iter_at_mark (out start_search, get_mark ("search_selected_end"));
+            increment = true;
+        }
+
+        replace_found_tag_selected ();
+
+        // search forward
+        if (source_iter_forward_search (start_search, search_text, flags, out match_start,
+            out match_end, null))
+        {
+            move_search_marks (match_start, match_end, true);
+
+            if (increment)
+            {
+                search_num_match++;
+                search_info_updated (true, search_nb_matches, search_num_match);
+                return;
+            }
+        }
+
+        else if (source_iter_forward_search (start, search_text, flags, out match_start,
+            out match_end, null))
+        {
+            move_search_marks (match_start, match_end, true);
+
+            search_num_match = 1;
+            search_info_updated (true, search_nb_matches, search_num_match);
+            return;
+        }
+
+        find_num_match ();
+    }
+
+    public void search_backward ()
+    {
+        return_if_fail (search_text != null);
+
+        if (search_nb_matches == 0)
+            return;
+
+        var flags = get_search_flags ();
+
+        TextIter start_search, end, match_start, match_end;
+        get_iter_at_mark (out start_search, get_insert ());
+        get_end_iter (out end);
+
+        bool decrement = false;
+        bool move_cursor = true;
+
+        TextIter start_prev = start_search;
+        start_prev.backward_char ();
+
+        // the cursor is on a match
+        if (start_search.has_tag (found_tag_selected) ||
+            start_prev.has_tag (found_tag_selected))
+        {
+            get_iter_at_mark (out start_search, get_mark ("search_selected_start"));
+            decrement = true;
+        }
+
+        // the user has clicked in the middle or at the beginning of a match
+        else if (start_search.has_tag (found_tag))
+        {
+            move_cursor = false;
+            start_search.forward_chars ((int) search_text.length);
+        }
+
+        // the user has clicked at the end of a match
+        else if (start_prev.has_tag (found_tag))
+            move_cursor = false;
+
+        replace_found_tag_selected ();
+
+        // search backward
+        if (source_iter_backward_search (start_search, search_text, flags,
+            out match_start, out match_end, null))
+        {
+            move_search_marks (match_start, match_end, move_cursor);
+
+            if (decrement)
+            {
+                search_num_match--;
+                search_info_updated (true, search_nb_matches, search_num_match);
+                return;
+            }
+        }
+
+        // take the last match
+        else if (source_iter_backward_search (end, search_text, flags, out match_start,
+            out match_end, null))
+        {
+            move_search_marks (match_start, match_end, true);
+
+            search_num_match = search_nb_matches;
+            search_info_updated (true, search_nb_matches, search_num_match);
+            return;
+        }
+
+        find_num_match ();
+    }
+
+    public void clear_search (bool disconnect_signals = true)
+    {
+        TextIter start, end;
+        get_bounds (out start, out end);
+        remove_tag (found_tag, start, end);
+        remove_tag (found_tag_selected, start, end);
+        search_text = null;
+
+        if (disconnect_signals)
+        {
+            cursor_moved.disconnect (search_cursor_moved_handler);
+            delete_range.disconnect (search_delete_range_before_handler);
+            delete_range.disconnect (search_delete_range_after_handler);
+            insert_text.disconnect (search_insert_text_before_handler);
+            insert_text.disconnect (search_insert_text_after_handler);
+        }
+    }
+
+    private void search_cursor_moved_handler ()
+    {
+        TextIter insert, insert_previous;
+        get_iter_at_mark (out insert, get_insert ());
+        insert_previous = insert;
+        insert_previous.backward_char ();
+        if (insert.has_tag (found_tag_selected) ||
+            insert_previous.has_tag (found_tag_selected))
+            return;
+
+        replace_found_tag_selected ();
+
+        if (insert.has_tag (found_tag) || insert_previous.has_tag (found_tag))
+            search_backward ();
+        else
+            search_info_updated (false, search_nb_matches, 0);
+    }
+
+    private void search_delete_range_before_handler (TextIter start, TextIter end)
+    {
+        TextIter start_search, stop_search, match_start, match_end;
+        start_search = start;
+        start_search.backward_chars ((int) search_text.length - 1);
+        stop_search = end;
+        stop_search.forward_chars ((int) search_text.length - 1);
+
+        invalidate_search_selected_marks ();
+
+        var flags = get_search_flags ();
+
+        while (source_iter_forward_search (start_search, search_text, flags,
+            out match_start, out match_end, stop_search))
+        {
+            if (match_start.compare (start) < 0 || match_end.compare (end) > 0)
+            {
+                remove_tag (found_tag, match_start, match_end);
+                remove_tag (found_tag_selected, match_start, match_end);
+            }
+
+            search_nb_matches--;
+            start_search = match_end;
+        }
+    }
+
+    private void search_delete_range_after_handler (TextIter location)
+    {
+        TextIter start_search, stop_search;
+        start_search = stop_search = location;
+        start_search.backward_chars ((int) search_text.length - 1);
+        stop_search.forward_chars ((int) search_text.length - 1);
+
+        search_matches_between (start_search, stop_search);
+    }
+
+    private void search_insert_text_before_handler (TextIter location)
+    {
+        // if text inserted in the middle of a current match, remove the tags
+
+        if (location.has_tag (found_tag) || location.has_tag (found_tag_selected))
+        {
+            replace_found_tag_selected ();
+            invalidate_search_selected_marks ();
+
+            TextIter start_search, match_start, match_end;
+            start_search = location;
+            start_search.forward_chars ((int) search_text.length - 1);
+            if (source_iter_backward_search (start_search, search_text, get_search_flags (),
+                out match_start, out match_end, null))
+            {
+                // in the middle
+                if (location.compare (match_end) < 0)
+                {
+                    remove_tag (found_tag, match_start, match_end);
+                    remove_tag (found_tag_selected, match_start, match_end);
+                    search_nb_matches--;
+                }
+
+                // ugly hack
+                // if location is between two matches
+                else if (location.compare (match_end) == 0)
+                {
+                    string search_text_backup = search_text;
+                    uint nb_matches, num_match;
+                    clear_search ();
+                    set_search_text (search_text_backup, search_case_sensitive,
+                        search_entire_word, out nb_matches, out num_match);
+                    search_info_updated (true, nb_matches, num_match);
+                    place_cursor (location);
+                }
+            }
+        }
+    }
+
+    private void search_insert_text_after_handler (TextIter location, string text, int len)
+    {
+        TextIter start_search, stop_search;
+        start_search = stop_search = location;
+        start_search.backward_chars (len + (int) search_text.length - 1);
+        stop_search.forward_chars ((int) search_text.length - 1);
+
+        search_matches_between (start_search, stop_search);
+    }
+
+    private void search_matches_between (TextIter start_search, TextIter stop_search)
+    {
+        TextIter match_start, match_end;
+
+        var flags = get_search_flags ();
+
+        while (source_iter_forward_search (start_search, search_text, flags,
+            out match_start, out match_end, stop_search))
+        {
+            apply_tag (found_tag, match_start, match_end);
+            search_nb_matches++;
+            start_search = match_end;
+        }
+
+        // simulate a cursor move
+        search_cursor_moved_handler ();
+    }
+
+    private SourceSearchFlags get_search_flags ()
+    {
+        var flags = SourceSearchFlags.TEXT_ONLY | SourceSearchFlags.VISIBLE_ONLY;
+        if (! search_case_sensitive)
+            flags |= SourceSearchFlags.CASE_INSENSITIVE;
+        return flags;
+    }
+
+    private void move_search_marks (TextIter start, TextIter end, bool move_cursor)
+    {
+        remove_tag (found_tag, start, end);
+        apply_tag (found_tag_selected, start, end);
+
+        move_mark_by_name ("search_selected_start", start);
+        move_mark_by_name ("search_selected_end", end);
+
+        if (move_cursor)
+        {
+            place_cursor (start);
+            tab.view.scroll_to_cursor ();
+        }
+    }
+
+    private void replace_found_tag_selected ()
+    {
+        TextIter start, end;
+        get_iter_at_mark (out start, get_mark ("search_selected_start"));
+        get_iter_at_mark (out end, get_mark ("search_selected_end"));
+        remove_tag (found_tag_selected, start, end);
+
+        apply_tag (found_tag, start, end);
+    }
+
+    private void find_num_match ()
+    {
+        TextIter start, stop, match_end;
+        get_start_iter (out start);
+        get_iter_at_mark (out stop, get_mark ("search_selected_start"));
+
+        var flags = get_search_flags ();
+
+        uint i = 0;
+        while (source_iter_forward_search (start, search_text, flags, null,
+            out match_end, stop))
+        {
+            i++;
+            start = match_end;
+        }
+
+        search_num_match = i + 1;
+        search_info_updated (true, search_nb_matches, search_num_match);
+    }
+
+    private void invalidate_search_selected_marks ()
+    {
+        TextIter iter;
+        get_start_iter (out iter);
+        move_mark_by_name ("search_selected_start", iter);
+        move_mark_by_name ("search_selected_end", iter);
     }
 }

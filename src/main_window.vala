@@ -265,6 +265,10 @@ public class MainWindow : Window
             // active during the documents list menu creation
             if (action != null)
                 action.set_active (true);
+
+            notify_property ("active-tab");
+            notify_property ("active-document");
+            notify_property ("active-view");
         });
 
         documents_panel.page_reordered.connect (() =>
