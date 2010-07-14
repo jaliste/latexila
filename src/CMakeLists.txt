@@ -11,6 +11,10 @@ vala_precompile (
 		unique-1.0
 		gdk-x11-2.0
 		x11
+
+# for debugging
+#	OPTIONS
+#		--debug
 	CUSTOM_VAPIS
 		${latexila_SOURCE_DIR}/vapi/config.vapi
 		${latexila_SOURCE_DIR}/vapi/gedit.vapi

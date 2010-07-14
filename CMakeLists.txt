@@ -10,6 +10,9 @@ message (STATUS "*** Building LaTeXila ${APP_VERSION} ***")
 set (DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${APP_NAME}"
 	CACHE PATH "The directory where the data is")
 
+# for debugging
+#set (CMAKE_C_FLAGS "-ggdb")
+
 # Native Language Support
 set (GETTEXT_PACKAGE ${APP_NAME})
 set (LOCALE_DIR "${CMAKE_INSTALL_PREFIX}/share/locale")

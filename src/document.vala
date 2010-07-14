@@ -35,8 +35,6 @@ public class Document : Gtk.SourceBuffer
     private uint search_num_match;
     private bool search_case_sensitive;
     private bool search_entire_word;
-    //private TextMark search_delete_tag_start;
-    //private TextMark search_delete_tag_end;
 
     private bool stop_cursor_moved_emission = false;
     public signal void cursor_moved ();
@@ -59,11 +57,11 @@ public class Document : Gtk.SourceBuffer
 
         found_tag = new TextTag ("found");
         found_tag_selected = new TextTag ("found_selected");
-        found_tag.background = "#FF8800";
-        found_tag_selected.background = "#FFFF00";
+        sync_found_tags ();
         TextTagTable tag_table = get_tag_table ();
         tag_table.add (found_tag);
         tag_table.add (found_tag_selected);
+        notify["style-scheme"].connect (sync_found_tags);
 
         TextIter iter;
         get_iter_at_line (out iter, 0);
@@ -596,12 +594,19 @@ public class Document : Gtk.SourceBuffer
         insert_previous.backward_char ();
         if (insert.has_tag (found_tag_selected) ||
             insert_previous.has_tag (found_tag_selected))
+        {
+            //stdout.printf ("has tag selected\n");
             return;
+        }
 
         replace_found_tag_selected ();
+        invalidate_search_selected_marks ();
 
         if (insert.has_tag (found_tag) || insert_previous.has_tag (found_tag))
+        {
+            //stdout.printf ("has tag\n");
             search_backward ();
+        }
         else
             search_info_updated (false, search_nb_matches, 0);
     }
@@ -614,6 +619,7 @@ public class Document : Gtk.SourceBuffer
         stop_search = end;
         stop_search.forward_chars ((int) search_text.length - 1);
 
+        replace_found_tag_selected ();
         invalidate_search_selected_marks ();
 
         while (iter_forward_search (start_search, stop_search, out match_start,
@@ -662,25 +668,19 @@ public class Document : Gtk.SourceBuffer
                     remove_tag (found_tag_selected, match_start, match_end);
                     search_nb_matches--;
                 }
-
-                // ugly hack
-                // if location is between two matches
-                else if (location.compare (match_end) == 0)
-                {
-                    string search_text_backup = search_text;
-                    uint nb_matches, num_match;
-                    clear_search ();
-                    set_search_text (search_text_backup, search_case_sensitive,
-                        search_entire_word, out nb_matches, out num_match);
-                    search_info_updated (true, nb_matches, num_match);
-                    place_cursor (location);
-                }
             }
         }
     }
 
-    private void search_insert_text_after_handler (TextIter location, string text, int len)
+    private void search_insert_text_after_handler (TextIter location, string text,
+        int len)
     {
+        // remove tags in text inserted
+        TextIter left_text = location;
+        left_text.backward_chars (len);
+        remove_tag (found_tag, left_text, location);
+        remove_tag (found_tag_selected, left_text, location);
+
         TextIter start_search, stop_search;
         start_search = stop_search = location;
         start_search.backward_chars (len + (int) search_text.length - 1);
@@ -700,6 +700,9 @@ public class Document : Gtk.SourceBuffer
             search_nb_matches++;
             start_search = match_end;
         }
+
+        replace_found_tag_selected ();
+        invalidate_search_selected_marks ();
 
         // simulate a cursor move
         search_cursor_moved_handler ();
@@ -734,7 +737,6 @@ public class Document : Gtk.SourceBuffer
         get_iter_at_mark (out start, get_mark ("search_selected_start"));
         get_iter_at_mark (out end, get_mark ("search_selected_end"));
         remove_tag (found_tag_selected, start, end);
-
         apply_tag (found_tag, start, end);
     }
 
@@ -761,5 +763,55 @@ public class Document : Gtk.SourceBuffer
         get_start_iter (out iter);
         move_mark_by_name ("search_selected_start", iter);
         move_mark_by_name ("search_selected_end", iter);
+    }
+
+    private void set_search_match_colors (TextTag text_tag)
+    {
+        SourceStyleScheme style_scheme = get_style_scheme ();
+        SourceStyle style = null;
+
+        if (style_scheme != null)
+            style = style_scheme.get_style ("search-match");
+
+        if (style_scheme == null || style == null)
+        {
+            text_tag.background = "#FFFF78";
+            return;
+        }
+
+        if (style.foreground_set && style.foreground != null)
+            text_tag.foreground = style.foreground;
+        else
+            text_tag.foreground = null;
+
+        if (style.background_set && style.background != null)
+            text_tag.background = style.background;
+        else
+            text_tag.background = null;
+
+        if (style.line_background_set && style.line_background != null)
+            text_tag.paragraph_background = style.line_background;
+        else
+            text_tag.paragraph_background = null;
+
+        text_tag.weight = style.bold_set && style.bold ?
+            Pango.Weight.BOLD : Pango.Weight.NORMAL;
+
+        text_tag.style = style.italic_set && style.italic ?
+            Pango.Style.ITALIC : Pango.Style.NORMAL;
+
+        text_tag.underline = style.underline_set && style.underline ?
+            Pango.Underline.SINGLE : Pango.Underline.NONE;
+
+        text_tag.strikethrough = style.strikethrough_set && style.strikethrough;
+    }
+
+    private void sync_found_tags ()
+    {
+        set_search_match_colors (found_tag);
+
+        // found tag selected: same as found tag but with orange background
+        set_search_match_colors (found_tag_selected);
+        found_tag_selected.background = "#FF8C00";
     }
 }
