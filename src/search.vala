@@ -264,6 +264,16 @@ public class SearchAndReplace : GLib.Object
 
             check_case_sensitive.toggled.connect (() => { set_search_text (); });
             check_entire_word.toggled.connect (() => { set_search_text (); });
+
+            button_replace.clicked.connect (replace);
+            entry_replace.activate.connect (replace);
+
+            button_replace_all.clicked.connect (() =>
+            {
+                return_if_fail (entry_find.text_length != 0);
+                set_search_text ();
+                working_document.replace_all (entry_replace.text);
+            });
         }
         catch (Error e)
         {
@@ -381,5 +391,12 @@ public class SearchAndReplace : GLib.Object
     {
         label_find_normal.hide ();
         label_find_error.hide ();
+    }
+
+    private void replace ()
+    {
+        return_if_fail (entry_find.text_length != 0);
+        set_search_text ();
+        working_document.replace (entry_replace.text);
     }
 }

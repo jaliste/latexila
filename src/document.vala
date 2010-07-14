@@ -396,7 +396,7 @@ public class Document : Gtk.SourceBuffer
 
         // if the cursor was after the last match, take the last match
         // (if we want to select one)
-        if (! next_match_after_cursor_found)
+        if (! next_match_after_cursor_found && i > 0)
         {
             search_num_match = num_match = i;
             move_search_marks (match_start, match_end, true);
@@ -813,5 +813,65 @@ public class Document : Gtk.SourceBuffer
         // found tag selected: same as found tag but with orange background
         set_search_match_colors (found_tag_selected);
         found_tag_selected.background = "#FF8C00";
+    }
+
+
+    /****************
+     *    REPLACE
+     ****************/
+
+    public void replace (string text)
+    {
+        return_if_fail (search_text != null);
+
+        /* the cursor is on a match? */
+        TextIter insert, insert_prev;
+        get_iter_at_mark (out insert, get_insert ());
+        insert_prev = insert;
+        insert_prev.backward_char ();
+
+        // no match selected, we search forward
+        if (! insert.has_tag (found_tag_selected) &&
+            ! insert_prev.has_tag (found_tag_selected))
+        {
+            search_forward ();
+            return;
+        }
+
+        /* replace text */
+        TextIter start, end;
+        get_iter_at_mark (out start, get_mark ("search_selected_start"));
+        get_iter_at_mark (out end, get_mark ("search_selected_end"));
+
+        begin_user_action ();
+        this.delete (start, end);
+        this.insert (start, text, -1);
+        end_user_action ();
+
+        // if the next match was directly after the previous, don't search forward
+        if (! start.has_tag (found_tag_selected))
+            search_forward ();
+    }
+
+    public void replace_all (string text)
+    {
+        return_if_fail (search_text != null);
+
+        TextIter start, match_start, match_end;
+        get_start_iter (out start);
+
+        stop_cursor_moved_emission = true;
+        begin_user_action ();
+
+        while (iter_forward_search (start, null, out match_start, out match_end))
+        {
+            this.delete (match_start, match_end);
+            this.insert (match_start, text, -1);
+            start = match_start;
+        }
+
+        end_user_action ();
+        stop_cursor_moved_emission = false;
+        emit_cursor_moved ();
     }
 }
