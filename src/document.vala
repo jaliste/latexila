@@ -369,12 +369,11 @@ public class Document : Gtk.SourceBuffer
             return;
         }
 
+        invalidate_search_selected_marks ();
         clear_search (false);
         search_text = text;
         search_case_sensitive = case_sensitive;
         search_entire_word = entire_word;
-
-        var flags = get_search_flags ();
 
         TextIter start, match_start, match_end, insert;
         get_start_iter (out start);
@@ -382,8 +381,7 @@ public class Document : Gtk.SourceBuffer
         bool next_match_after_cursor_found = ! select;
         uint i = 0;
 
-        while (source_iter_forward_search (start, text, flags, out match_start,
-            out match_end, null))
+        while (iter_forward_search (start, null, out match_start, out match_end))
         {
             i++;
             if (! next_match_after_cursor_found && insert.compare (match_end) <= 0)
@@ -398,7 +396,18 @@ public class Document : Gtk.SourceBuffer
             start = match_end;
         }
 
+        // if the cursor was after the last match, take the last match
+        // (if we want to select one)
+        if (! next_match_after_cursor_found)
+        {
+            search_num_match = num_match = i;
+            move_search_marks (match_start, match_end, true);
+        }
+
         search_nb_matches = nb_matches = i;
+
+        if (search_nb_matches == 0)
+            clear_search_tags ();
     }
 
     public void search_forward ()
@@ -407,8 +416,6 @@ public class Document : Gtk.SourceBuffer
 
         if (search_nb_matches == 0)
             return;
-
-        var flags = get_search_flags ();
 
         TextIter start_search, start, match_start, match_end;
         get_iter_at_mark (out start_search, get_insert ());
@@ -424,8 +431,7 @@ public class Document : Gtk.SourceBuffer
         replace_found_tag_selected ();
 
         // search forward
-        if (source_iter_forward_search (start_search, search_text, flags, out match_start,
-            out match_end, null))
+        if (iter_forward_search (start_search, null, out match_start, out match_end))
         {
             move_search_marks (match_start, match_end, true);
 
@@ -437,8 +443,7 @@ public class Document : Gtk.SourceBuffer
             }
         }
 
-        else if (source_iter_forward_search (start, search_text, flags, out match_start,
-            out match_end, null))
+        else if (iter_forward_search (start, null, out match_start, out match_end))
         {
             move_search_marks (match_start, match_end, true);
 
@@ -456,8 +461,6 @@ public class Document : Gtk.SourceBuffer
 
         if (search_nb_matches == 0)
             return;
-
-        var flags = get_search_flags ();
 
         TextIter start_search, end, match_start, match_end;
         get_iter_at_mark (out start_search, get_insert ());
@@ -491,8 +494,7 @@ public class Document : Gtk.SourceBuffer
         replace_found_tag_selected ();
 
         // search backward
-        if (source_iter_backward_search (start_search, search_text, flags,
-            out match_start, out match_end, null))
+        if (iter_backward_search (start_search, null, out match_start, out match_end))
         {
             move_search_marks (match_start, match_end, move_cursor);
 
@@ -505,8 +507,7 @@ public class Document : Gtk.SourceBuffer
         }
 
         // take the last match
-        else if (source_iter_backward_search (end, search_text, flags, out match_start,
-            out match_end, null))
+        else if (iter_backward_search (end, null, out match_start, out match_end))
         {
             move_search_marks (match_start, match_end, true);
 
@@ -518,12 +519,53 @@ public class Document : Gtk.SourceBuffer
         find_num_match ();
     }
 
+    private bool iter_forward_search (TextIter start, TextIter? end,
+        out TextIter match_start, out TextIter match_end)
+    {
+        bool found = false;
+        while (! found)
+        {
+            found = source_iter_forward_search (start, search_text, get_search_flags (),
+                out match_start, out match_end, end);
+
+            if (found && search_entire_word)
+            {
+                found = match_start.starts_word () && match_end.ends_word ();
+                if (! found)
+                    start = match_end;
+            }
+            else
+                break;
+        }
+
+        return found;
+    }
+
+    private bool iter_backward_search (TextIter start, TextIter? end,
+        out TextIter match_start, out TextIter match_end)
+    {
+        bool found = false;
+        while (! found)
+        {
+            found = source_iter_backward_search (start, search_text, get_search_flags (),
+                out match_start, out match_end, end);
+
+            if (found && search_entire_word)
+            {
+                found = match_start.starts_word () && match_end.ends_word ();
+                if (! found)
+                    start = match_start;
+            }
+            else
+                break;
+        }
+
+        return found;
+    }
+
     public void clear_search (bool disconnect_signals = true)
     {
-        TextIter start, end;
-        get_bounds (out start, out end);
-        remove_tag (found_tag, start, end);
-        remove_tag (found_tag_selected, start, end);
+        clear_search_tags ();
         search_text = null;
 
         if (disconnect_signals)
@@ -534,6 +576,16 @@ public class Document : Gtk.SourceBuffer
             insert_text.disconnect (search_insert_text_before_handler);
             insert_text.disconnect (search_insert_text_after_handler);
         }
+    }
+
+    private void clear_search_tags ()
+    {
+        invalidate_search_selected_marks ();
+
+        TextIter start, end;
+        get_bounds (out start, out end);
+        remove_tag (found_tag, start, end);
+        remove_tag (found_tag_selected, start, end);
     }
 
     private void search_cursor_moved_handler ()
@@ -564,10 +616,8 @@ public class Document : Gtk.SourceBuffer
 
         invalidate_search_selected_marks ();
 
-        var flags = get_search_flags ();
-
-        while (source_iter_forward_search (start_search, search_text, flags,
-            out match_start, out match_end, stop_search))
+        while (iter_forward_search (start_search, stop_search, out match_start,
+            out match_end))
         {
             if (match_start.compare (start) < 0 || match_end.compare (end) > 0)
             {
@@ -602,8 +652,8 @@ public class Document : Gtk.SourceBuffer
             TextIter start_search, match_start, match_end;
             start_search = location;
             start_search.forward_chars ((int) search_text.length - 1);
-            if (source_iter_backward_search (start_search, search_text, get_search_flags (),
-                out match_start, out match_end, null))
+
+            if (iter_backward_search (start_search, null, out match_start, out match_end))
             {
                 // in the middle
                 if (location.compare (match_end) < 0)
@@ -643,10 +693,8 @@ public class Document : Gtk.SourceBuffer
     {
         TextIter match_start, match_end;
 
-        var flags = get_search_flags ();
-
-        while (source_iter_forward_search (start_search, search_text, flags,
-            out match_start, out match_end, stop_search))
+        while (iter_forward_search (start_search, stop_search, out match_start,
+            out match_end))
         {
             apply_tag (found_tag, match_start, match_end);
             search_nb_matches++;
@@ -696,11 +744,8 @@ public class Document : Gtk.SourceBuffer
         get_start_iter (out start);
         get_iter_at_mark (out stop, get_mark ("search_selected_start"));
 
-        var flags = get_search_flags ();
-
         uint i = 0;
-        while (source_iter_forward_search (start, search_text, flags, null,
-            out match_end, stop))
+        while (iter_forward_search (start, stop, null, out match_end))
         {
             i++;
             start = match_end;
