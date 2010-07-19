@@ -181,11 +181,11 @@ public class Application : GLib.Object
         active_window.on_file_new ();
     }
 
-    public void open_documents (string[] uris)
+    public void open_documents ([CCode (array_length = false, array_null_terminated = true)] string[] uris)
     {
-        for (int i = 0 ; uris[i] != null ; i++)
+        foreach (var uri in uris)
         {
-            var location = File.new_for_uri (uris[i]);
+            var location = File.new_for_uri (uri);
             active_window.open_document (location);
         }
     }

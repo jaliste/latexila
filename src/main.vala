@@ -22,6 +22,7 @@ using Gtk;
 bool option_version;
 bool option_new_document;
 bool option_new_window;
+[CCode (array_length = false, array_null_terminated = true)]
 string[] remaining_args;
 
 const OptionEntry[] options =
@@ -85,19 +86,16 @@ int main (string[] args)
     bool command_open = false;
     Unique.MessageData data = new Unique.MessageData ();
 
-    if (remaining_args != null)
+    if (remaining_args.length != 0)
     {
         command_open = true;
 
         // since remaining_args.length == 0, we use a dynamic array
         string[] uris = {};
-        for (int i = 0 ; remaining_args[i] != null ; i++)
-        {
+        foreach (var arg in remaining_args)
             // The command line argument can be absolute or relative.
             // With URI's, that's always absolute, so no problem.
-            File file = File.new_for_path (remaining_args[i]);
-            uris += file.get_uri ();
-        }
+            uris += File.new_for_path (arg).get_uri ();
 
         data.set_uris (uris);
     }
