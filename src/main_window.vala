@@ -703,7 +703,7 @@ public class MainWindow : Window
     {
         if (active_tab == null)
         {
-            set_title ("LaTeXila");
+            this.title = "LaTeXila";
             return;
         }
 
@@ -728,24 +728,11 @@ public class MainWindow : Window
             }
         }
 
-        if (active_document.get_modified ())
-            title = "*" + title;
-
-        if (active_view.readonly)
-        {
-            if (dirname != null)
-                set_title (title + " [" + _("Read-Only") + "] (" + dirname
-                    + ") - LaTeXila");
-            else
-                set_title (title + " [" + _("Read-Only") + "] - LaTeXila");
-        }
-        else
-        {
-            if (dirname != null)
-                set_title (title + " (" + dirname + ") - LaTeXila");
-            else
-                set_title (title + " - LaTeXila");
-        }
+        this.title = (active_document.get_modified () ? "*" : "") +
+                     title +
+                     (active_view.readonly ? " [" + _("Read-Only") + "]" : "") +
+                     (dirname != null ? " (" + dirname + ")" : "") +
+                     " - LaTeXila";
     }
 
     // return true if the document has been saved
