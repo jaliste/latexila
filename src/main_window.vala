@@ -440,7 +440,7 @@ public class MainWindow : Window
     public DocumentTab? create_tab (bool jump_to)
     {
         var tab = new DocumentTab ();
-
+debug ("here");
         /* get unsaved document number */
         uint[] all_nums = {};
         foreach (Document doc in Application.get_default ().get_documents ())

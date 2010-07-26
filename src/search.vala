@@ -19,7 +19,7 @@
 
 using Gtk;
 
-public static void set_entry_error (Widget entry, bool error)
+public void set_entry_error (Widget entry, bool error)
 {
     if (error)
     {
@@ -46,12 +46,12 @@ public class GotoLine : HBox
         this.main_window = main_window;
         spacing = 3;
 
-        Button close_button = new Button ();
+        var close_button = new Button ();
         pack_start (close_button, false, false, 0);
         close_button.set_relief (ReliefStyle.NONE);
         var img = new Image.from_stock (STOCK_CLOSE, IconSize.MENU);
         close_button.add (img);
-        close_button.clicked.connect (() => { hide (); });
+        close_button.clicked.connect (() => hide ());
 
         var label = new Label (_("Go to Line:"));
         pack_start (label, false, false, 2);
@@ -62,8 +62,8 @@ public class GotoLine : HBox
         entry.set_icon_activatable (EntryIconPosition.SECONDARY, true);
         entry.set_tooltip_text (_("Line you want to move the cursor to"));
         entry.set_size_request (100, -1);
-        entry.activate.connect (() => { hide (); });
-        entry.icon_press.connect (() => { hide (); });
+        entry.activate.connect (() => hide ());
+        entry.icon_press.connect (() => hide ());
         entry.changed.connect (on_changed);
     }
 
@@ -82,7 +82,7 @@ public class GotoLine : HBox
             return;
         }
 
-        string text = entry.get_text ();
+        var text = entry.get_text ();
 
         // check if all characters are digits
         for (int i = 0 ; i < text.length ; i++)
@@ -95,8 +95,8 @@ public class GotoLine : HBox
             }
         }
 
-        int line = text.to_int ();
-        bool error = ! main_window.active_document.goto_line (--line);
+        var line = text.to_int ();
+        var error = ! main_window.active_document.goto_line (--line);
         set_entry_error (entry, error);
         main_window.active_view.scroll_to_cursor ();
     }
@@ -149,7 +149,7 @@ public class SearchAndReplace : GLib.Object
 
         try
         {
-            Builder builder = new Builder ();
+            var builder = new Builder ();
             builder.add_from_file (path);
 
             /* get objects */
@@ -169,18 +169,17 @@ public class SearchAndReplace : GLib.Object
 
             entry_replace = (Entry) builder.get_object ("entry_replace");
             frame_replace = (Frame) builder.get_object ("frame_replace");
-            Button button_clear_replace =
+            var button_clear_replace = 
                 (Button) builder.get_object ("button_clear_replace");
-            Button button_replace = (Button) builder.get_object ("button_replace");
-            Button button_replace_all =
-                (Button) builder.get_object ("button_replace_all");
+            var button_replace = (Button) builder.get_object ("button_replace");
+            var button_replace_all = (Button) builder.get_object ("button_replace_all");
 
             hbox_replace = (HBox) builder.get_object ("hbox_replace");
 
-            Button button_previous = (Button) builder.get_object ("button_previous");
-            Button button_next = (Button) builder.get_object ("button_next");
+            var button_previous = (Button) builder.get_object ("button_previous");
+            var button_next = (Button) builder.get_object ("button_next");
 
-            Button button_close = (Button) builder.get_object ("button_close");
+            var button_close = (Button) builder.get_object ("button_close");
 
             /* styles */
             Gdk.Color white;
@@ -218,15 +217,8 @@ public class SearchAndReplace : GLib.Object
 
             button_close.clicked.connect (hide);
 
-            button_clear_find.clicked.connect (() =>
-            {
-                entry_find.text = "";
-            });
-
-            button_clear_replace.clicked.connect (() =>
-            {
-                entry_replace.text = "";
-            });
+            button_clear_find.clicked.connect (() => entry_find.text = "");
+            button_clear_replace.clicked.connect (() => entry_replace.text = "");
 
             button_previous.clicked.connect (() =>
             {
@@ -240,7 +232,7 @@ public class SearchAndReplace : GLib.Object
 
             entry_find.changed.connect (() =>
             {
-                bool sensitive = entry_find.text_length > 0;
+                var sensitive = entry_find.text_length > 0;
                 button_clear_find.sensitive = sensitive;
                 button_previous.sensitive = sensitive;
                 button_next.sensitive = sensitive;
@@ -262,8 +254,8 @@ public class SearchAndReplace : GLib.Object
                 button_clear_replace.sensitive = entry_replace.text_length > 0;
             });
 
-            check_case_sensitive.toggled.connect (() => { set_search_text (); });
-            check_entire_word.toggled.connect (() => { set_search_text (); });
+            check_case_sensitive.toggled.connect (() => set_search_text ());
+            check_entire_word.toggled.connect (() => set_search_text ());
 
             button_replace.clicked.connect (replace);
             entry_replace.activate.connect (replace);

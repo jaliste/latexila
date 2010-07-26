@@ -29,9 +29,9 @@ public class DocumentView : Gtk.SourceView
 
     public DocumentView (Document doc)
     {
-        set_buffer (doc);
+        this.buffer = doc;
 
-        notify["readonly"].connect (() => { set_editable (! readonly); });
+        notify["readonly"].connect (() => this.editable = !readonly);
 
         wrap_mode = WrapMode.WORD;
         auto_indent = true;
@@ -44,7 +44,7 @@ public class DocumentView : Gtk.SourceView
 
         // tab width
         // FIXME use directly settings.get() when the vapi file is fixed upstream
-        Variant variant = editor_settings.get_value ("tabs-size");
+        var variant = editor_settings.get_value ("tabs-size");
         tab_width = variant.get_uint32 ();
 
         insert_spaces_instead_of_tabs = editor_settings.get_boolean ("insert-spaces");
@@ -62,48 +62,43 @@ public class DocumentView : Gtk.SourceView
 
     public void cut_selection ()
     {
-        TextBuffer buffer = get_buffer ();
-        return_if_fail (buffer != null);
+        return_if_fail (this.buffer != null);
         var clipboard = get_clipboard (Gdk.SELECTION_CLIPBOARD);
-        buffer.cut_clipboard (clipboard, ! readonly);
+        this.buffer.cut_clipboard (clipboard, ! readonly);
         scroll_to_cursor (SCROLL_MARGIN);
         grab_focus ();
     }
 
     public void copy_selection ()
     {
-        TextBuffer buffer = get_buffer ();
-        return_if_fail (buffer != null);
+        return_if_fail (this.buffer != null);
         var clipboard = get_clipboard (Gdk.SELECTION_CLIPBOARD);
-        buffer.copy_clipboard (clipboard);
+        this.buffer.copy_clipboard (clipboard);
         grab_focus ();
     }
 
     public void my_paste_clipboard ()
     {
-        TextBuffer buffer = get_buffer ();
-        return_if_fail (buffer != null);
+        return_if_fail (this.buffer != null);
         var clipboard = get_clipboard (Gdk.SELECTION_CLIPBOARD);
-        buffer.paste_clipboard (clipboard, null, ! readonly);
+        this.buffer.paste_clipboard (clipboard, null, ! readonly);
         scroll_to_cursor (SCROLL_MARGIN);
         grab_focus ();
     }
 
     public void delete_selection ()
     {
-        TextBuffer buffer = get_buffer ();
-        return_if_fail (buffer != null);
-        buffer.delete_selection (true, ! readonly);
+        return_if_fail (this.buffer != null);
+        this.buffer.delete_selection (true, ! readonly);
         scroll_to_cursor (SCROLL_MARGIN);
     }
 
     public void my_select_all ()
     {
-        TextBuffer buffer = get_buffer ();
-        return_if_fail (buffer != null);
+        return_if_fail (this.buffer != null);
         TextIter start, end;
-        buffer.get_bounds (out start, out end);
-        buffer.select_range (start, end);
+        this.buffer.get_bounds (out start, out end);
+        this.buffer.select_range (start, end);
     }
 
     // TODO when GtkSourceView 3.0 is released we can delete this function
@@ -112,7 +107,7 @@ public class DocumentView : Gtk.SourceView
         uint column = 0;
         uint tab_width = get_tab_width ();
 
-        TextIter position = iter;
+        var position = iter;
         position.set_visible_line_offset (0);
 
         while (! iter.equal (position))

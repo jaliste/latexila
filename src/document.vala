@@ -58,7 +58,7 @@ public class Document : Gtk.SourceBuffer
         found_tag = new TextTag ("found");
         found_tag_selected = new TextTag ("found_selected");
         sync_found_tags ();
-        TextTagTable tag_table = get_tag_table ();
+        var tag_table = get_tag_table ();
         tag_table.add (found_tag);
         tag_table.add (found_tag_selected);
         notify["style-scheme"].connect (sync_found_tags);
@@ -99,7 +99,7 @@ public class Document : Gtk.SourceBuffer
         {
             stderr.printf ("Error: %s\n", e.message);
 
-            string primary_msg = _("Impossible to load the file '%s'.")
+            var primary_msg = _("Impossible to load the file '%s'.")
                 .printf (location.get_parse_name ());
             tab.add_message (primary_msg, e.message, MessageType.ERROR);
         }
@@ -111,10 +111,10 @@ public class Document : Gtk.SourceBuffer
 
         if (check_file_changed_on_disk && is_externally_modified ())
         {
-            string primary_msg = _("The file %s has been modified since reading it.")
+            var primary_msg = _("The file %s has been modified since reading it.")
                 .printf (location.get_parse_name ());
-            string secondary_msg = _("If you save it, all the external changes could be lost. Save it anyway?");
-            TabInfoBar infobar = tab.add_message (primary_msg, secondary_msg,
+            var secondary_msg = _("If you save it, all the external changes could be lost. Save it anyway?");
+            var infobar = tab.add_message (primary_msg, secondary_msg, 
                 MessageType.WARNING);
             infobar.add_stock_button_with_text (_("Save Anyway"), STOCK_SAVE,
                 ResponseType.YES);
@@ -131,7 +131,7 @@ public class Document : Gtk.SourceBuffer
         // we use get_text () to exclude undisplayed text
         TextIter start, end;
         get_bounds (out start, out end);
-        string text = get_text (start, end, false);
+        var text = get_text (start, end, false);
 
         try
         {
@@ -150,19 +150,19 @@ public class Document : Gtk.SourceBuffer
         {
             stderr.printf ("Error: %s\n", e.message);
 
-            string primary_msg = _("Impossible to save the file.");
-            TabInfoBar infobar = tab.add_message (primary_msg, e.message, MessageType.ERROR);
+            var primary_msg = _("Impossible to save the file.");
+            var infobar = tab.add_message (primary_msg, e.message, MessageType.ERROR);
             infobar.add_ok_button ();
         }
     }
 
     private void update_syntax_highlighting ()
     {
-        Gtk.SourceLanguageManager lm = Gtk.SourceLanguageManager.get_default ();
+        var lm = Gtk.SourceLanguageManager.get_default ();
         string content_type = null;
         try
         {
-            FileInfo info = location.query_info (FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+            var info = location.query_info (FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
                 FileQueryInfoFlags.NONE, null);
             content_type = info.get_content_type ();
         }
@@ -213,7 +213,7 @@ public class Document : Gtk.SourceBuffer
 
     public void set_style_scheme_from_string (string scheme_id)
     {
-        SourceStyleSchemeManager manager = SourceStyleSchemeManager.get_default ();
+        var manager = SourceStyleSchemeManager.get_default ();
         style_scheme = manager.get_scheme (scheme_id);
     }
 
@@ -222,7 +222,7 @@ public class Document : Gtk.SourceBuffer
         TimeVal timeval = { 0, 0 };
         try
         {
-            FileInfo info = location.query_info (FILE_ATTRIBUTE_TIME_MODIFIED,
+            var info = location.query_info (FILE_ATTRIBUTE_TIME_MODIFIED,
                 FileQueryInfoFlags.NONE, null);
             if (info.has_attribute (FILE_ATTRIBUTE_TIME_MODIFIED))
             {
@@ -245,11 +245,11 @@ public class Document : Gtk.SourceBuffer
         TextIter start, end;
         get_selection_bounds (out start, out end);
 
-        int start_line = start.get_line ();
-        int end_line = end.get_line ();
+        var start_line = start.get_line ();
+        var end_line = end.get_line ();
 
         begin_user_action ();
-        for (int i = start_line ; i <= end_line ; i++)
+        for (var i = start_line ; i <= end_line ; i++)
         {
             TextIter iter;
             get_iter_at_line (out iter, i);
@@ -268,13 +268,13 @@ public class Document : Gtk.SourceBuffer
         TextIter start, end;
         get_selection_bounds (out start, out end);
 
-        int start_line = start.get_line ();
-        int end_line = end.get_line ();
-        int line_count = get_line_count ();
+        var start_line = start.get_line ();
+        var end_line = end.get_line ();
+        var line_count = get_line_count ();
 
         begin_user_action ();
 
-        for (int i = start_line ; i <= end_line ; i++)
+        for (var i = start_line ; i <= end_line ; i++)
         {
             get_iter_at_line (out start, i);
 
@@ -284,12 +284,12 @@ public class Document : Gtk.SourceBuffer
             else
                 get_iter_at_line (out end, i + 1);
 
-            string line = get_text (start, end, false);
+            var line = get_text (start, end, false);
 
             /* find the first '%' character */
-            int j = 0;
-            int start_delete = -1;
-            int stop_delete = -1;
+            var j = 0;
+            var start_delete = -1;
+            var stop_delete = -1;
             while (line[j] != '\0')
             {
                 if (line[j] == '%')
@@ -324,7 +324,7 @@ public class Document : Gtk.SourceBuffer
     {
         return_val_if_fail (line >= -1, false);
 
-        bool ret = true;
+        var ret = true;
         TextIter iter;
 
         if (line >= get_line_count ())
@@ -376,7 +376,7 @@ public class Document : Gtk.SourceBuffer
         TextIter start, match_start, match_end, insert;
         get_start_iter (out start);
         get_iter_at_mark (out insert, get_insert ());
-        bool next_match_after_cursor_found = ! select;
+        var next_match_after_cursor_found = ! select;
         uint i = 0;
 
         while (iter_forward_search (start, null, out match_start, out match_end))
@@ -419,7 +419,7 @@ public class Document : Gtk.SourceBuffer
         get_iter_at_mark (out start_search, get_insert ());
         get_start_iter (out start);
 
-        bool increment = false;
+        var increment = false;
         if (start_search.has_tag (found_tag_selected))
         {
             get_iter_at_mark (out start_search, get_mark ("search_selected_end"));
@@ -464,10 +464,10 @@ public class Document : Gtk.SourceBuffer
         get_iter_at_mark (out start_search, get_insert ());
         get_end_iter (out end);
 
-        bool decrement = false;
-        bool move_cursor = true;
+        var decrement = false;
+        var move_cursor = true;
 
-        TextIter start_prev = start_search;
+        var start_prev = start_search;
         start_prev.backward_char ();
 
         // the cursor is on a match
@@ -520,7 +520,7 @@ public class Document : Gtk.SourceBuffer
     private bool iter_forward_search (TextIter start, TextIter? end,
         out TextIter match_start, out TextIter match_end)
     {
-        bool found = false;
+        var found = false;
         while (! found)
         {
             found = source_iter_forward_search (start, search_text, get_search_flags (),
@@ -542,7 +542,7 @@ public class Document : Gtk.SourceBuffer
     private bool iter_backward_search (TextIter start, TextIter? end,
         out TextIter match_start, out TextIter match_end)
     {
-        bool found = false;
+        var found = false;
         while (! found)
         {
             found = source_iter_backward_search (start, search_text, get_search_flags (),
@@ -676,7 +676,7 @@ public class Document : Gtk.SourceBuffer
         int len)
     {
         // remove tags in text inserted
-        TextIter left_text = location;
+        var left_text = location;
         left_text.backward_chars (len);
         remove_tag (found_tag, left_text, location);
         remove_tag (found_tag_selected, left_text, location);
@@ -767,7 +767,7 @@ public class Document : Gtk.SourceBuffer
 
     private void set_search_match_colors (TextTag text_tag)
     {
-        SourceStyleScheme style_scheme = get_style_scheme ();
+        var style_scheme = get_style_scheme ();
         SourceStyle style = null;
 
         if (style_scheme != null)

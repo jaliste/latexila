@@ -36,12 +36,8 @@ public class AppSettings : GLib.Settings
 
         editor.changed["use-default-font"].connect ((setting, key) =>
         {
-            bool val = setting.get_boolean (key);
-            string font;
-            if (val)
-                font = get_system_font ();
-            else
-                font = editor.get_string ("editor-font");
+            var val = setting.get_boolean (key);
+            var font = val ? get_system_font () : editor.get_string ("editor-font");
             set_font (font);
         });
 
@@ -49,20 +45,17 @@ public class AppSettings : GLib.Settings
         {
             if (editor.get_boolean ("use-default-font"))
                 return;
-            string font = setting.get_string (key);
-            set_font (font);
+            set_font (setting.get_string (key));
         });
 
         editor.changed["scheme"].connect ((setting, key) =>
         {
-            string scheme_id = setting.get_string (key);
+            var scheme_id = setting.get_string (key);
 
-            Gtk.SourceStyleSchemeManager manager =
-                Gtk.SourceStyleSchemeManager.get_default ();
-            Gtk.SourceStyleScheme scheme = manager.get_scheme (scheme_id);
+            var manager = Gtk.SourceStyleSchemeManager.get_default ();
+            var scheme = manager.get_scheme (scheme_id);
 
-            List<Document> docs = Application.get_default ().get_documents ();
-            foreach (Document doc in docs)
+            foreach (var doc in Application.get_default ().get_documents ())
                 doc.style_scheme = scheme;
 
             // we don't use doc.set_style_scheme_from_string() for performance reason
@@ -71,48 +64,43 @@ public class AppSettings : GLib.Settings
         editor.changed["tabs-size"].connect ((setting, key) =>
         {
             // FIXME use directly settings.get() when the vapi file is fixed upstream
-            Variant variant = setting.get_value (key);
-            uint val = variant.get_uint32 ();
+            var variant = setting.get_value (key);
+            var val = variant.get_uint32 ();
             val = val.clamp (1, 24);
 
-            List<DocumentView> views = Application.get_default ().get_views ();
-            foreach (DocumentView view in views)
+            foreach (var view in Application.get_default ().get_views ())
                 view.tab_width = val;
         });
 
         editor.changed["insert-spaces"].connect ((setting, key) =>
         {
-            bool val = setting.get_boolean (key);
+            var val = setting.get_boolean (key);
 
-            List<DocumentView> views = Application.get_default ().get_views ();
-            foreach (DocumentView view in views)
+            foreach (var view in Application.get_default ().get_views ())
                 view.insert_spaces_instead_of_tabs = val;
         });
 
         editor.changed["display-line-numbers"].connect ((setting, key) =>
         {
-            bool val = setting.get_boolean (key);
+            var val = setting.get_boolean (key);
 
-            List<DocumentView> views = Application.get_default ().get_views ();
-            foreach (DocumentView view in views)
+            foreach (var view in Application.get_default ().get_views ())
                 view.show_line_numbers = val;
         });
 
         editor.changed["highlight-current-line"].connect ((setting, key) =>
         {
-            bool val = setting.get_boolean (key);
+            var val = setting.get_boolean (key);
 
-            List<DocumentView> views = Application.get_default ().get_views ();
-            foreach (DocumentView view in views)
+            foreach (var view in Application.get_default ().get_views ())
                 view.highlight_current_line = val;
         });
 
         editor.changed["bracket-matching"].connect ((setting, key) =>
         {
-            bool val = setting.get_boolean (key);
+            var val = setting.get_boolean (key);
 
-            List<Document> docs = Application.get_default ().get_documents ();
-            foreach (Document doc in docs)
+            foreach (var doc in Application.get_default ().get_documents ())
                 doc.highlight_matching_brackets = val;
         });
     }
@@ -125,8 +113,7 @@ public class AppSettings : GLib.Settings
 
     private void set_font (string font)
     {
-        List<DocumentView> views = Application.get_default ().get_views ();
-        foreach (DocumentView view in views)
+        foreach (var view in Application.get_default ().get_views ())
             view.set_font_from_string (font);
     }
 }

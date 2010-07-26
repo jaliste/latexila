@@ -38,20 +38,17 @@ public class PreferencesDialog : Dialog
         destroy_with_parent = true;
         border_width = 5;
 
-        response.connect ((dialog, response_id) =>
-        {
-            dialog.hide ();
-        });
+        response.connect (() => hide ());
 
         var path = Path.build_filename (Config.DATA_DIR, "ui", "preferences_dialog.ui");
 
         try
         {
-            Builder builder = new Builder ();
+            var builder = new Builder ();
             builder.add_from_file (path);
 
             // get objects
-            Widget notebook = (Widget) builder.get_object ("notebook");
+            var notebook = (Notebook) builder.get_object ("notebook");
             var display_line_nb_checkbutton =
                 builder.get_object ("display_line_nb_checkbutton");
             var tab_width_spinbutton = builder.get_object ("tab_width_spinbutton");
@@ -62,16 +59,14 @@ public class PreferencesDialog : Dialog
             var bracket_matching_checkbutton =
                 builder.get_object ("bracket_matching_checkbutton");
 
-            Button default_font_checkbutton =
+            var default_font_checkbutton = 
                 (Button) builder.get_object ("default_font_checkbutton");
             var font_button = builder.get_object ("font_button");
-            Widget font_hbox = (Widget) builder.get_object ("font_hbox");
-            TreeView schemes_treeview =
-                (TreeView) builder.get_object ("schemes_treeview");
+            var font_hbox = (Widget) builder.get_object ("font_hbox");
+            var schemes_treeview = (TreeView) builder.get_object ("schemes_treeview");
 
             // bind settings
-            GLib.Settings settings =
-                new GLib.Settings ("org.gnome.latexila.preferences.editor");
+            var settings = new GLib.Settings ("org.gnome.latexila.preferences.editor");
 
             settings.bind ("use-default-font", default_font_checkbutton, "active",
                 SettingsBindFlags.GET | SettingsBindFlags.SET);
@@ -89,7 +84,7 @@ public class PreferencesDialog : Dialog
                 SettingsBindFlags.GET | SettingsBindFlags.SET);
 
             // schemes treeview
-            string current_scheme_id = settings.get_string ("scheme");
+            var current_scheme_id = settings.get_string ("scheme");
             initialize_schemes_treeview (schemes_treeview, current_scheme_id);
             schemes_treeview.cursor_changed.connect ((treeview) =>
             {
@@ -107,32 +102,32 @@ public class PreferencesDialog : Dialog
             });
 
             // font hbox sensitivity
-            bool use_default_font = settings.get_boolean ("use-default-font");
+            var use_default_font = settings.get_boolean ("use-default-font");
             font_hbox.set_sensitive (! use_default_font);
             settings.changed["use-default-font"].connect ((setting, key) =>
             {
-                bool val = setting.get_boolean (key);
+                var val = setting.get_boolean (key);
                 font_hbox.set_sensitive (! val);
             });
 
             // default font checkbutton label
-            string label = _("Use the system fixed width font (%s)")
+            var label = _("Use the system fixed width font (%s)")
                 .printf (Application.get_default ().settings.get_system_font ());
             default_font_checkbutton.set_label (label);
 
             // pack notebook
-            Box content_area = (Box) get_content_area ();
+            var content_area = (Box) get_content_area ();
             content_area.pack_start (notebook, true, true, 0);
-            ((Container) notebook).border_width = 5;
+            notebook.border_width = 5;
         }
         catch (Error e)
         {
-            string message = "Error: %s".printf (e.message);
+            var message = "Error: %s".printf (e.message);
             stderr.printf ("%s\n", message);
 
-            Label label_error = new Label (message);
+            var label_error = new Label (message);
             label_error.set_line_wrap (true);
-            Box content_area = (Box) get_content_area ();
+            var content_area = (Box) get_content_area ();
             content_area.pack_start (label_error, true, true, 0);
             content_area.show_all ();
         }
@@ -160,26 +155,26 @@ public class PreferencesDialog : Dialog
 
     private void initialize_schemes_treeview (TreeView treeview, string current_id)
     {
-        ListStore list_store = new ListStore (StyleSchemes.N_COLUMNS, typeof (string),
+        var list_store = new ListStore (StyleSchemes.N_COLUMNS, typeof (string),
             typeof (string));
         list_store.set_sort_column_id (StyleSchemes.ID, SortType.ASCENDING);
         treeview.set_model (list_store);
 
-        CellRenderer renderer = new CellRendererText ();
-        TreeViewColumn column = new TreeViewColumn.with_attributes (
+        var renderer = new CellRendererText ();
+        var column = new TreeViewColumn.with_attributes (
             "Name and description", renderer,
             "markup", StyleSchemes.DESC, null);
         treeview.append_column (column);
 
-        TreeSelection select = treeview.get_selection ();
+        var select = treeview.get_selection ();
         select.set_mode (SelectionMode.SINGLE);
 
         /* fill style scheme list store */
-        SourceStyleSchemeManager manager = SourceStyleSchemeManager.get_default ();
+        var manager = SourceStyleSchemeManager.get_default ();
         foreach (string id in manager.get_scheme_ids ())
         {
-            SourceStyleScheme scheme = manager.get_scheme (id);
-            string desc = "<b>%s</b> - %s".printf (scheme.name, scheme.description);
+            var scheme = manager.get_scheme (id);
+            var desc = "<b>%s</b> - %s".printf (scheme.name, scheme.description);
             TreeIter iter;
             list_store.append (out iter);
             list_store.set (iter,

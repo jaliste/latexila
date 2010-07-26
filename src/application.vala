@@ -57,12 +57,11 @@ public class Application : GLib.Object
         };
 
         List<Gdk.Pixbuf> list = null;
-        foreach (string filename in filenames)
+        foreach (var filename in filenames)
         {
             try
             {
-                Gdk.Pixbuf pixbuf = new Gdk.Pixbuf.from_file (filename);
-                list.append (pixbuf);
+                list.append (new Gdk.Pixbuf.from_file (filename));
             }
             catch (Error e)
             {
@@ -71,7 +70,6 @@ public class Application : GLib.Object
         }
 
         Gtk.Window.set_default_icon_list (list);
-
 
         settings = new AppSettings ();
         create_window ();
@@ -88,7 +86,7 @@ public class Application : GLib.Object
     public List<Document> get_documents ()
     {
         List<Document> res = null;
-        foreach (MainWindow w in windows)
+        foreach (var w in windows)
             res.concat (w.get_documents ());
         return res;
     }
@@ -97,7 +95,7 @@ public class Application : GLib.Object
     public List<DocumentView> get_views ()
     {
         List<DocumentView> res = null;
-        foreach (MainWindow w in windows)
+        foreach (var w in windows)
             res.concat (w.get_views ());
         return res;
     }
@@ -118,8 +116,8 @@ public class Application : GLib.Object
         // current workspace.
         if (! active_window.is_on_workspace_screen (screen, workspace))
         {
-            bool found = false;
-            foreach (MainWindow w in windows)
+            var found = false;
+            foreach (var w in windows)
             {
                 if (w == active_window)
                     continue;

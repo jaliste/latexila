@@ -34,7 +34,7 @@ public class Dialogs : GLib.Object
     {
         assert (unsaved_docs.length () >= 2);
 
-        Dialog dialog = new Dialog.with_buttons (null,
+        var dialog = new Dialog.with_buttons (null,
             window,
             DialogFlags.DESTROY_WITH_PARENT,
             _("Close without Saving"), ResponseType.CLOSE,
@@ -44,21 +44,21 @@ public class Dialogs : GLib.Object
 
         dialog.has_separator = false;
 
-        HBox hbox = new HBox (false, 12);
+        var hbox = new HBox (false, 12);
         hbox.border_width = 5;
-        VBox content_area = (VBox) dialog.get_content_area ();
+        var content_area = (VBox) dialog.get_content_area ();
         content_area.pack_start (hbox, true, true, 0);
 
         /* image */
-        Widget image = new Image.from_stock (STOCK_DIALOG_WARNING, IconSize.DIALOG);
-        ((Misc) image).set_alignment ((float) 0.5, (float) 0.0);
+        var image = new Image.from_stock (STOCK_DIALOG_WARNING, IconSize.DIALOG);
+        image.set_alignment ((float) 0.5, (float) 0.0);
         hbox.pack_start (image, false, false, 0);
 
-        VBox vbox = new VBox (false, 12);
+        var vbox = new VBox (false, 12);
         hbox.pack_start (vbox, true, true, 0);
 
         /* primary label */
-        Label primary_label = new Label (null);
+        var primary_label = new Label (null);
         primary_label.set_line_wrap (true);
         primary_label.set_use_markup (true);
         primary_label.set_alignment ((float) 0.0, (float) 0.5);
@@ -70,7 +70,7 @@ public class Dialogs : GLib.Object
 
         vbox.pack_start (primary_label, false, false, 0);
 
-        VBox vbox2 = new VBox (false, 8);
+        var vbox2 = new VBox (false, 8);
         vbox.pack_start (vbox2, false, false, 0);
 
         var select_label = new Label (_("Select the documents you want to save:"));
@@ -79,16 +79,16 @@ public class Dialogs : GLib.Object
         vbox2.pack_start (select_label, false, false, 0);
 
         /* unsaved documents list with checkboxes */
-        TreeView treeview = new TreeView ();
+        var treeview = new TreeView ();
         treeview.set_size_request (260, 120);
         treeview.headers_visible = false;
         treeview.enable_search = false;
 
-        ListStore store = new ListStore (UnsavedDocs.N_COLUMNS, typeof (bool),
+        var store = new ListStore (UnsavedDocs.N_COLUMNS, typeof (bool),
             typeof (string), typeof (Document));
 
         // fill the list
-        foreach (Document doc in unsaved_docs)
+        foreach (var doc in unsaved_docs)
         {
             TreeIter iter;
             store.append (out iter);
@@ -130,7 +130,7 @@ public class Dialogs : GLib.Object
         vbox2.pack_start (sw, true, true, 0);
 
         /* secondary label */
-        Label secondary_label = new Label (_("If you don't save, all your changes will be permanently lost."));
+        var secondary_label = new Label (_("If you don't save, all your changes will be permanently lost."));
         secondary_label.set_line_wrap (true);
         secondary_label.set_alignment ((float) 0.0, (float) 0.5);
         secondary_label.set_selectable (true);
@@ -148,7 +148,7 @@ public class Dialogs : GLib.Object
         else if (resp == ResponseType.ACCEPT)
         {
             // close all saved documents
-            foreach (Document doc in window.get_documents ())
+            foreach (var doc in window.get_documents ())
             {
                 if (! doc.get_modified ())
                     window.close_tab (doc.tab);
@@ -157,7 +157,7 @@ public class Dialogs : GLib.Object
             // get unsaved docs to save
             List<Document> selected_docs = null;
             TreeIter iter;
-            bool valid = store.get_iter_first (out iter);
+            var valid = store.get_iter_first (out iter);
             while (valid)
             {
                 bool selected;
@@ -177,7 +177,7 @@ public class Dialogs : GLib.Object
             }
             selected_docs.reverse ();
 
-            foreach (Document doc in selected_docs)
+            foreach (var doc in selected_docs)
             {
                 if (window.save_document (doc, false))
                     window.close_tab (doc.tab, true);

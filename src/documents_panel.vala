@@ -26,7 +26,7 @@ public class DocumentsPanel : Notebook
 
     public DocumentsPanel ()
     {
-        this.set_scrollable (true);
+        this.scrollable = true;
         switch_page.connect ((page, page_num) =>
         {
             active_tab = (DocumentTab) get_nth_page ((int) page_num);
@@ -35,7 +35,7 @@ public class DocumentsPanel : Notebook
 
     public void add_tab (DocumentTab tab, int position, bool jump_to)
     {
-        EventBox event_box = new EventBox ();
+        var event_box = new EventBox ();
         event_box.add (tab.label);
         event_box.button_press_event.connect ((event) =>
         {
@@ -51,7 +51,7 @@ public class DocumentsPanel : Notebook
             return false;
         });
 
-        int i = this.insert_page (tab, event_box, position);
+        var i = this.insert_page (tab, event_box, position);
         this.set_tab_reorderable (tab, true);
         if (jump_to)
             this.set_current_page (i);

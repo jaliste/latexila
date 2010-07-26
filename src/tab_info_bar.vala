@@ -23,7 +23,7 @@ public class TabInfoBar : InfoBar
 {
     public TabInfoBar (string primary_msg, string secondary_msg, MessageType msg_type)
     {
-        HBox content_area = (HBox) get_content_area ();
+        var content_area = (HBox) get_content_area ();
 
         // icon
         string stock_id;
@@ -44,29 +44,27 @@ public class TabInfoBar : InfoBar
                 break;
         }
 
-        Widget image = new Image.from_stock (stock_id, IconSize.DIALOG);
-        ((Misc) image).set_alignment ((float) 0.5, (float) 0.0);
+        var image = new Image.from_stock (stock_id, IconSize.DIALOG);
+        image.set_alignment ((float) 0.5, (float) 0.0);
         content_area.pack_start (image, false, false, 0);
 
         // text
-        VBox vbox = new VBox (false, 10);
+        var vbox = new VBox (false, 10);
         content_area.pack_start (vbox, true, true, 0);
 
-        Label primary_label = new Label (null);
+        var primary_label = new Label ("<b>" + primary_msg + "</b>");
         vbox.pack_start (primary_label, false, false, 0);
         primary_label.set_alignment ((float) 0.0, (float) 0.5);
         primary_label.set_selectable (true);
         primary_label.set_line_wrap (true);
         primary_label.set_use_markup (true);
-        primary_label.set_markup ("<b>" + primary_msg + "</b>");
 
-        Label secondary_label = new Label (null);
+        var secondary_label = new Label ("<small>" + secondary_msg + "</small>");
         vbox.pack_start (secondary_label, false, false, 0);
         secondary_label.set_alignment ((float) 0.0, (float) 0.5);
         secondary_label.set_selectable (true);
         secondary_label.set_line_wrap (true);
         secondary_label.set_use_markup (true);
-        secondary_label.set_markup ("<small>" + secondary_msg + "</small>");
 
         set_message_type (msg_type);
         show_all ();
@@ -84,8 +82,8 @@ public class TabInfoBar : InfoBar
 
     public void add_stock_button_with_text (string text, string stock_id, int response_id)
     {
-        Button button = (Button) add_button (text, response_id);
-        Widget image = new Image.from_stock (stock_id, IconSize.BUTTON);
+        var button = (Button) add_button (text, response_id);
+        var image = new Image.from_stock (stock_id, IconSize.BUTTON);
         button.set_image (image);
     }
 }
