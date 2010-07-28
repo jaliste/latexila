@@ -30,7 +30,7 @@ list (APPEND CMAKE_MODULE_PATH "${latexila_SOURCE_DIR}/cmake/vala")
 include (ValaPrecompile)
 include (ValaVersion)
 find_package (Vala REQUIRED)
-ensure_vala_version ("0.9.2" MINIMUM)
+ensure_vala_version ("0.9.4" MINIMUM)
 
 find_package (PkgConfig)
 pkg_check_modules (GTK REQUIRED "gtk+-2.0 >= 2.16")

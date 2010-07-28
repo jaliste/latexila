@@ -25,6 +25,7 @@ public class Document : Gtk.SourceBuffer
     public DocumentTab tab;
     public uint unsaved_document_n { get; set; }
     private TimeVal mtime;
+    private bool backup_made = false;
 
     private TextTag found_tag;
     private TextTag found_tag_selected;
@@ -114,7 +115,7 @@ public class Document : Gtk.SourceBuffer
             var primary_msg = _("The file %s has been modified since reading it.")
                 .printf (location.get_parse_name ());
             var secondary_msg = _("If you save it, all the external changes could be lost. Save it anyway?");
-            var infobar = tab.add_message (primary_msg, secondary_msg, 
+            var infobar = tab.add_message (primary_msg, secondary_msg,
                 MessageType.WARNING);
             infobar.add_stock_button_with_text (_("Save Anyway"), STOCK_SAVE,
                 ResponseType.YES);
@@ -135,16 +136,21 @@ public class Document : Gtk.SourceBuffer
 
         try
         {
+            var settings = new GLib.Settings ("org.gnome.latexila.preferences.editor");
+            bool make_backup = ! backup_made
+                && settings.get_boolean ("create-backup-copy");
+
             // Attention, the second parameter named "length" in the API is the size in
             // bytes, not the number of characters, so we must use text.size() and not
             // text.length.
-            location.replace_contents (text, text.size (), null, false,
+            location.replace_contents (text, text.size (), null, make_backup,
                 FileCreateFlags.NONE, null, null);
 
             mtime = get_modification_time ();
             set_modified (false);
 
             RecentManager.get_default ().add_item (location.get_uri ());
+            backup_made = true;
         }
         catch (Error e)
         {

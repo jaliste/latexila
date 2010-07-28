@@ -160,7 +160,7 @@ public class Application : GLib.Object
             if (windows.length () == 0)
                 Gtk.main_quit ();
             else if (window == active_window)
-                active_window = windows.data;
+                active_window = (MainWindow) windows.data;
         });
 
         window.focus_in_event.connect (() =>

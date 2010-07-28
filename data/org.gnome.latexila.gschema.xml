@@ -24,6 +24,26 @@
       <summary>Style Scheme</summary>
       <description>The ID of a GtkSourceView Style Scheme used to color the text.</description>
     </key>
+    <key name="create-backup-copy" type="b">
+      <default>true</default>
+      <summary>Create Backup Copies</summary>
+      <description>Whether LaTeXila should create backup copies for the files it saves.</description>
+    </key>
+    <key name="auto-save" type="b">
+      <default>false</default>
+      <summary>Autosave</summary>
+      <description>Whether LaTeXila should automatically save modified files after a time interval. You can set the time interval with the "Autosave Interval" option.</description>
+    </key>
+    <key name="auto-save-interval" type="u">
+      <default>10</default>
+      <summary>Autosave Interval</summary>
+      <description>Number of minutes after which LaTeXila will automatically save modified files. This will only take effect if the "Autosave" option is turned on.</description>
+    </key>
+    <key name="reopen-files" type="b">
+      <default>true</default>
+      <summary>Reopen files on startup</summary>
+      <description>Whether LaTeXila should reopen the files that was opened the last time.</description>
+    </key>
     <key name="tabs-size" type="u">
       <default>2</default>
       <summary>Tab Size</summary>

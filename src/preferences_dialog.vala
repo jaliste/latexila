@@ -58,6 +58,10 @@ public class PreferencesDialog : Dialog
                 builder.get_object ("hl_current_line_checkbutton");
             var bracket_matching_checkbutton =
                 builder.get_object ("bracket_matching_checkbutton");
+            var backup_checkbutton = builder.get_object ("backup_checkbutton");
+            var autosave_checkbutton = builder.get_object ("autosave_checkbutton");
+            var autosave_spinbutton = builder.get_object ("autosave_spinbutton");
+            var reopen_checkbutton = builder.get_object ("reopen_checkbutton");
 
             var default_font_checkbutton = 
                 (Button) builder.get_object ("default_font_checkbutton");
@@ -81,6 +85,14 @@ public class PreferencesDialog : Dialog
             settings.bind ("highlight-current-line", hl_current_line_checkbutton,
                 "active", SettingsBindFlags.GET | SettingsBindFlags.SET);
             settings.bind ("bracket-matching", bracket_matching_checkbutton, "active",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            settings.bind ("create-backup-copy", backup_checkbutton, "active",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            settings.bind ("auto-save", autosave_checkbutton, "active",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            settings.bind ("auto-save-interval", autosave_spinbutton, "value",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            settings.bind ("reopen-files", reopen_checkbutton, "active",
                 SettingsBindFlags.GET | SettingsBindFlags.SET);
 
             // schemes treeview

@@ -43,9 +43,9 @@ public class DocumentView : Gtk.SourceView
         set_font_from_settings ();
 
         // tab width
-        // FIXME use directly settings.get() when the vapi file is fixed upstream
-        var variant = editor_settings.get_value ("tabs-size");
-        tab_width = variant.get_uint32 ();
+        uint tmp;
+        editor_settings.get ("tabs-size", "u", out tmp);
+        tab_width = tmp;
 
         insert_spaces_instead_of_tabs = editor_settings.get_boolean ("insert-spaces");
         show_line_numbers = editor_settings.get_boolean ("display-line-numbers");

@@ -166,9 +166,7 @@ public class MainWindow : Window
         GLib.Settings settings = new GLib.Settings ("org.gnome.latexila.state.window");
 
         int w, h;
-        // FIXME use directly settings.get() when the vapi file is fixed upstream
-        Variant variant = settings.get_value ("size");
-        variant.get ("(ii)", out w, out h);
+        settings.get ("size", "(ii)", out w, out h);
         set_default_size (w, h);
 
         Gdk.WindowState state = (Gdk.WindowState) settings.get_int ("state");
@@ -440,7 +438,7 @@ public class MainWindow : Window
     public DocumentTab? create_tab (bool jump_to)
     {
         var tab = new DocumentTab ();
-debug ("here");
+
         /* get unsaved document number */
         uint[] all_nums = {};
         foreach (Document doc in Application.get_default ().get_documents ())
@@ -910,9 +908,7 @@ debug ("here");
             h -= 100;
         }
 
-        // FIXME use directly settings.set() when the vapi file is fixed upstream
-        Variant size = new Variant ("(ii)", w, h);
-        settings.set_value ("size", size);
+        settings.set ("size", "(ii)", w, h);
 
         if (sync)
             settings.sync ();
