@@ -123,7 +123,7 @@ public class Document : Gtk.SourceBuffer
             // bytes, not the number of characters, so we must use text.size() and not
             // text.length.
             location.replace_contents (text, text.size (), etag, make_backup,
-                FileCreateFlags.NONE, null, null);
+                FileCreateFlags.NONE, out _etag, null);
 
             set_modified (false);
 
@@ -220,7 +220,8 @@ public class Document : Gtk.SourceBuffer
 		{
 			return false;
 		}
-		return (current_etag != null && current_etag != _etag);
+
+		return current_etag != null && current_etag != _etag;
     }
 
     public void set_style_scheme_from_string (string scheme_id)
