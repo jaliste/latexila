@@ -24,8 +24,8 @@ public class Document : Gtk.SourceBuffer
     public File location { get; set; }
     public DocumentTab tab;
     public uint unsaved_document_n { get; set; }
-    private TimeVal mtime;
     private bool backup_made = false;
+    private string _etag;
 
     private TextTag found_tag;
     private TextTag found_tag_selected;
@@ -54,8 +54,6 @@ public class Document : Gtk.SourceBuffer
         });
         changed.connect (emit_cursor_moved);
 
-        mtime = { 0, 0 };
-
         found_tag = new TextTag ("found");
         found_tag_selected = new TextTag ("found_selected");
         sync_found_tags ();
@@ -77,9 +75,7 @@ public class Document : Gtk.SourceBuffer
         try
         {
             string text;
-            location.load_contents (null, out text, null, null);
-
-            mtime = get_modification_time ();
+            location.load_contents (null, out text, null, out _etag);
 
             begin_not_undoable_action ();
             set_text (text, -1);
@@ -110,25 +106,6 @@ public class Document : Gtk.SourceBuffer
     {
         assert (location != null);
 
-        if (check_file_changed_on_disk && is_externally_modified ())
-        {
-            var primary_msg = _("The file %s has been modified since reading it.")
-                .printf (location.get_parse_name ());
-            var secondary_msg = _("If you save it, all the external changes could be lost. Save it anyway?");
-            var infobar = tab.add_message (primary_msg, secondary_msg,
-                MessageType.WARNING);
-            infobar.add_stock_button_with_text (_("Save Anyway"), STOCK_SAVE,
-                ResponseType.YES);
-            infobar.add_button (_("Don't Save"), ResponseType.CANCEL);
-            infobar.response.connect ((response_id) =>
-            {
-                if (response_id == ResponseType.YES)
-                    save (false);
-                infobar.destroy ();
-            });
-            return;
-        }
-
         // we use get_text () to exclude undisplayed text
         TextIter start, end;
         get_bounds (out start, out end);
@@ -140,13 +117,14 @@ public class Document : Gtk.SourceBuffer
             bool make_backup = ! backup_made
                 && settings.get_boolean ("create-backup-copy");
 
+            string? etag = check_file_changed_on_disk ? _etag : null;
+
             // Attention, the second parameter named "length" in the API is the size in
             // bytes, not the number of characters, so we must use text.size() and not
             // text.length.
-            location.replace_contents (text, text.size (), null, make_backup,
+            location.replace_contents (text, text.size (), etag, make_backup,
                 FileCreateFlags.NONE, null, null);
 
-            mtime = get_modification_time ();
             set_modified (false);
 
             RecentManager.get_default ().add_item (location.get_uri ());
@@ -154,11 +132,31 @@ public class Document : Gtk.SourceBuffer
         }
         catch (Error e)
         {
-            stderr.printf ("Error: %s\n", e.message);
+            if (e is IOError.WRONG_ETAG)
+            {
+                var primary_msg = _("The file %s has been modified since reading it.")
+                    .printf (location.get_parse_name ());
+                var secondary_msg = _("If you save it, all the external changes could be lost. Save it anyway?");
+                var infobar = tab.add_message (primary_msg, secondary_msg,
+                    MessageType.WARNING);
+                infobar.add_stock_button_with_text (_("Save Anyway"), STOCK_SAVE,
+                    ResponseType.YES);
+                infobar.add_button (_("Don't Save"), ResponseType.CANCEL);
+                infobar.response.connect ((response_id) =>
+                {
+                    if (response_id == ResponseType.YES)
+                        save (false);
+                    infobar.destroy ();
+                });
+            }
+            else
+            {
+                stderr.printf ("Error: %s\n", e.message);
 
-            var primary_msg = _("Impossible to save the file.");
-            var infobar = tab.add_message (primary_msg, e.message, MessageType.ERROR);
-            infobar.add_ok_button ();
+                var primary_msg = _("Impossible to save the file.");
+                var infobar = tab.add_message (primary_msg, e.message, MessageType.ERROR);
+                infobar.add_ok_button ();
+            }
         }
     }
 
@@ -211,33 +209,24 @@ public class Document : Gtk.SourceBuffer
         if (location == null)
             return false;
 
-        TimeVal timeval = get_modification_time ();
-
-        return (timeval.tv_sec > mtime.tv_sec) ||
-            (timeval.tv_sec == mtime.tv_sec && timeval.tv_usec > mtime.tv_usec);
+		string current_etag = null;
+		try
+		{
+			var file_info = location.query_info (FILE_ATTRIBUTE_ETAG_VALUE,
+			    FileQueryInfoFlags.NONE, null);
+			current_etag = file_info.get_etag ();
+		}
+		catch (GLib.Error e)
+		{
+			return false;
+		}
+		return (current_etag != null && current_etag != _etag);
     }
 
     public void set_style_scheme_from_string (string scheme_id)
     {
         var manager = SourceStyleSchemeManager.get_default ();
         style_scheme = manager.get_scheme (scheme_id);
-    }
-
-    private TimeVal get_modification_time ()
-    {
-        TimeVal timeval = { 0, 0 };
-        try
-        {
-            var info = location.query_info (FILE_ATTRIBUTE_TIME_MODIFIED,
-                FileQueryInfoFlags.NONE, null);
-            if (info.has_attribute (FILE_ATTRIBUTE_TIME_MODIFIED))
-            {
-                info.get_modification_time (out timeval);
-                return timeval;
-            }
-        }
-        catch (Error e) {}
-        return timeval;
     }
 
     private void emit_cursor_moved ()
