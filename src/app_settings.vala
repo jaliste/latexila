@@ -102,6 +102,23 @@ public class AppSettings : GLib.Settings
             foreach (var doc in Application.get_default ().get_documents ())
                 doc.highlight_matching_brackets = val;
         });
+
+        editor.changed["auto-save"].connect ((setting, key) =>
+        {
+            var val = setting.get_boolean (key);
+
+            foreach (var doc in Application.get_default ().get_documents ())
+                doc.tab.auto_save = val;
+        });
+
+        editor.changed["auto-save-interval"].connect ((setting, key) =>
+        {
+            uint val;
+            setting.get (key, "u", out val);
+
+            foreach (var doc in Application.get_default ().get_documents ())
+                doc.tab.auto_save_interval = val;
+        });
     }
 
     public string get_system_font ()

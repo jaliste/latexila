@@ -412,7 +412,7 @@ public class MainWindow : Window
 
                     /* the document is already opened in another window */
                     DocumentTab tab = create_tab_from_location (location, true);
-                    tab.view.readonly = true;
+                    tab.document.readonly = true;
                     string primary_msg = _("This file (%s) is already opened in another LaTeXila window.")
                         .printf (location.get_parse_name ());
                     string secondary_msg = _("LaTeXila opened this instance of the file in a non-editable way. Do you want to edit it anyway?");
@@ -423,7 +423,7 @@ public class MainWindow : Window
                     infobar.response.connect ((response_id) =>
                     {
                         if (response_id == ResponseType.YES)
-                            tab.view.readonly = false;
+                            tab.document.readonly = false;
                         infobar.destroy ();
                         tab.view.grab_focus ();
                     });
@@ -728,7 +728,7 @@ public class MainWindow : Window
 
         this.title = (active_document.get_modified () ? "*" : "") +
                      title +
-                     (active_view.readonly ? " [" + _("Read-Only") + "]" : "") +
+                     (active_document.readonly ? " [" + _("Read-Only") + "]" : "") +
                      (dirname != null ? " (" + dirname + ")" : "") +
                      " - LaTeXila";
     }

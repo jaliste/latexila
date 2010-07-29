@@ -60,10 +60,11 @@ public class PreferencesDialog : Dialog
                 builder.get_object ("bracket_matching_checkbutton");
             var backup_checkbutton = builder.get_object ("backup_checkbutton");
             var autosave_checkbutton = builder.get_object ("autosave_checkbutton");
-            var autosave_spinbutton = builder.get_object ("autosave_spinbutton");
+            var autosave_spinbutton = (Widget) builder.get_object ("autosave_spinbutton");
+            Label autosave_label = (Label) builder.get_object ("autosave_label");
             var reopen_checkbutton = builder.get_object ("reopen_checkbutton");
 
-            var default_font_checkbutton = 
+            var default_font_checkbutton =
                 (Button) builder.get_object ("default_font_checkbutton");
             var font_button = builder.get_object ("font_button");
             var font_hbox = (Widget) builder.get_object ("font_hbox");
@@ -111,6 +112,26 @@ public class PreferencesDialog : Dialog
                 model.get (iter, StyleSchemes.ID, out id, -1);
 
                 settings.set_string ("scheme", id);
+            });
+
+            // autosave spinbutton sensitivity
+            var auto_save_enabled = settings.get_boolean ("auto-save");
+            autosave_spinbutton.set_sensitive (auto_save_enabled);
+            settings.changed["auto-save"].connect ((setting, key) =>
+            {
+                var val = setting.get_boolean (key);
+                autosave_spinbutton.set_sensitive (val);
+            });
+
+            // autosave label
+            uint interval;
+            settings.get ("auto-save-interval", "u", out interval);
+            autosave_label.label = interval > 1 ? _("minutes") : _("minute");
+            settings.changed["auto-save-interval"].connect ((setting, key) =>
+            {
+                uint val;
+                setting.get (key, "u", out val);
+                autosave_label.label = val > 1 ? _("minutes") : _("minute");
             });
 
             // font hbox sensitivity

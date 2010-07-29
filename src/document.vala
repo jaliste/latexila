@@ -22,6 +22,7 @@ using Gtk;
 public class Document : Gtk.SourceBuffer
 {
     public File location { get; set; }
+    public bool readonly { get; set; default = false; }
     public DocumentTab tab;
     public uint unsaved_document_n { get; set; }
     private bool backup_made = false;

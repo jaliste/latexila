@@ -21,7 +21,6 @@ using Gtk;
 
 public class DocumentView : Gtk.SourceView
 {
-    public bool readonly { get; set; default = false; }
     public const double SCROLL_MARGIN = 0.02;
 
     private GLib.Settings editor_settings;
@@ -31,7 +30,10 @@ public class DocumentView : Gtk.SourceView
     {
         this.buffer = doc;
 
-        notify["readonly"].connect (() => this.editable = !readonly);
+        doc.notify["readonly"].connect ((d, p) =>
+        {
+            this.editable = ! ((Document) d).readonly;
+        });
 
         wrap_mode = WrapMode.WORD;
         auto_indent = true;
@@ -64,7 +66,7 @@ public class DocumentView : Gtk.SourceView
     {
         return_if_fail (this.buffer != null);
         var clipboard = get_clipboard (Gdk.SELECTION_CLIPBOARD);
-        this.buffer.cut_clipboard (clipboard, ! readonly);
+        this.buffer.cut_clipboard (clipboard, ! ((Document) this.buffer).readonly);
         scroll_to_cursor (SCROLL_MARGIN);
         grab_focus ();
     }
@@ -81,7 +83,8 @@ public class DocumentView : Gtk.SourceView
     {
         return_if_fail (this.buffer != null);
         var clipboard = get_clipboard (Gdk.SELECTION_CLIPBOARD);
-        this.buffer.paste_clipboard (clipboard, null, ! readonly);
+        this.buffer.paste_clipboard (clipboard, null,
+            ! ((Document) this.buffer).readonly);
         scroll_to_cursor (SCROLL_MARGIN);
         grab_focus ();
     }
@@ -89,7 +92,7 @@ public class DocumentView : Gtk.SourceView
     public void delete_selection ()
     {
         return_if_fail (this.buffer != null);
-        this.buffer.delete_selection (true, ! readonly);
+        this.buffer.delete_selection (true, ! ((Document) this.buffer).readonly);
         scroll_to_cursor (SCROLL_MARGIN);
     }
 

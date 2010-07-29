@@ -41,6 +41,71 @@ public class DocumentTab : VBox
         private set { _label_text.label = value; }
     }
 
+    private uint auto_save_timeout;
+
+    private uint _auto_save_interval;
+    public uint auto_save_interval
+    {
+        get
+        {
+            return _auto_save_interval;
+        }
+
+        set
+        {
+            return_if_fail (value > 0);
+
+            if (_auto_save_interval == value)
+                return;
+
+            _auto_save_interval = value;
+
+            if (! _auto_save)
+                return;
+
+            if (auto_save_timeout > 0)
+            {
+                return_if_fail (document.location != null);
+                return_if_fail (! document.readonly);
+                remove_auto_save_timeout ();
+                install_auto_save_timeout ();
+            }
+        }
+    }
+
+    private bool _auto_save;
+    public bool auto_save
+    {
+        get
+        {
+            return _auto_save;
+        }
+
+        set
+        {
+            if (value == _auto_save)
+                return;
+
+            _auto_save = value;
+
+            if (_auto_save && auto_save_timeout <= 0 && document.location != null
+                && ! document.readonly)
+            {
+                install_auto_save_timeout ();
+                return;
+            }
+
+            if (! _auto_save && auto_save_timeout > 0)
+            {
+                remove_auto_save_timeout ();
+                return;
+            }
+
+            return_if_fail ((! _auto_save && auto_save_timeout <= 0)
+                || document.location == null || document.readonly);
+        }
+    }
+
     public signal void close_document ();
 
     public DocumentTab ()
@@ -115,6 +180,22 @@ public class DocumentTab : VBox
         _label.pack_start (close_button, false, false, 0);
         update_label_tooltip ();
         _label.show_all ();
+
+
+        /* auto save */
+        var settings = new GLib.Settings ("org.gnome.latexila.preferences.editor");
+        auto_save = settings.get_boolean ("auto-save");
+        uint tmp;
+        settings.get ("auto-save-interval", "u", out tmp);
+        auto_save_interval = tmp;
+
+        install_auto_save_timeout_if_needed ();
+
+        document.notify["location"].connect (() =>
+        {
+            if (auto_save_timeout <= 0)
+                install_auto_save_timeout_if_needed ();
+        });
     }
 
     public TabInfoBar add_message (string primary_msg, string secondary_msg,
@@ -175,7 +256,7 @@ public class DocumentTab : VBox
                 secondary_msg = _("Do you want to reload the file?");
 
             var infobar = add_message (primary_msg, secondary_msg, MessageType.WARNING);
-            infobar.add_stock_button_with_text (_("Reload"), STOCK_REFRESH, 
+            infobar.add_stock_button_with_text (_("Reload"), STOCK_REFRESH,
                 ResponseType.OK);
             infobar.add_button (STOCK_CANCEL, ResponseType.CANCEL);
 
@@ -193,5 +274,49 @@ public class DocumentTab : VBox
         }
 
         return false;
+    }
+
+    private void install_auto_save_timeout ()
+    {
+        return_if_fail (auto_save_timeout <= 0);
+        return_if_fail (auto_save);
+        return_if_fail (auto_save_interval > 0);
+
+        auto_save_timeout = Timeout.add_seconds (auto_save_interval * 60, on_auto_save);
+    }
+
+    private bool install_auto_save_timeout_if_needed ()
+    {
+        return_val_if_fail (auto_save_timeout <= 0, false);
+
+        if (auto_save && document.location != null && ! document.readonly)
+        {
+            install_auto_save_timeout ();
+            return true;
+        }
+
+        return false;
+    }
+
+    private void remove_auto_save_timeout ()
+    {
+        return_if_fail (auto_save_timeout > 0);
+
+        Source.remove (auto_save_timeout);
+        auto_save_timeout = 0;
+    }
+
+    private bool on_auto_save ()
+    {
+        return_val_if_fail (document.location != null, false);
+        return_val_if_fail (! document.readonly, false);
+        return_val_if_fail (auto_save_timeout > 0, false);
+        return_val_if_fail (auto_save, false);
+        return_val_if_fail (auto_save_interval > 0, false);
+
+        if (document.get_modified ())
+            document.save ();
+
+        return true;
     }
 }
