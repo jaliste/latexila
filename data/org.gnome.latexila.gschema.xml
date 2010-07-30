@@ -82,5 +82,8 @@
     <key name="size" type="(ii)">
       <default>(800, 600)</default>
     </key>
+    <key name="documents" type="as">
+      <default>[""]</default>
+    </key>
   </schema>
 </schemalist>

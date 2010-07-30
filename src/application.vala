@@ -179,7 +179,8 @@ public class Application : GLib.Object
         active_window.on_file_new ();
     }
 
-    public void open_documents ([CCode (array_length = false, array_null_terminated = true)] string[] uris)
+    public void open_documents (
+        [CCode (array_length = false, array_null_terminated = true)] string[] uris)
     {
         foreach (var uri in uris)
         {

@@ -22,6 +22,7 @@ using Gtk;
 bool option_version;
 bool option_new_document;
 bool option_new_window;
+
 [CCode (array_length = false, array_null_terminated = true)]
 string[] remaining_args;
 
@@ -137,6 +138,17 @@ int main (string[] args)
     else
     {
         var latexila = Application.get_default ();
+
+        /* reopen files on startup */
+        var editor_settings = new GLib.Settings ("org.gnome.latexila.preferences.editor");
+        if (editor_settings.get_boolean ("reopen-files"))
+        {
+            var window_settings = new GLib.Settings ("org.gnome.latexila.state.window");
+
+            // TODO use settings.get_strv () when vapi is fixed upstream
+            string[] uris = window_settings.get_value ("documents").dup_strv ();
+            latexila.open_documents (uris);
+        }
 
         /* execute commands */
         // the --new-window option have no effect in this case
