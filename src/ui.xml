@@ -62,6 +62,131 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <menuitem action="SearchGoToLine" />
     </menu>
 
+    <menu action="Latex">
+      <menu action="Sectioning">
+        <menuitem action="SectioningPart" />
+        <menuitem action="SectioningChapter" />
+        <separator />
+        <menuitem action="SectioningSection" />
+        <menuitem action="SectioningSubsection" />
+        <menuitem action="SectioningSubsubsection" />
+        <menuitem action="SectioningParagraph" />
+        <menuitem action="SectioningSubparagraph" />
+      </menu>
+
+      <menu action="References">
+        <menuitem action="ReferencesLabel" />
+        <menuitem action="ReferencesRef" />
+        <menuitem action="ReferencesPageref" />
+        <separator />
+        <menuitem action="ReferencesIndex" />
+        <menuitem action="ReferencesFootnote" />
+        <separator />
+        <menuitem action="ReferencesCite" />
+      </menu>
+
+      <menu action="Environments">
+        <menuitem action="EnvironmentCenter" />
+        <menuitem action="EnvironmentLeft" />
+        <menuitem action="EnvironmentRight" />
+        <separator />
+        <menuitem action="EnvironmentMinipage" />
+        <separator />
+        <menuitem action="EnvironmentQuote" />
+        <menuitem action="EnvironmentQuotation" />
+        <menuitem action="EnvironmentVerse" />
+      </menu>
+
+      <menu action="ListEnvironments">
+        <menuitem action="ListEnvItemize" />
+        <menuitem action="ListEnvEnumerate" />
+        <menuitem action="ListEnvDescription" />
+        <separator />
+        <menuitem action="ListEnvItem" />
+      </menu>
+
+      <menu action="CharacterSize">
+        <menuitem action="CharacterSizeTiny" />
+        <menuitem action="CharacterSizeScriptsize" />
+        <menuitem action="CharacterSizeFootnotesize" />
+        <menuitem action="CharacterSizeSmall" />
+        <menuitem action="CharacterSizeNormalsize" />
+        <menuitem action="CharacterSizelarge" />
+        <menuitem action="CharacterSizeLarge" />
+        <menuitem action="CharacterSizeLARGE" />
+        <menuitem action="CharacterSizehuge" />
+        <menuitem action="CharacterSizeHuge" />
+      </menu>
+
+      <menu action="FontStyles">
+        <menuitem action="Bold" />
+        <menuitem action="Italic" />
+        <menuitem action="Typewriter" />
+        <menuitem action="Slanted" />
+        <menuitem action="SmallCaps" />
+        <separator />
+        <menuitem action="Emph" />
+        <separator />
+        <menuitem action="Underline" />
+        <separator />
+        <menu action="FontFamily">
+          <menuitem action="FontFamilyRoman" />
+          <menuitem action="FontFamilySansSerif" />
+          <menuitem action="FontFamilyMonospace" />
+        </menu>
+        <menu action="FontSeries">
+          <menuitem action="FontSeriesMedium" />
+          <menuitem action="FontSeriesBold" />
+        </menu>
+        <menu action="FontShape">
+          <menuitem action="FontShapeUpright" />
+          <menuitem action="FontShapeItalic" />
+          <menuitem action="FontShapeSlanted" />
+          <menuitem action="FontShapeSmallCaps" />
+        </menu>
+      </menu>
+
+      <menu action="Math">
+        <menu action="MathEnvironments">
+          <menuitem action="MathEnvNormal" />
+          <menuitem action="MathEnvCentered" />
+          <menuitem action="MathEnvNumbered" />
+          <menuitem action="MathEnvArray" />
+          <menuitem action="MathEnvNumberedArray" />
+        </menu>
+        <separator />
+        <menuitem action="MathSuperscript" />
+        <menuitem action="MathSubscript" />
+        <separator />
+        <menuitem action="MathFrac" />
+        <menuitem action="MathSquareRoot" />
+        <menuitem action="MathNthRoot" />
+        <separator />
+        <menu action="MathLeftDelimiters">
+          <menuitem action="MathLeftDelimiter1" />
+          <menuitem action="MathLeftDelimiter2" />
+          <menuitem action="MathLeftDelimiter3" />
+          <menuitem action="MathLeftDelimiter4" />
+          <menuitem action="MathLeftDelimiter5" />
+          <menuitem action="MathLeftDelimiter6" />
+          <menuitem action="MathLeftDelimiter7" />
+          <menuitem action="MathLeftDelimiter8" />
+          <menuitem action="MathLeftDelimiter9" />
+        </menu>
+        <menu action="MathRightDelimiters">
+          <menuitem action="MathRightDelimiter1" />
+          <menuitem action="MathRightDelimiter2" />
+          <menuitem action="MathRightDelimiter3" />
+          <menuitem action="MathRightDelimiter4" />
+          <menuitem action="MathRightDelimiter5" />
+          <menuitem action="MathRightDelimiter6" />
+          <menuitem action="MathRightDelimiter7" />
+          <menuitem action="MathRightDelimiter8" />
+          <menuitem action="MathRightDelimiter9" />
+        </menu>
+      </menu>
+    </menu>
+
     <menu action="Documents" name="DocumentsMenu">
       <menuitem action="DocumentsSaveAll" />
       <menuitem action="DocumentsCloseAll" />

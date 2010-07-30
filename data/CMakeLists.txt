@@ -3,3 +3,4 @@ install (FILES "org.gnome.latexila.gschema.xml"
 install (SCRIPT "cmake-compile-schemas")
 
 add_subdirectory ("images/app")
+add_subdirectory ("images/icons")
