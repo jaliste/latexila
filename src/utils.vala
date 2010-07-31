@@ -79,4 +79,47 @@ namespace Utils
             return uri_get_dirname (location.get_path () ?? location.get_uri ());
         }
     }
+
+    public const uint ALL_WORKSPACES = 0xffffff;
+
+    /* Get the workspace the window is on
+     *
+     * This function gets the workspace that the #GtkWindow is visible on,
+     * it returns ALL_WORKSPACES if the window is sticky, or if
+     * the window manager doesn't support this function.
+     */
+    public uint get_window_workspace (Gtk.Window gtkwindow)
+    {
+        return_val_if_fail (gtkwindow.get_realized (), 0);
+
+        uint ret = ALL_WORKSPACES;
+
+        Gdk.Window window = gtkwindow.get_window ();
+        Gdk.Display display = window.get_display ();
+        unowned X.Display x_display = Gdk.x11_display_get_xdisplay (display);
+
+        X.Atom type;
+        int format;
+        ulong nitems;
+        ulong bytes_after;
+        uint *workspace;
+
+        Gdk.error_trap_push ();
+
+        int result = x_display.get_window_property (Gdk.x11_drawable_get_xid (window),
+            Gdk.x11_get_xatom_by_name_for_display (display, "_NET_WM_DESKTOP"),
+            0, long.MAX, false, X.XA_CARDINAL, out type, out format, out nitems,
+            out bytes_after, out workspace);
+
+        int err = Gdk.error_trap_pop ();
+
+        if (err != X.Success || result != X.Success)
+            return ret;
+
+        if (type == X.XA_CARDINAL && format == 32 && nitems > 0)
+            ret = workspace[0];
+
+        X.free (workspace);
+        return ret;
+    }
 }

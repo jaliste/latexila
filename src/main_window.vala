@@ -828,8 +828,8 @@ public class MainWindow : Window
         if (! this.get_realized ())
             this.realize ();
 
-        uint ws = Gedit.Utils.get_window_workspace (this);
-        return ws == workspace || ws == Gedit.Utils.Workspace.ALL_WORKSPACES;
+        uint ws = Utils.get_window_workspace (this);
+        return ws == workspace || ws == Utils.ALL_WORKSPACES;
     }
 
 
