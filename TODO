@@ -1,9 +1,6 @@
 TODO
 
 - Edit toolbar:
-	- MenuToolAction: problem to implement this class in vala
-	  see: http://mail.gnome.org/archives/vala-list/2010-July/msg00208.html
-
 	- create a custom MenuToolButton:
 	  Now the icon does nothing when we click it, we must always click first on the arrow and then select the item.
 	  It would be better if the icon is the last item used (and we can click on it).

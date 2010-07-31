@@ -1,6 +1,5 @@
-[CCode (cheader_filename = "menu_tool_action.h")]
-public class MenuToolAction : Gtk.Action
+[Compact, CCode (cname = "GtkActionClass")]
+public class GtkActionClass
 {
-    public MenuToolAction (string name, string? label, string? tooltip,
-        string? stock_id);
+    public GLib.Type toolbar_item_type;
 }

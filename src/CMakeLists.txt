@@ -19,7 +19,7 @@ vala_precompile (
 		${vapi_files}
 )
 
-add_executable (latexila ${VALA_C} menu_tool_action.c menu_tool_action.h)
+add_executable (latexila ${VALA_C})
 install (TARGETS latexila DESTINATION "bin")
 
 file (GLOB UI "*.ui")
