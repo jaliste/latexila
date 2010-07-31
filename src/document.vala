@@ -820,6 +820,7 @@ public class Document : Gtk.SourceBuffer
     public void replace (string text)
     {
         return_if_fail (search_text != null);
+        return_if_fail (! readonly);
 
         /* the cursor is on a match? */
         TextIter insert, insert_prev;
@@ -853,6 +854,7 @@ public class Document : Gtk.SourceBuffer
     public void replace_all (string text)
     {
         return_if_fail (search_text != null);
+        return_if_fail (! readonly);
 
         TextIter start, match_start, match_end;
         get_start_iter (out start);

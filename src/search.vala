@@ -169,7 +169,7 @@ public class SearchAndReplace : GLib.Object
 
             entry_replace = (Entry) builder.get_object ("entry_replace");
             frame_replace = (Frame) builder.get_object ("frame_replace");
-            var button_clear_replace = 
+            var button_clear_replace =
                 (Button) builder.get_object ("button_clear_replace");
             var button_replace = (Button) builder.get_object ("button_replace");
             var button_replace_all = (Button) builder.get_object ("button_replace_all");
@@ -298,6 +298,7 @@ public class SearchAndReplace : GLib.Object
         label_find_error.hide ();
         search_and_replace.show ();
         entry_find.grab_focus ();
+        set_replace_sensitivity ();
 
         main_window.notify["active-document"].connect (active_document_changed);
     }
@@ -383,6 +384,14 @@ public class SearchAndReplace : GLib.Object
     {
         label_find_normal.hide ();
         label_find_error.hide ();
+        set_replace_sensitivity ();
+    }
+
+    private void set_replace_sensitivity ()
+    {
+        bool readonly = main_window.active_document.readonly;
+        frame_replace.set_sensitive (! readonly);
+        hbox_replace.set_sensitive (! readonly);
     }
 
     private void replace ()
