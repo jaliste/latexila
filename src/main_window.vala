@@ -372,6 +372,9 @@ public class MainWindow : Window
         toolbar.set_style (ToolbarStyle.ICONS);
         setup_toolbar_open_button (toolbar);
 
+        Toolbar edit_toolbar = (Toolbar) ui_manager.get_widget ("/EditToolbar");
+        edit_toolbar.set_style (ToolbarStyle.ICONS);
+
         documents_panel = new DocumentsPanel ();
         documents_panel.right_click.connect ((event) =>
         {
@@ -466,6 +469,7 @@ public class MainWindow : Window
         var main_vbox = new VBox (false, 0);
         main_vbox.pack_start (menu, false, false, 0);
         main_vbox.pack_start (toolbar, false, false, 0);
+        main_vbox.pack_start (edit_toolbar, false, false, 0);
         main_vbox.pack_start (documents_panel, true, true, 0);
         main_vbox.pack_start (goto_line, false, false, 1);
         main_vbox.pack_start (search_and_replace.search_and_replace, false, false, 1);
@@ -519,6 +523,37 @@ public class MainWindow : Window
             _("Open recently used files"), "");
         configure_recent_chooser ((RecentChooser) recent_action);
 
+        // menus under toolitems
+        Action sectioning = new MenuToolAction ("SectioningToolItem", _("Sectioning"),
+            _("Sectioning"), "sectioning-section");
+        var sectioning_mtb = new MenuToolButton (null, null);
+        ((Activatable) sectioning_mtb).set_related_action (sectioning);
+
+        Action sizes = new MenuToolAction ("CharacterSizeToolItem", _("Characters Sizes"),
+            _("Characters Sizes"), "character-size");
+        var sizes_mtb = new MenuToolButton (null, null);
+        ((Activatable) sizes_mtb).set_related_action (sizes);
+
+        Action references = new MenuToolAction ("ReferencesToolItem", _("References"),
+            _("References"), "references");
+        var references_mtb = new MenuToolButton (null, null);
+        ((Activatable) references_mtb).set_related_action (references);
+
+        Action math_env = new MenuToolAction ("MathEnvironmentsToolItem",
+            _("Math Environments"), _("Math Environments"), "math");
+        var math_env_mtb = new MenuToolButton (null, null);
+        ((Activatable) math_env_mtb).set_related_action (math_env);
+
+        Action math_left_del = new MenuToolAction ("MathLeftDelimitersToolItem",
+			_("Left Delimiters"), _("Left Delimiters"), "delimiters-left");
+		var math_left_del_mtb = new MenuToolButton (null, null);
+		((Activatable) math_left_del_mtb).set_related_action (math_left_del);
+
+		Action math_right_del = new MenuToolAction ("MathRightDelimitersToolItem",
+			_("Right Delimiters"), _("Right Delimiters"), "delimiters-right");
+		var math_right_del_mtb = new MenuToolButton (null, null);
+		((Activatable) math_right_del_mtb).set_related_action (math_right_del);
+
         action_group = new ActionGroup ("ActionGroup");
         action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
         action_group.add_actions (action_entries, this);
@@ -527,6 +562,12 @@ public class MainWindow : Window
         latex_action_group = new ActionGroup ("LatexActionGroup");
         latex_action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
         latex_action_group.add_actions (latex_action_entries, this);
+        latex_action_group.add_action (sectioning);
+        latex_action_group.add_action (sizes);
+        latex_action_group.add_action (references);
+        latex_action_group.add_action (math_env);
+        latex_action_group.add_action (math_left_del);
+        latex_action_group.add_action (math_right_del);
 
         ui_manager = new UIManager ();
         ui_manager.insert_action_group (action_group, 0);

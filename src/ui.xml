@@ -220,6 +220,110 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
     <toolitem action="SearchReplace" />
   </toolbar>
 
+  <toolbar name="EditToolbar">
+    <toolitem action="SectioningToolItem">
+      <menu action="Sectioning">
+        <menuitem action="SectioningPart" />
+        <menuitem action="SectioningChapter" />
+        <separator />
+        <menuitem action="SectioningSection" />
+        <menuitem action="SectioningSubsection" />
+        <menuitem action="SectioningSubsubsection" />
+        <menuitem action="SectioningParagraph" />
+        <menuitem action="SectioningSubparagraph" />
+      </menu>
+    </toolitem>
+
+    <toolitem action="ReferencesToolItem">
+      <menu action="References">
+        <menuitem action="ReferencesLabel" />
+        <menuitem action="ReferencesRef" />
+        <menuitem action="ReferencesPageref" />
+        <menuitem action="ReferencesIndex" />
+        <menuitem action="ReferencesFootnote" />
+        <menuitem action="ReferencesCite" />
+      </menu>
+    </toolitem>
+
+    <toolitem action="CharacterSizeToolItem">
+      <menu action="CharacterSize">
+        <menuitem action="CharacterSizeTiny" />
+        <menuitem action="CharacterSizeScriptsize" />
+        <menuitem action="CharacterSizeFootnotesize" />
+        <menuitem action="CharacterSizeSmall" />
+        <menuitem action="CharacterSizeNormalsize" />
+        <menuitem action="CharacterSizelarge" />
+        <menuitem action="CharacterSizeLarge" />
+        <menuitem action="CharacterSizeLARGE" />
+        <menuitem action="CharacterSizehuge" />
+        <menuitem action="CharacterSizeHuge" />
+      </menu>
+    </toolitem>
+
+    <separator />
+
+    <toolitem action="Bold" />
+    <toolitem action="Italic" />
+    <toolitem action="Typewriter" />
+    <toolitem action="Underline" />
+
+    <separator />
+
+    <toolitem action="EnvironmentCenter" />
+
+    <separator />
+
+    <toolitem action="ListEnvItemize" />
+    <toolitem action="ListEnvEnumerate" />
+    <toolitem action="ListEnvDescription" />
+    <toolitem action="ListEnvItem" />
+
+    <separator />
+
+    <toolitem action="MathEnvironmentsToolItem">
+      <menu action="MathEnvironments">
+        <menuitem action="MathEnvNormal" />
+        <menuitem action="MathEnvCentered" />
+        <menuitem action="MathEnvNumbered" />
+        <menuitem action="MathEnvArray" />
+        <menuitem action="MathEnvNumberedArray" />
+      </menu>
+    </toolitem>
+    <separator />
+    <toolitem action="MathSuperscript" />
+    <toolitem action="MathSubscript" />
+    <separator />
+    <toolitem action="MathFrac" />
+    <toolitem action="MathSquareRoot" />
+    <separator />
+    <toolitem action="MathLeftDelimitersToolItem">
+      <menu action="MathLeftDelimiters">
+        <menuitem action="MathLeftDelimiter1" />
+        <menuitem action="MathLeftDelimiter2" />
+        <menuitem action="MathLeftDelimiter3" />
+        <menuitem action="MathLeftDelimiter4" />
+        <menuitem action="MathLeftDelimiter5" />
+        <menuitem action="MathLeftDelimiter6" />
+        <menuitem action="MathLeftDelimiter7" />
+        <menuitem action="MathLeftDelimiter8" />
+        <menuitem action="MathLeftDelimiter9" />
+      </menu>
+    </toolitem>
+    <toolitem action="MathRightDelimitersToolItem">
+      <menu action="MathRightDelimiters">
+        <menuitem action="MathRightDelimiter1" />
+        <menuitem action="MathRightDelimiter2" />
+        <menuitem action="MathRightDelimiter3" />
+        <menuitem action="MathRightDelimiter4" />
+        <menuitem action="MathRightDelimiter5" />
+        <menuitem action="MathRightDelimiter6" />
+        <menuitem action="MathRightDelimiter7" />
+        <menuitem action="MathRightDelimiter8" />
+        <menuitem action="MathRightDelimiter9" />
+      </menu>
+    </toolitem>
+  </toolbar>
+
   <popup name="NotebookPopup">
     <menuitem action="DocumentsMoveToNewWindow" />
     <separator />

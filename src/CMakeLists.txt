@@ -1,9 +1,9 @@
-file (GLOB VALA_SOURCES RELATIVE "${latexila_SOURCE_DIR}/src/" "*.vala")
-file (GLOB VAPI "${latexila_SOURCE_DIR}/vapi/*.vapi")
+file (GLOB vala_sources RELATIVE "${latexila_SOURCE_DIR}/src/" "*.vala")
+file (GLOB vapi_files "${latexila_SOURCE_DIR}/vapi/*.vapi")
 
 vala_precompile (
 	VALA_C
-		${VALA_SOURCES}
+		${vala_sources}
 	PACKAGES
 		gtk+-2.0
 		gtksourceview-2.0
@@ -16,11 +16,10 @@ vala_precompile (
 #	OPTIONS
 #		--debug
 	CUSTOM_VAPIS
-		${latexila_SOURCE_DIR}/vapi/config.vapi
-		${latexila_SOURCE_DIR}/vapi/gedit.vapi
+		${vapi_files}
 )
 
-add_executable (latexila ${VALA_C} gedit-utils.c gedit-utils.h)
+add_executable (latexila ${VALA_C} gedit-utils.c gedit-utils.h menu_tool_action.c menu_tool_action.h)
 install (TARGETS latexila DESTINATION "bin")
 
 file (GLOB UI "*.ui")
