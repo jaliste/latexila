@@ -50,6 +50,8 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
     </menu>
 
     <menu action="View">
+      <menuitem action="ViewEditToolbar" />
+      <separator />
       <menuitem action="ViewZoomIn" />
       <menuitem action="ViewZoomOut" />
       <menuitem action="ViewZoomReset" />

@@ -6,6 +6,7 @@
 
   <schema id="org.gnome.latexila.preferences" path="/apps/latexila/preferences/">
     <child name="editor" schema="org.gnome.latexila.preferences.editor" />
+    <child name="ui" schema="org.gnome.latexila.preferences.ui" />
   </schema>
 
   <schema id="org.gnome.latexila.preferences.editor" path="/apps/latexila/preferences/editor/">
@@ -71,6 +72,14 @@
     </key>
   </schema>
 
+  <schema id="org.gnome.latexila.preferences.ui" path="/apps/latexila/preferences/ui/">
+    <key name="edit-toolbar-visible" type="b">
+      <default>true</default>
+      <summary>Edit toolbar is visible</summary>
+      <description>Whether the edit toolbar (bold, italic, character sizes, ...) should be visible.</description>
+    </key>
+  </schema>
+
   <schema id="org.gnome.latexila.state" path="/apps/latexila/state/">
     <child name="window" schema="org.gnome.latexila.state.window"/>
   </schema>
@@ -83,7 +92,7 @@
       <default>(800, 600)</default>
     </key>
     <key name="documents" type="as">
-      <default>[""]</default>
+      <default>['']</default>
     </key>
   </schema>
 </schemalist>

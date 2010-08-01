@@ -290,11 +290,18 @@ public class MainWindow : Window
 		    null, on_math_right_delimiter_9 }
     };
 
+    private const ToggleActionEntry[] toggle_action_entries =
+    {
+        { "ViewEditToolbar", null, N_("_Edit Toolbar"), null,
+		    N_("Show or hide the edit toolbar"), on_show_edit_toolbar }
+    };
+
     private string file_chooser_current_folder = Environment.get_home_dir ();
     private DocumentsPanel documents_panel;
     private CustomStatusbar statusbar;
     private GotoLine goto_line;
     private SearchAndReplace search_and_replace;
+    private Toolbar edit_toolbar;
 
     private UIManager ui_manager;
     private ActionGroup action_group;
@@ -372,7 +379,7 @@ public class MainWindow : Window
         toolbar.set_style (ToolbarStyle.ICONS);
         setup_toolbar_open_button (toolbar);
 
-        Toolbar edit_toolbar = (Toolbar) ui_manager.get_widget ("/EditToolbar");
+        edit_toolbar = (Toolbar) ui_manager.get_widget ("/EditToolbar");
         edit_toolbar.set_style (ToolbarStyle.ICONS);
 
         documents_panel = new DocumentsPanel ();
@@ -479,6 +486,7 @@ public class MainWindow : Window
         show_all ();
         goto_line.hide ();
         search_and_replace.hide ();
+        show_or_hide_edit_toolbar ();
     }
 
     public List<Document> get_documents ()
@@ -524,32 +532,32 @@ public class MainWindow : Window
         configure_recent_chooser ((RecentChooser) recent_action);
 
         // menus under toolitems
-        Action sectioning = new MenuToolAction ("SectioningToolItem", _("Sectioning"),
+        var sectioning = new MenuToolAction ("SectioningToolItem", _("Sectioning"),
             _("Sectioning"), "sectioning-section");
         var sectioning_mtb = new MenuToolButton (null, null);
         ((Activatable) sectioning_mtb).set_related_action (sectioning);
 
-        Action sizes = new MenuToolAction ("CharacterSizeToolItem", _("Characters Sizes"),
+        var sizes = new MenuToolAction ("CharacterSizeToolItem", _("Characters Sizes"),
             _("Characters Sizes"), "character-size");
         var sizes_mtb = new MenuToolButton (null, null);
         ((Activatable) sizes_mtb).set_related_action (sizes);
 
-        Action references = new MenuToolAction ("ReferencesToolItem", _("References"),
+        var references = new MenuToolAction ("ReferencesToolItem", _("References"),
             _("References"), "references");
         var references_mtb = new MenuToolButton (null, null);
         ((Activatable) references_mtb).set_related_action (references);
 
-        Action math_env = new MenuToolAction ("MathEnvironmentsToolItem",
+        var math_env = new MenuToolAction ("MathEnvironmentsToolItem",
             _("Math Environments"), _("Math Environments"), "math");
         var math_env_mtb = new MenuToolButton (null, null);
         ((Activatable) math_env_mtb).set_related_action (math_env);
 
-        Action math_left_del = new MenuToolAction ("MathLeftDelimitersToolItem",
+        var math_left_del = new MenuToolAction ("MathLeftDelimitersToolItem",
 			_("Left Delimiters"), _("Left Delimiters"), "delimiters-left");
 		var math_left_del_mtb = new MenuToolButton (null, null);
 		((Activatable) math_left_del_mtb).set_related_action (math_left_del);
 
-		Action math_right_del = new MenuToolAction ("MathRightDelimitersToolItem",
+		var math_right_del = new MenuToolAction ("MathRightDelimitersToolItem",
 			_("Right Delimiters"), _("Right Delimiters"), "delimiters-right");
 		var math_right_del_mtb = new MenuToolButton (null, null);
 		((Activatable) math_right_del_mtb).set_related_action (math_right_del);
@@ -558,6 +566,7 @@ public class MainWindow : Window
         action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
         action_group.add_actions (action_entries, this);
         action_group.add_action (recent_action);
+        action_group.add_toggle_actions (toggle_action_entries, this);
 
         latex_action_group = new ActionGroup ("LatexActionGroup");
         latex_action_group.set_translation_domain (Config.GETTEXT_PACKAGE);
@@ -622,6 +631,18 @@ public class MainWindow : Window
     private void on_menu_item_deselect (Item proxy)
     {
         statusbar.pop (tip_message_cid);
+    }
+
+    private void show_or_hide_edit_toolbar ()
+    {
+        GLib.Settings settings = new GLib.Settings ("org.gnome.latexila.preferences.ui");
+        bool show = settings.get_boolean ("edit-toolbar-visible");
+
+        if (! show)
+            edit_toolbar.hide ();
+
+        ToggleAction action = (ToggleAction) action_group.get_action ("ViewEditToolbar");
+        action.set_active (show);
     }
 
     public void open_document (File location)
@@ -706,7 +727,6 @@ public class MainWindow : Window
         /* sensitivity of undo and redo */
         tab.document.notify["can-undo"].connect (() =>
         {
-
             if (tab != active_tab)
                 return;
             set_undo_sensitivity ();
@@ -727,8 +747,9 @@ public class MainWindow : Window
             selection_changed ();
         });
 
-        tab.document.notify["location"].connect (() => { sync_name (tab); });
-        tab.document.modified_changed.connect (() => { sync_name (tab); });
+        tab.document.notify["location"].connect (() => sync_name (tab));
+        tab.document.modified_changed.connect (() => sync_name (tab));
+        tab.document.notify["readonly"].connect (() => sync_name (tab));
         tab.document.cursor_moved.connect (update_cursor_position_statusbar);
 
         tab.show ();
@@ -1122,11 +1143,13 @@ public class MainWindow : Window
 
     public void save_state (bool sync = false)
     {
-        GLib.Settings settings = new GLib.Settings ("org.gnome.latexila.state.window");
 
-        // state of the window
+
+        /* state of the window */
+        GLib.Settings settings_window =
+            new GLib.Settings ("org.gnome.latexila.state.window");
         Gdk.WindowState state = get_window ().get_state ();
-        settings.set_int ("state", state);
+        settings_window.set_int ("state", state);
 
         // get width and height of the window
         int w, h;
@@ -1140,10 +1163,22 @@ public class MainWindow : Window
             h -= 100;
         }
 
-        settings.set ("size", "(ii)", w, h);
+        settings_window.set ("size", "(ii)", w, h);
+
+        /* ui preferences */
+        GLib.Settings settings_ui =
+            new GLib.Settings ("org.gnome.latexila.preferences.ui");
+
+        // We don't bind this setting to the toggle action because when we change the
+        // setting it must be applied only on the current window and not all windows.
+        ToggleAction action = (ToggleAction) action_group.get_action ("ViewEditToolbar");
+        settings_ui.set_boolean ("edit-toolbar-visible", action.active);
 
         if (sync)
-            settings.sync ();
+        {
+            settings_window.sync ();
+            settings_ui.sync ();
+        }
     }
 
     private void move_tab_to_new_window (DocumentTab tab)
@@ -1368,6 +1403,15 @@ public class MainWindow : Window
     }
 
     /* View */
+
+    public void on_show_edit_toolbar (Action action)
+    {
+        bool show = ((ToggleAction) action).active;
+        if (show)
+            edit_toolbar.show_all ();
+        else
+            edit_toolbar.hide ();
+    }
 
     public void on_view_zoom_in ()
     {

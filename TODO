@@ -1,8 +1,22 @@
 TODO
 
+- Managing templates
+- Symbols
+- Compilation, build menu, log zone, etc
+- File browser
+
+- choose the character encoding and the line ending type when saving a document
+- most used symbols
+- quick build configurable buttons
+
+==========================
+Not a priority:
+
 - Edit toolbar:
 	- create a custom MenuToolButton:
 	  Now the icon does nothing when we click it, we must always click first on the arrow and then select the item.
 	  It would be better if the icon is the last item used (and we can click on it).
 
-- Managing templates
+- Search and replace:
+	- search selected text (if no \n)
+	- performance: "delete" min_nb_chars_for_incremental_search
