@@ -28,6 +28,9 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <menuitem action="FileSave" />
       <menuitem action="FileSaveAs" />
       <separator />
+      <menuitem action="FileCreateTemplate" />
+      <menuitem action="FileDeleteTemplate" />
+      <separator />
       <menuitem action="FileClose" />
       <menuitem action="FileQuit" />
     </menu>

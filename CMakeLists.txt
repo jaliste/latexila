@@ -2,19 +2,19 @@ cmake_minimum_required (VERSION 2.6.4)
 
 project ("latexila" C)
 
-set (APP_NAME "latexila")
+set (APP_NAME "LaTeXila")
 set (APP_VERSION "1.98.0")
 
-message (STATUS "*** Building LaTeXila ${APP_VERSION} ***")
+message (STATUS "*** Building ${APP_NAME} ${APP_VERSION} ***")
 
-set (DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${APP_NAME}"
+set (DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/latexila"
 	CACHE PATH "The directory where the data is")
 
 # for debugging
 #set (CMAKE_C_FLAGS "-ggdb")
 
 # Native Language Support
-set (GETTEXT_PACKAGE ${APP_NAME})
+set (GETTEXT_PACKAGE "latexila")
 set (LOCALE_DIR "${CMAKE_INSTALL_PREFIX}/share/locale")
 find_package (Gettext REQUIRED)
 file (GLOB latexila_PO_FILES ${latexila_SOURCE_DIR}/po/*.po)

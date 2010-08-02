@@ -17,6 +17,8 @@
  * along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Gtk;
+
 namespace Utils
 {
     public void flush_queue ()
@@ -121,5 +123,13 @@ namespace Utils
 
         X.free (workspace);
         return ret;
+    }
+
+    public Widget add_scrollbar (Widget child)
+    {
+        var scrollbar = new ScrolledWindow (null, null);
+        scrollbar.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
+        scrollbar.add (child);
+        return scrollbar;
     }
 }

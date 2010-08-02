@@ -77,17 +77,7 @@ public class Document : Gtk.SourceBuffer
         {
             string text;
             location.load_contents (null, out text, null, out _etag);
-
-            begin_not_undoable_action ();
-            set_text (text, -1);
-            Utils.flush_queue ();
-            set_modified (false);
-            end_not_undoable_action ();
-
-            // move the cursor at the first line
-            TextIter iter;
-            get_start_iter (out iter);
-            place_cursor (iter);
+            set_contents (text);
 
             update_syntax_highlighting ();
 
@@ -101,6 +91,20 @@ public class Document : Gtk.SourceBuffer
                 .printf (location.get_parse_name ());
             tab.add_message (primary_msg, e.message, MessageType.ERROR);
         }
+    }
+
+    public void set_contents (string contents)
+    {
+        begin_not_undoable_action ();
+        set_text (contents, -1);
+        Utils.flush_queue ();
+        set_modified (false);
+        end_not_undoable_action ();
+
+        // move the cursor at the first line
+        TextIter iter;
+        get_start_iter (out iter);
+        place_cursor (iter);
     }
 
     public void save (bool check_file_changed_on_disk = true)

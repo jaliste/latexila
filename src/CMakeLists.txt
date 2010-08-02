@@ -11,6 +11,7 @@ vala_precompile (
 		unique-1.0
 		gdk-x11-2.0
 		x11
+		posix
 
 # for debugging
 #	OPTIONS

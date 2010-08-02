@@ -123,10 +123,8 @@ public class Dialogs : GLib.Object
         treeview.append_column (column);
 
         // with a scrollbar
-        var sw = new ScrolledWindow (null, null);
-        sw.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
+        ScrolledWindow sw = (ScrolledWindow) Utils.add_scrollbar (treeview);
         sw.set_shadow_type (ShadowType.IN);
-        sw.add (treeview);
         vbox2.pack_start (sw, true, true, 0);
 
         /* secondary label */

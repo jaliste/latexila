@@ -61,13 +61,7 @@ public class Application : GLib.Object
 	    { Config.DATA_DIR + "/images/icons/math-square-root.png", "math-square-root" },
 	    { Config.DATA_DIR + "/images/icons/math-nth-root.png", "math-nth-root" },
 	    { Config.DATA_DIR + "/images/icons/delimiters-left.png", "delimiters-left" },
-	    { Config.DATA_DIR + "/images/icons/delimiters-right.png", "delimiters-right" },
-	    { Config.DATA_DIR + "/images/icons/go_previous_error.png", "go-previous-error" },
-	    { Config.DATA_DIR + "/images/icons/go_next_error.png", "go-next-error" },
-	    { Config.DATA_DIR + "/images/icons/go_previous_warning.png", "go-previous-warning" },
-	    { Config.DATA_DIR + "/images/icons/go_next_warning.png", "go-next-warning" },
-	    { Config.DATA_DIR + "/images/icons/go_previous_badbox.png", "go-previous-badbox" },
-	    { Config.DATA_DIR + "/images/icons/go_next_badbox.png", "go-next-badbox" }
+	    { Config.DATA_DIR + "/images/icons/delimiters-right.png", "delimiters-right" }
     };
 
     public static int NEW_WINDOW = 1;
@@ -229,7 +223,7 @@ public class Application : GLib.Object
 
     public void create_document ()
     {
-        active_window.on_file_new ();
+        active_window.create_tab (true);
     }
 
     public void open_documents (

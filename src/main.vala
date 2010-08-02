@@ -79,7 +79,7 @@ int main (string[] args)
 
     if (option_version)
     {
-        stdout.printf ("LaTeXila %s\n", Config.APP_VERSION);
+        stdout.printf ("%s %s\n", Config.APP_NAME, Config.APP_VERSION);
         return 0;
     }
 

@@ -37,6 +37,10 @@ public class MainWindow : Window
             N_("Save the current file"), on_file_save },
         { "FileSaveAs", STOCK_SAVE_AS, null, null,
             N_("Save the current file with a different name"), on_file_save_as },
+        { "FileCreateTemplate", null, N_("Create _Template From Document..."), null,
+		    N_("Create a new template from the current document"), on_create_template },
+	    { "FileDeleteTemplate", null, N_("_Delete Template..."), null,
+		    N_("Delete personnal template(s)"), on_delete_template },
         { "FileClose", STOCK_CLOSE, null, null,
             N_("Close the current file"), on_file_close },
         { "FileQuit", STOCK_QUIT, null, null,
@@ -1020,7 +1024,7 @@ public class MainWindow : Window
             File file = file_chooser.get_file ();
 
             /* if the file exists, ask the user if the file can be replaced */
-            if (file.query_exists (null))
+            if (file.query_exists ())
             {
                 var confirmation = new MessageDialog (this,
                     DialogFlags.DESTROY_WITH_PARENT,
@@ -1257,7 +1261,7 @@ public class MainWindow : Window
 
     public void on_file_new ()
     {
-        create_tab (true);
+        Templates.get_default ().show_dialog_new (this);
     }
 
     public void on_new_window ()
@@ -1301,6 +1305,18 @@ public class MainWindow : Window
     {
         return_if_fail (active_tab != null);
         save_document (active_document, true);
+    }
+
+    public void on_create_template ()
+    {
+        return_if_fail (active_tab != null);
+        Templates.get_default ().show_dialog_create (this);
+    }
+
+    public void on_delete_template ()
+    {
+        return_if_fail (active_tab != null);
+        Templates.get_default ().show_dialog_delete (this);
     }
 
     public void on_file_close ()
