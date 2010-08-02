@@ -296,6 +296,8 @@ public class MainWindow : Window
 
     private const ToggleActionEntry[] toggle_action_entries =
     {
+        { "ViewSidePanel", null, N_("_Side panel"), null,
+		    N_("Show or hide the side panel"), on_show_side_panel },
         { "ViewEditToolbar", null, N_("_Edit Toolbar"), null,
 		    N_("Show or hide the edit toolbar"), on_show_edit_toolbar }
     };
@@ -306,6 +308,8 @@ public class MainWindow : Window
     private GotoLine goto_line;
     private SearchAndReplace search_and_replace;
     private Toolbar edit_toolbar;
+    private VBox side_panel;
+    private HPaned main_hpaned;
 
     private UIManager ui_manager;
     private ActionGroup action_group;
@@ -397,6 +401,7 @@ public class MainWindow : Window
         tip_message_cid = statusbar.get_context_id ("tip_message");
         goto_line = new GotoLine (this);
         search_and_replace = new SearchAndReplace (this);
+        side_panel = new Symbols (this);
 
         /* signal handlers */
 
@@ -481,9 +486,23 @@ public class MainWindow : Window
         main_vbox.pack_start (menu, false, false, 0);
         main_vbox.pack_start (toolbar, false, false, 0);
         main_vbox.pack_start (edit_toolbar, false, false, 0);
-        main_vbox.pack_start (documents_panel, true, true, 0);
-        main_vbox.pack_start (goto_line, false, false, 1);
-        main_vbox.pack_start (search_and_replace.search_and_replace, false, false, 1);
+
+        // main horizontal pane
+        // left: side panel (symbols, file browser, ...)
+        // right: documents panel, search and replace, log zone, ...
+        main_hpaned = new HPaned ();
+        main_hpaned.set_position (settings.get_int ("side-panel-size"));
+        main_vbox.pack_start (main_hpaned);
+
+        // vbox source view: documents panel, goto line, search and replace
+        VBox vbox_source_view = new VBox (false, 2);
+        vbox_source_view.pack_start (documents_panel);
+        vbox_source_view.pack_start (goto_line, false, false, 0);
+        vbox_source_view.pack_start (search_and_replace.search_and_replace, false, false);
+
+        main_hpaned.add1 (side_panel);
+        main_hpaned.add2 (vbox_source_view);
+
         main_vbox.pack_end (statusbar, false, false, 0);
 
         add (main_vbox);
@@ -491,6 +510,7 @@ public class MainWindow : Window
         goto_line.hide ();
         search_and_replace.hide ();
         show_or_hide_edit_toolbar ();
+        show_or_hide_side_panel ();
     }
 
     public List<Document> get_documents ()
@@ -646,6 +666,18 @@ public class MainWindow : Window
             edit_toolbar.hide ();
 
         ToggleAction action = (ToggleAction) action_group.get_action ("ViewEditToolbar");
+        action.set_active (show);
+    }
+
+    private void show_or_hide_side_panel ()
+    {
+        GLib.Settings settings = new GLib.Settings ("org.gnome.latexila.preferences.ui");
+        bool show = settings.get_boolean ("side-panel-visible");
+
+        if (! show)
+            side_panel.hide ();
+
+        ToggleAction action = (ToggleAction) action_group.get_action ("ViewSidePanel");
         action.set_active (show);
     }
 
@@ -1147,8 +1179,6 @@ public class MainWindow : Window
 
     public void save_state (bool sync = false)
     {
-
-
         /* state of the window */
         GLib.Settings settings_window =
             new GLib.Settings ("org.gnome.latexila.state.window");
@@ -1169,6 +1199,8 @@ public class MainWindow : Window
 
         settings_window.set ("size", "(ii)", w, h);
 
+        settings_window.set_int ("side-panel-size", main_hpaned.get_position ());
+
         /* ui preferences */
         GLib.Settings settings_ui =
             new GLib.Settings ("org.gnome.latexila.preferences.ui");
@@ -1177,6 +1209,9 @@ public class MainWindow : Window
         // setting it must be applied only on the current window and not all windows.
         ToggleAction action = (ToggleAction) action_group.get_action ("ViewEditToolbar");
         settings_ui.set_boolean ("edit-toolbar-visible", action.active);
+
+        action = (ToggleAction) action_group.get_action ("ViewSidePanel");
+        settings_ui.set_boolean ("side-panel-visible", action.active);
 
         if (sync)
         {
@@ -1419,6 +1454,15 @@ public class MainWindow : Window
     }
 
     /* View */
+
+    public void on_show_side_panel (Action action)
+    {
+        bool show = ((ToggleAction) action).active;
+        if (show)
+            side_panel.show_all ();
+        else
+            side_panel.hide ();
+    }
 
     public void on_show_edit_toolbar (Action action)
     {

@@ -78,6 +78,11 @@
       <summary>Edit toolbar is visible</summary>
       <description>Whether the edit toolbar (bold, italic, character sizes, ...) should be visible.</description>
     </key>
+    <key name="side-panel-visible" type="b">
+      <default>true</default>
+      <summary>Side panel is Visible</summary>
+      <description>Whether the side panel at the left of editing windows should be visible.</description>
+    </key>
   </schema>
 
   <schema id="org.gnome.latexila.state" path="/apps/latexila/state/">
@@ -93,6 +98,9 @@
     </key>
     <key name="documents" type="as">
       <default>['']</default>
+    </key>
+    <key name="side-panel-size" type="i">
+      <default>256</default>
     </key>
   </schema>
 </schemalist>
