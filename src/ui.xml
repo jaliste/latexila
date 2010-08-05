@@ -68,6 +68,15 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
       <menuitem action="SearchGoToLine" />
     </menu>
 
+    <menu action="Build">
+      <menuitem action="BuildStopExecution" />
+      <menuitem action="BuildPreviousMessage" />
+      <menuitem action="BuildNextMessage" />
+      <menuitem action="BuildShowErrors" />
+      <menuitem action="BuildShowWarnings" />
+      <menuitem action="BuildShowBadBoxes" />
+    </menu>
+
     <menu action="Latex">
       <menu action="Sectioning">
         <menuitem action="SectioningPart" />
@@ -328,6 +337,15 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
         <menuitem action="MathRightDelimiter9" />
       </menu>
     </toolitem>
+  </toolbar>
+
+  <toolbar name="LogToolbar">
+    <toolitem action="BuildStopExecution" />
+    <toolitem action="BuildPreviousMessage" />
+    <toolitem action="BuildNextMessage" />
+    <toolitem action="BuildShowErrors" />
+    <toolitem action="BuildShowWarnings" />
+    <toolitem action="BuildShowBadBoxes" />
   </toolbar>
 
   <popup name="NotebookPopup">

@@ -89,6 +89,15 @@ public class MainWindow : Window
         { "SearchGoToLine", STOCK_JUMP_TO, N_("_Go to Line..."), "<Control>G",
             N_("Go to a specific line"), on_search_goto_line },
 
+        // Build
+        { "Build", null, N_("_Build") },
+        { "BuildStopExecution", STOCK_STOP, N_("_Stop Execution"), "<Release>F9",
+            N_("Stop Execution"), null },
+        { "BuildPreviousMessage", STOCK_GO_UP, N_("_Previous Message"), null,
+            N_("Go to the previous build output message"), null },
+        { "BuildNextMessage", STOCK_GO_DOWN, N_("_Next Message"), null,
+            N_("Go to the next build output message"), null },
+
         // Documents
         { "Documents", null, N_("_Documents") },
         { "DocumentsSaveAll", STOCK_SAVE, N_("_Save All"), "<Shift><Control>L",
@@ -299,7 +308,14 @@ public class MainWindow : Window
         { "ViewSidePanel", null, N_("_Side panel"), null,
 		    N_("Show or hide the side panel"), on_show_side_panel },
         { "ViewEditToolbar", null, N_("_Edit Toolbar"), null,
-		    N_("Show or hide the edit toolbar"), on_show_edit_toolbar }
+		    N_("Show or hide the edit toolbar"), on_show_edit_toolbar },
+
+		{ "BuildShowErrors", STOCK_DIALOG_ERROR, N_("Show _Errors"), null,
+		    N_("Show Errors"), on_build_show_errors },
+		{ "BuildShowWarnings", STOCK_DIALOG_WARNING, N_("Show _Warnings"), null,
+		    N_("Show Warnings"), on_build_show_warnings },
+		{ "BuildShowBadBoxes", "badbox", N_("Show _BadBoxes"), null,
+		    N_("Show BadBoxes"), on_build_show_badboxes }
     };
 
     private string file_chooser_current_folder = Environment.get_home_dir ();
@@ -307,6 +323,7 @@ public class MainWindow : Window
     private CustomStatusbar statusbar;
     private GotoLine goto_line;
     private SearchAndReplace search_and_replace;
+    private LogZone log_zone;
     private Toolbar edit_toolbar;
     private VBox side_panel;
     private LogZone bottom_panel;
@@ -392,6 +409,11 @@ public class MainWindow : Window
         edit_toolbar = (Toolbar) ui_manager.get_widget ("/EditToolbar");
         edit_toolbar.set_style (ToolbarStyle.ICONS);
 
+        Toolbar log_toolbar = (Toolbar) ui_manager.get_widget ("/LogToolbar");
+        log_toolbar.set_style (ToolbarStyle.ICONS);
+        log_toolbar.set_icon_size (IconSize.MENU);
+        log_toolbar.set_orientation (Orientation.VERTICAL);
+
         documents_panel = new DocumentsPanel ();
         documents_panel.right_click.connect ((event) =>
         {
@@ -404,11 +426,12 @@ public class MainWindow : Window
         goto_line = new GotoLine (this);
         search_and_replace = new SearchAndReplace (this);
         side_panel = new Symbols (this);
-        bottom_panel = new LogZone ();
-        bottom_panel.set_position (settings.get_int ("action-history-size"));
+        bottom_panel = log_zone = new LogZone (log_toolbar);
+        log_zone.set_position (settings.get_int ("action-history-size"));
+        show_or_hide_build_messages ();
 
         /* TEST log zone */
-        LogStore log_store = bottom_panel.add_action ("Title", "command");
+        LogStore log_store = log_zone.add_action ("Title", "command");
         log_store.print_output_info ("Info");
         log_store.print_output_normal ("Normal");
         log_store.print_output_message (null, null,
@@ -425,7 +448,7 @@ public class MainWindow : Window
         log_store.print_output_exit (1);
         log_store.print_output_exit (42, "exit message");
 
-        log_store = bottom_panel.add_action ("Title 2", "command 2");
+        log_store = log_zone.add_action ("Title 2", "command 2");
         log_store.print_output_message ("/home/seb/test/test", 3, "error",
             OutputMessageType.ERROR);
 
@@ -715,6 +738,27 @@ public class MainWindow : Window
 
         ToggleAction action = (ToggleAction) action_group.get_action ("ViewSidePanel");
         action.set_active (show);
+    }
+
+    private void show_or_hide_build_messages ()
+    {
+        GLib.Settings settings = new GLib.Settings ("org.gnome.latexila.preferences.ui");
+        bool show_errors = settings.get_boolean ("show-build-errors");
+        bool show_warnings = settings.get_boolean ("show-build-warnings");
+        bool show_badboxes = settings.get_boolean ("show-build-badboxes");
+
+        log_zone.show_errors = show_errors;
+        log_zone.show_warnings = show_warnings;
+        log_zone.show_badboxes = show_badboxes;
+
+        ToggleAction action = (ToggleAction) action_group.get_action ("BuildShowErrors");
+        action.set_active (show_errors);
+
+        action = (ToggleAction) action_group.get_action ("BuildShowWarnings");
+        action.set_active (show_warnings);
+
+        action = (ToggleAction) action_group.get_action ("BuildShowBadBoxes");
+        action.set_active (show_badboxes);
     }
 
     public void open_document (File location)
@@ -1251,6 +1295,15 @@ public class MainWindow : Window
         action = (ToggleAction) action_group.get_action ("ViewSidePanel");
         settings_ui.set_boolean ("side-panel-visible", action.active);
 
+        action = (ToggleAction) action_group.get_action ("BuildShowErrors");
+        settings_ui.set_boolean ("show-build-errors", action.active);
+
+        action = (ToggleAction) action_group.get_action ("BuildShowWarnings");
+        settings_ui.set_boolean ("show-build-warnings", action.active);
+
+        action = (ToggleAction) action_group.get_action ("BuildShowBadBoxes");
+        settings_ui.set_boolean ("show-build-badboxes", action.active);
+
         if (sync)
         {
             settings_window.sync ();
@@ -1547,6 +1600,23 @@ public class MainWindow : Window
     {
         return_if_fail (active_tab != null);
         goto_line.show ();
+    }
+
+    /* Build */
+
+    public void on_build_show_errors (Action action)
+    {
+        log_zone.show_errors = ((ToggleAction) action).active;
+    }
+
+    public void on_build_show_warnings (Action action)
+    {
+        log_zone.show_warnings = ((ToggleAction) action).active;
+    }
+
+    public void on_build_show_badboxes (Action action)
+    {
+        log_zone.show_badboxes = ((ToggleAction) action).active;
     }
 
     /* Documents */

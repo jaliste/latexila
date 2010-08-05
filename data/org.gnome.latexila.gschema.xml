@@ -83,6 +83,18 @@
       <summary>Side panel is Visible</summary>
       <description>Whether the side panel at the left of editing windows should be visible.</description>
     </key>
+    <key name="show-build-errors" type="b">
+      <default>true</default>
+      <summary>Show build output errors</summary>
+    </key>
+    <key name="show-build-warnings" type="b">
+      <default>true</default>
+      <summary>Show build output warnings</summary>
+    </key>
+    <key name="show-build-badboxes" type="b">
+      <default>true</default>
+      <summary>Show build output badboxes</summary>
+    </key>
   </schema>
 
   <schema id="org.gnome.latexila.state" path="/apps/latexila/state/">

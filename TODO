@@ -4,7 +4,6 @@ TODO
 	- vertical toolbar with:
 		- stop execution
 		- previous/next message
-		- show errors/warnings/badboxes (create an icon for badboxes)
 	- action history: support for quick-build actions (one parent action and several child actions)
 
 - Compilation, build menu, etc

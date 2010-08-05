@@ -61,7 +61,8 @@ public class Application : GLib.Object
 	    { Config.DATA_DIR + "/images/icons/math-square-root.png", "math-square-root" },
 	    { Config.DATA_DIR + "/images/icons/math-nth-root.png", "math-nth-root" },
 	    { Config.DATA_DIR + "/images/icons/delimiters-left.png", "delimiters-left" },
-	    { Config.DATA_DIR + "/images/icons/delimiters-right.png", "delimiters-right" }
+	    { Config.DATA_DIR + "/images/icons/delimiters-right.png", "delimiters-right" },
+	    { Config.DATA_DIR + "/images/icons/badbox.png", "badbox" }
     };
 
     public static int NEW_WINDOW = 1;

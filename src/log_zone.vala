@@ -50,11 +50,15 @@ public class LogZone : HPaned
         N_COLUMNS
     }
 
-    public LogZone ()
+    public bool show_errors { get; set; }
+    public bool show_warnings { get; set; }
+    public bool show_badboxes { get; set; }
+
+    public LogZone (Toolbar log_toolbar)
     {
         /* action history */
         ListStore history_list_store = new ListStore (HistoryActionColumn.N_COLUMNS,
-            typeof (string), typeof (LogStore));
+            typeof (string), typeof (TreeModelFilter));
 
         history_view = new TreeView.with_model (history_list_store);
         var renderer = new CellRendererText ();
@@ -70,20 +74,24 @@ public class LogZone : HPaned
             TreeModel history_model;
             if (selection.get_selected (out history_model, out iter))
             {
-                LogStore output_model;
+                TreeModelFilter output_model;
                 history_model.get (iter,
                     HistoryActionColumn.OUTPUT_STORE, out output_model,
                     -1);
 
                 // disconnect scroll signal from current model
-                LogStore current_output_model = (LogStore) output_view.get_model ();
-                current_output_model.scroll_and_flush.disconnect (on_scroll_and_flush);
+                TreeModelFilter tmp = (TreeModelFilter) output_view.get_model ();
+                LogStore current_log_store = (LogStore) tmp.child_model;
+                current_log_store.scroll_and_flush.disconnect (on_scroll_and_flush);
 
+                output_model.refilter ();
                 output_view.set_model (output_model);
-                output_model.scroll_and_flush.connect (on_scroll_and_flush);
+
+                current_log_store = (LogStore) output_model.child_model;
+                current_log_store.scroll_and_flush.connect (on_scroll_and_flush);
 
                 output_view.columns_autosize ();
-                output_model.scroll_to_selected_row ();
+                current_log_store.scroll_to_selected_row ();
             }
         });
 
@@ -94,7 +102,10 @@ public class LogZone : HPaned
         LogStore output_list_store = new LogStore ();
         output_list_store.print_output_normal (_("Welcome to LaTeXila!"));
 
-        output_view = new TreeView.with_model (output_list_store);
+        TreeModelFilter output_filter = new TreeModelFilter (output_list_store, null);
+        output_filter.set_visible_func (filter_visible_func);
+
+        output_view = new TreeView.with_model (output_filter);
         output_view.set_headers_visible (false);
         output_view.set_tooltip_column (OutputLineColumn.FILENAME);
 
@@ -147,12 +158,47 @@ public class LogZone : HPaned
         select.set_select_function (output_row_selection_func);
 
         sw = Utils.add_scrollbar (output_view);
-        add2 (sw);
+        HBox hbox = new HBox (false, 0);
+        hbox.pack_start (sw);
+        hbox.pack_start (log_toolbar, false, false, 0);
+        add2 (hbox);
+
+        /* show errors/warnings/badboxes */
+        notify["show-errors"].connect (refilter);
+        notify["show-warnings"].connect (refilter);
+        notify["show-badboxes"].connect (refilter);
+    }
+
+    private bool filter_visible_func (TreeModel model, TreeIter iter)
+    {
+        OutputMessageType msg_type;
+        model.get (iter, OutputLineColumn.MESSAGE_TYPE, out msg_type, -1);
+
+        switch (msg_type)
+        {
+            case OutputMessageType.ERROR:
+                return show_errors;
+            case OutputMessageType.WARNING:
+                return show_warnings;
+            case OutputMessageType.BADBOX:
+                return show_badboxes;
+            default:
+                return true;
+        }
+    }
+
+    private void refilter ()
+    {
+        return_if_fail (output_view != null);
+        TreeModelFilter filter = (TreeModelFilter) output_view.get_model ();
+        filter.refilter ();
     }
 
     public LogStore add_action (string title, string command)
     {
         LogStore log_store = new LogStore ();
+        TreeModelFilter filter = new TreeModelFilter (log_store, null);
+        filter.set_visible_func (filter_visible_func);
 
         // print title and command to the new list store
         string title_with_num = "%d. %s".printf (action_num, title);
@@ -165,7 +211,7 @@ public class LogZone : HPaned
         history_model.append (out iter);
         history_model.set (iter,
             HistoryActionColumn.TITLE, title_with_num,
-            HistoryActionColumn.OUTPUT_STORE, log_store,
+            HistoryActionColumn.OUTPUT_STORE, filter,
             -1);
 
         // select the new entry
@@ -188,22 +234,29 @@ public class LogZone : HPaned
         return log_store;
     }
 
-    private bool output_row_selection_func (TreeSelection selection, TreeModel model,
+    private bool output_row_selection_func (TreeSelection selection, TreeModel filter,
         TreePath path, bool path_currently_selected)
     {
         TreeIter iter;
-        if (model.get_iter (out iter, path))
+        if (filter.get_iter (out iter, path))
         {
             int msg_type;
             string filename;
-            model.get (iter,
+            filter.get (iter,
                 OutputLineColumn.FILENAME, out filename,
                 OutputLineColumn.MESSAGE_TYPE, out msg_type,
                 -1);
 
             if (msg_type != OutputMessageType.OTHER && filename != null
                 && filename.length > 0)
-                ((LogStore) model).select_row (iter);
+            {
+                TreeModelFilter filter2 = (TreeModelFilter) filter;
+                TreeIter child_iter;
+                filter2.convert_iter_to_child_iter (out child_iter, iter);
+
+                LogStore model = (LogStore) filter2.child_model;
+                model.select_row (child_iter);
+            }
         }
 
         // rows will never be selected
