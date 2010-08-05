@@ -1,6 +1,14 @@
 TODO
 
-- Compilation, build menu, log zone, etc
+- Log Zone:
+	- vertical toolbar with:
+		- stop execution
+		- previous/next message
+		- show errors/warnings/badboxes (create an icon for badboxes)
+	- action history: support for quick-build actions (one parent action and several child actions)
+
+- Compilation, build menu, etc
+
 - File browser
 
 - choose the character encoding and the line ending type when saving a document
@@ -9,6 +17,9 @@ TODO
 
 ==========================
 Not a priority:
+
+- LaTeX menu:
+	- Texmaker has a nice menu => rearrange and add some items
 
 - Edit toolbar:
 	- create a custom MenuToolButton:

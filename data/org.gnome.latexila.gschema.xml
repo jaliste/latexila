@@ -94,13 +94,19 @@
       <default>0</default>
     </key>
     <key name="size" type="(ii)">
-      <default>(800, 600)</default>
+      <default>(950, 660)</default>
     </key>
     <key name="documents" type="as">
       <default>['']</default>
     </key>
     <key name="side-panel-size" type="i">
       <default>256</default>
+    </key>
+    <key name="vertical-paned-position" type="i">
+      <default>375</default>
+    </key>
+    <key name="action-history-size" type="i">
+      <default>180</default>
     </key>
   </schema>
 </schemalist>

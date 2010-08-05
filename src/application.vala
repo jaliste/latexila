@@ -229,8 +229,10 @@ public class Application : GLib.Object
     public void open_documents (
         [CCode (array_length = false, array_null_terminated = true)] string[] uris)
     {
-        foreach (var uri in uris)
+        foreach (string uri in uris)
         {
+            if (uri.length == 0)
+                continue;
             var location = File.new_for_uri (uri);
             active_window.open_document (location);
         }

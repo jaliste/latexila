@@ -309,7 +309,9 @@ public class MainWindow : Window
     private SearchAndReplace search_and_replace;
     private Toolbar edit_toolbar;
     private VBox side_panel;
+    private LogZone bottom_panel;
     private HPaned main_hpaned;
+    private VPaned vpaned;
 
     private UIManager ui_manager;
     private ActionGroup action_group;
@@ -402,6 +404,30 @@ public class MainWindow : Window
         goto_line = new GotoLine (this);
         search_and_replace = new SearchAndReplace (this);
         side_panel = new Symbols (this);
+        bottom_panel = new LogZone ();
+        bottom_panel.set_position (settings.get_int ("action-history-size"));
+
+        /* TEST log zone */
+        LogStore log_store = bottom_panel.add_action ("Title", "command");
+        log_store.print_output_info ("Info");
+        log_store.print_output_normal ("Normal");
+        log_store.print_output_message (null, null,
+            "message without filename, without line number, type: other",
+            OutputMessageType.OTHER);
+        log_store.print_output_message ("/home/seb/test/informatique.tex", 42,
+            "badbox", OutputMessageType.BADBOX);
+        log_store.print_output_message ("/home/seb/test/essai", null, "warning",
+            OutputMessageType.WARNING);
+        log_store.print_output_message ("/home/seb/test/test", 3, "error",
+            OutputMessageType.ERROR);
+        log_store.print_output_stats (42, 1337, 1);
+        log_store.print_output_exit (0);
+        log_store.print_output_exit (1);
+        log_store.print_output_exit (42, "exit message");
+
+        log_store = bottom_panel.add_action ("Title 2", "command 2");
+        log_store.print_output_message ("/home/seb/test/test", 3, "error",
+            OutputMessageType.ERROR);
 
         /* signal handlers */
 
@@ -500,8 +526,18 @@ public class MainWindow : Window
         vbox_source_view.pack_start (goto_line, false, false, 0);
         vbox_source_view.pack_start (search_and_replace.search_and_replace, false, false);
 
+        // vertical pane
+        // top: vbox source view
+        // bottom: log zone
+        vpaned = new VPaned ();
+        vpaned.set_position (settings.get_int ("vertical-paned-position"));
+
+        // when we resize the window, the bottom panel keeps the same height
+        vpaned.pack1 (vbox_source_view, true, true);
+        vpaned.pack2 (bottom_panel, false, true);
+
         main_hpaned.add1 (side_panel);
-        main_hpaned.add2 (vbox_source_view);
+        main_hpaned.add2 (vpaned);
 
         main_vbox.pack_end (statusbar, false, false, 0);
 
@@ -1200,6 +1236,8 @@ public class MainWindow : Window
         settings_window.set ("size", "(ii)", w, h);
 
         settings_window.set_int ("side-panel-size", main_hpaned.get_position ());
+        settings_window.set_int ("vertical-paned-position", vpaned.get_position ());
+        settings_window.set_int ("action-history-size", bottom_panel.get_position ());
 
         /* ui preferences */
         GLib.Settings settings_ui =
