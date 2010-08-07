@@ -1,5 +1,8 @@
-install (FILES "org.gnome.latexila.gschema.xml"
-	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas")
+configure_file ("${latexila_SOURCE_DIR}/data/org.gnome.latexila.gschema.xml.in"
+	"${latexila_BINARY_DIR}/data/org.gnome.latexila.gschema.xml")
+install (FILES "${latexila_BINARY_DIR}/data/org.gnome.latexila.gschema.xml"
+	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/")
+
 install (SCRIPT "cmake-compile-schemas")
 
 add_subdirectory ("templates")

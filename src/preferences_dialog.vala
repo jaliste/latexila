@@ -70,6 +70,16 @@ public class PreferencesDialog : Dialog
             var font_hbox = (Widget) builder.get_object ("font_hbox");
             var schemes_treeview = (TreeView) builder.get_object ("schemes_treeview");
 
+            var entry_command_view = builder.get_object ("entry_command_view");
+            var entry_latex = builder.get_object ("entry_latex");
+            var entry_pdflatex = builder.get_object ("entry_pdflatex");
+            var entry_dvi_to_pdf = builder.get_object ("entry_dvi_to_pdf");
+            var entry_dvi_to_ps = builder.get_object ("entry_dvi_to_ps");
+            var entry_bibtex = builder.get_object ("entry_bibtex");
+            var entry_makeindex = builder.get_object ("entry_makeindex");
+            var checkbutton_latex_filter =
+                builder.get_object ("checkbutton_latex_filter");
+
             // bind settings
             var settings = new GLib.Settings ("org.gnome.latexila.preferences.editor");
 
@@ -95,6 +105,26 @@ public class PreferencesDialog : Dialog
                 SettingsBindFlags.GET | SettingsBindFlags.SET);
             settings.bind ("reopen-files", reopen_checkbutton, "active",
                 SettingsBindFlags.GET | SettingsBindFlags.SET);
+
+            GLib.Settings latex_settings =
+                new GLib.Settings ("org.gnome.latexila.preferences.latex");
+
+            latex_settings.bind ("command-view", entry_command_view, "text",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            latex_settings.bind ("command-latex", entry_latex, "text",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            latex_settings.bind ("command-pdflatex", entry_pdflatex, "text",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            latex_settings.bind ("command-dvipdf", entry_dvi_to_pdf, "text",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            latex_settings.bind ("command-dvips", entry_dvi_to_ps, "text",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            latex_settings.bind ("command-bibtex", entry_bibtex, "text",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            latex_settings.bind ("command-makeindex", entry_makeindex, "text",
+                SettingsBindFlags.GET | SettingsBindFlags.SET);
+            latex_settings.bind ("filter-latex-commands", checkbutton_latex_filter,
+                "active", SettingsBindFlags.GET | SettingsBindFlags.SET);
 
             // schemes treeview
             var current_scheme_id = settings.get_string ("scheme");

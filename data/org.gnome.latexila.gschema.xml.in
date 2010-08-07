@@ -7,6 +7,7 @@
   <schema id="org.gnome.latexila.preferences" path="/apps/latexila/preferences/">
     <child name="editor" schema="org.gnome.latexila.preferences.editor" />
     <child name="ui" schema="org.gnome.latexila.preferences.ui" />
+    <child name="latex" schema="org.gnome.latexila.preferences.latex" />
   </schema>
 
   <schema id="org.gnome.latexila.preferences.editor" path="/apps/latexila/preferences/editor/">
@@ -94,6 +95,47 @@
     <key name="show-build-badboxes" type="b">
       <default>true</default>
       <summary>Show build output badboxes</summary>
+    </key>
+  </schema>
+
+  <schema id="org.gnome.latexila.preferences.latex" path="/apps/latexila/preferences/latex/">
+    <key name="command-view" type="s">
+      <default>'gnome-open'</default>
+      <summary>Program for viewing documents</summary>
+    </key>
+    <key name="command-latex" type="s">
+      <default>'@COMMAND_LATEX@ -interaction=nonstopmode %.tex'</default>
+      <summary>latex command</summary>
+      <description>latex command ("%" is the filename without extension)</description>
+    </key>
+    <key name="command-pdflatex" type="s">
+      <default>'@COMMAND_PDFLATEX@ -interaction=nonstopmode %.tex'</default>
+      <summary>pdflatex command</summary>
+      <description>pdflatex command ("%" is the filename without extension)</description>
+    </key>
+    <key name="command-dvipdf" type="s">
+      <default>'@COMMAND_DVIPDF@ %.dvi'</default>
+      <summary>DVI to PDF command</summary>
+      <description>DVI to PDF command ("%" is the filename without extension)</description>
+    </key>
+    <key name="command-dvips" type="s">
+      <default>'@COMMAND_DVIPS@ -o %.ps %.dvi'</default>
+      <summary>DVI to PS command</summary>
+      <description>DVI to PS command ("%" is the filename without extension)</description>
+    </key>
+    <key name="command-bibtex" type="s">
+      <default>'@COMMAND_BIBTEX@ %.aux'</default>
+      <summary>BibTeX command</summary>
+      <description>BibTeX command ("%" is the filename without extension)</description>
+    </key>
+    <key name="command-makeindex" type="s">
+      <default>'@COMMAND_MAKEINDEX@ %.idx'</default>
+      <summary>MakeIndex command</summary>
+      <description>MakeIndex command ("%" is the filename without extension)</description>
+    </key>
+    <key name="filter-latex-commands" type="b">
+      <default>true</default>
+      <summary>Filter latex and pdflatex commands</summary>
     </key>
   </schema>
 
