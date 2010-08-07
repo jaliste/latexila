@@ -41,7 +41,11 @@ public class LogZone : HPaned
 {
     private TreeView history_view;
     private TreeView output_view;
+    private LogStore current_log_store;
     private int action_num = 1;
+
+    private Action action_previous_msg;
+    private Action action_next_msg;
 
     enum HistoryActionColumn
     {
@@ -54,8 +58,11 @@ public class LogZone : HPaned
     public bool show_warnings { get; set; }
     public bool show_badboxes { get; set; }
 
-    public LogZone (Toolbar log_toolbar)
+    public LogZone (Toolbar log_toolbar, Action previous_msg, Action next_msg)
     {
+        action_previous_msg = previous_msg;
+        action_next_msg = next_msg;
+
         /* action history */
         ListStore history_list_store = new ListStore (HistoryActionColumn.N_COLUMNS,
             typeof (string), typeof (TreeModelFilter));
@@ -80,8 +87,6 @@ public class LogZone : HPaned
                     -1);
 
                 // disconnect scroll signal from current model
-                TreeModelFilter tmp = (TreeModelFilter) output_view.get_model ();
-                LogStore current_log_store = (LogStore) tmp.child_model;
                 current_log_store.scroll_and_flush.disconnect (on_scroll_and_flush);
 
                 output_model.refilter ();
@@ -92,6 +97,7 @@ public class LogZone : HPaned
 
                 output_view.columns_autosize ();
                 current_log_store.scroll_to_selected_row ();
+                set_previous_next_actions_sensitivity ();
             }
         });
 
@@ -99,10 +105,10 @@ public class LogZone : HPaned
         add1 (sw);
 
         /* log details */
-        LogStore output_list_store = new LogStore ();
-        output_list_store.print_output_normal (_("Welcome to LaTeXila!"));
+        current_log_store = new LogStore ();
+        current_log_store.print_output_normal (_("Welcome to LaTeXila!"));
 
-        TreeModelFilter output_filter = new TreeModelFilter (output_list_store, null);
+        TreeModelFilter output_filter = new TreeModelFilter (current_log_store, null);
         output_filter.set_visible_func (filter_visible_func);
 
         output_view = new TreeView.with_model (output_filter);
@@ -164,9 +170,9 @@ public class LogZone : HPaned
         add2 (hbox);
 
         /* show errors/warnings/badboxes */
-        notify["show-errors"].connect (refilter);
-        notify["show-warnings"].connect (refilter);
-        notify["show-badboxes"].connect (refilter);
+        notify["show-errors"].connect (on_show_property_changed);
+        notify["show-warnings"].connect (on_show_property_changed);
+        notify["show-badboxes"].connect (on_show_property_changed);
     }
 
     private bool filter_visible_func (TreeModel model, TreeIter iter)
@@ -187,11 +193,12 @@ public class LogZone : HPaned
         }
     }
 
-    private void refilter ()
+    private void on_show_property_changed ()
     {
         return_if_fail (output_view != null);
         TreeModelFilter filter = (TreeModelFilter) output_view.get_model ();
         filter.refilter ();
+        set_previous_next_actions_sensitivity ();
     }
 
     public LogStore add_action (string title, string command)
@@ -256,6 +263,7 @@ public class LogZone : HPaned
 
                 LogStore model = (LogStore) filter2.child_model;
                 model.select_row (child_iter);
+                set_previous_next_actions_sensitivity ();
             }
         }
 
@@ -263,11 +271,33 @@ public class LogZone : HPaned
         return false;
     }
 
-    private void on_scroll_and_flush (TreePath path)
+    private void on_scroll_and_flush (TreeIter iter)
     {
         return_if_fail (output_view != null);
-        output_view.scroll_to_cell (path, null, false, 0, 0);
-        Utils.flush_queue ();
+        TreeModelFilter filter = (TreeModelFilter) output_view.get_model ();
+        TreeIter filter_iter;
+        if (filter.convert_child_iter_to_iter (out filter_iter, iter))
+        {
+            TreePath path = filter.get_path (filter_iter);
+            output_view.scroll_to_cell (path, null, false, 0, 0);
+            Utils.flush_queue ();
+        }
+    }
+
+    public void go_to_message (bool next)
+    {
+        current_log_store.go_to_message (next, show_errors, show_warnings, show_badboxes);
+        current_log_store.scroll_to_selected_row ();
+        set_previous_next_actions_sensitivity ();
+    }
+
+    private void set_previous_next_actions_sensitivity ()
+    {
+        bool can_prev, can_next;
+        current_log_store.can_go_to_previous_next_msg (out can_prev, out can_next,
+            show_errors, show_warnings, show_badboxes);
+        action_previous_msg.sensitive = can_prev;
+        action_next_msg.sensitive = can_next;
     }
 }
 
@@ -282,9 +312,18 @@ public class LogStore : ListStore
     private static const string INFO_MESSAGE = "*****";
 
     private int nb_lines = 0;
-    private TreePath selected_row = null;
+    private TreeIter selected_row;
+    private bool selected_row_valid = false;
 
-    public signal void scroll_and_flush (TreePath path);
+    public signal void scroll_and_flush (TreeIter iter);
+
+    struct MsgInfo
+    {
+        public OutputMessageType type;
+        public TreeIter iter;
+    }
+
+    private MsgInfo[] index = {};
 
     public LogStore ()
     {
@@ -416,6 +455,10 @@ public class LogStore : ListStore
             -1);
 
         scroll_to_iter (iter);
+
+        // append to index
+        MsgInfo index_info = { msg_type, iter };
+        index += index_info;
     }
 
     public void print_output_normal (string msg)
@@ -445,38 +488,31 @@ public class LogStore : ListStore
 	     * second or so there is not a big difference.
 	     */
 	    if (force || nb_lines < 50 || nb_lines % 40 == 0)
-	    {
-	        TreePath path = get_path (iter);
-	        scroll_and_flush (path);
-        }
+	        scroll_and_flush (iter);
     }
 
     public void scroll_to_selected_row ()
     {
-        if (selected_row != null)
+        if (selected_row_valid)
             scroll_and_flush (selected_row);
     }
 
     public void select_row (TreeIter iter)
     {
-        TreePath path = get_path (iter);
         TreeModel model = (TreeModel) this;
 
-        if (selected_row != null)
+        if (selected_row_valid)
         {
             // if the row to select is not the same as the row already selected,
 		    // we must deselect this row
-		    if (selected_row.compare (path) != 0)
+		    if (selected_row != iter)
 		    {
-		        TreeIter current_iter_selected;
-		        get_iter (out current_iter_selected, selected_row);
-
 		        // invert the colors
 		        string bg_color;
-		        model.get (current_iter_selected,
+		        model.get (selected_row,
 		            OutputLineColumn.BG_COLOR, out bg_color,
 		            -1);
-                set (current_iter_selected,
+                set (selected_row,
                     OutputLineColumn.COLOR, bg_color,
                     OutputLineColumn.BG_COLOR, null,
                     -1);
@@ -493,6 +529,136 @@ public class LogStore : ListStore
             OutputLineColumn.BG_COLOR, color,
             -1);
 
-        selected_row = path;
+        selected_row = iter;
+        selected_row_valid = true;
+    }
+
+    // for going to previous message: next=false
+    public void go_to_message (bool next, bool error, bool warning, bool badbox)
+    {
+        return_if_fail (index.length > 0);
+
+        // no row selected
+        if (! selected_row_valid)
+        {
+            return_if_fail (next);
+
+            // take the first
+            for (int i = 0 ; i < index.length ; i++)
+            {
+                if (! msg_type_accepted (index[i].type, error, warning, badbox))
+                    continue;
+
+                select_row (index[i].iter);
+                return;
+            }
+            return_if_reached ();
+        }
+
+        // used only when going to previous message
+        int row_to_select = -1;
+
+        for (int i = 0 ; i < index.length ; i++)
+        {
+            // if we are on the selected row
+            if (index[i].iter == selected_row)
+            {
+                // if we go to the next message we search... the next ok message
+                if (next)
+                {
+                    for (int j = i + 1 ; j < index.length ; j++)
+                    {
+                        if (! msg_type_accepted (index[j].type, error, warning, badbox))
+                            continue;
+
+                        select_row (index[j].iter);
+                        return;
+                    }
+                    return_if_reached ();
+                }
+
+                // if we go to the previous message, we know already which row to select
+                else
+                {
+                    return_if_fail (row_to_select != -1);
+                    select_row (index[row_to_select].iter);
+                    return;
+                }
+            }
+
+            if (! next)
+            {
+                if (! msg_type_accepted (index[i].type, error, warning, badbox))
+                    continue;
+
+                // We are on a previous ok message, we save the position in the index so
+                // if it is the last previous ok message we must not search it when we
+                // reach the selected row.
+                row_to_select = i;
+            }
+        }
+
+        return_if_reached ();
+    }
+
+    private bool msg_type_accepted (OutputMessageType type, bool accept_error,
+        bool accept_warning, bool accept_badbox)
+    {
+        return (accept_error && type == OutputMessageType.ERROR)
+            || (accept_warning && type == OutputMessageType.WARNING)
+            || (accept_badbox && type == OutputMessageType.BADBOX);
+    }
+
+    public void can_go_to_previous_next_msg (out bool can_prev, out bool can_next,
+        bool accept_error, bool accept_warning, bool accept_badbox)
+    {
+        // no message
+        if (index.length == 0)
+        {
+            can_prev = can_next = false;
+            return;
+        }
+
+        // no row selected
+        if (! selected_row_valid)
+        {
+            can_prev = false;
+            can_next = true;
+            return;
+        }
+
+        // a row is selected, can we go to a previous message?
+        for (int i = 0 ; i < index.length ; i++)
+        {
+            if (index[i].iter == selected_row)
+            {
+                can_prev = false;
+                break;
+            }
+
+            if (! msg_type_accepted (index[i].type, accept_error, accept_warning,
+                accept_badbox))
+                continue;
+
+            can_prev = true;
+            break;
+        }
+
+        // a row is selected, can we go to a next message?
+        for (int i = index.length - 1 ; i >= 0 ; i--)
+        {
+            if (index[i].iter == selected_row)
+            {
+                can_next = false;
+                break;
+            }
+
+            if (! msg_type_accepted (index[i].type, accept_error, accept_warning,
+                accept_badbox))
+                continue;
+
+            can_next = true;
+            break;
+        }
     }
 }

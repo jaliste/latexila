@@ -94,9 +94,9 @@ public class MainWindow : Window
         { "BuildStopExecution", STOCK_STOP, N_("_Stop Execution"), "<Release>F9",
             N_("Stop Execution"), null },
         { "BuildPreviousMessage", STOCK_GO_UP, N_("_Previous Message"), null,
-            N_("Go to the previous build output message"), null },
+            N_("Go to the previous build output message"), on_build_previous_msg },
         { "BuildNextMessage", STOCK_GO_DOWN, N_("_Next Message"), null,
-            N_("Go to the next build output message"), null },
+            N_("Go to the next build output message"), on_build_next_msg },
 
         // Documents
         { "Documents", null, N_("_Documents") },
@@ -426,7 +426,11 @@ public class MainWindow : Window
         goto_line = new GotoLine (this);
         search_and_replace = new SearchAndReplace (this);
         side_panel = new Symbols (this);
-        bottom_panel = log_zone = new LogZone (log_toolbar);
+
+        Action action_previous_msg = action_group.get_action ("BuildPreviousMessage");
+        Action action_next_msg = action_group.get_action ("BuildNextMessage");
+        bottom_panel = log_zone = new LogZone (log_toolbar, action_previous_msg,
+            action_next_msg);
         log_zone.set_position (settings.get_int ("action-history-size"));
         show_or_hide_build_messages ();
 
@@ -1603,6 +1607,16 @@ public class MainWindow : Window
     }
 
     /* Build */
+
+    public void on_build_previous_msg ()
+    {
+        log_zone.go_to_message (false);
+    }
+
+    public void on_build_next_msg ()
+    {
+        log_zone.go_to_message (true);
+    }
 
     public void on_build_show_errors (Action action)
     {
