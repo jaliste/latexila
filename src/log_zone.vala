@@ -64,10 +64,10 @@ public class LogZone : HPaned
         action_next_msg = next_msg;
 
         /* action history */
-        ListStore history_list_store = new ListStore (HistoryActionColumn.N_COLUMNS,
+        TreeStore history_tree_store = new TreeStore (HistoryActionColumn.N_COLUMNS,
             typeof (string), typeof (TreeModelFilter));
 
-        history_view = new TreeView.with_model (history_list_store);
+        history_view = new TreeView.with_model (history_tree_store);
         var renderer = new CellRendererText ();
         TreeViewColumn column = new TreeViewColumn.with_attributes (_("Action History"),
             renderer, "text", HistoryActionColumn.TITLE, null);
@@ -201,23 +201,54 @@ public class LogZone : HPaned
         set_previous_next_actions_sensitivity ();
     }
 
-    public LogStore add_action (string title, string command)
+    public LogStore add_simple_action (string title)
+    {
+        return add_action_full (title, false, null, null, null, null);
+    }
+
+    public LogStore add_parent_action (string title, out TreePath path)
+    {
+        return add_action_full (title, true, out path, null, null, null);
+    }
+
+    public LogStore add_child_action (string title, TreePath parent, int step,
+        int nb_steps)
+    {
+        return add_action_full (title, false, null, parent, step, nb_steps);
+    }
+
+    private LogStore add_action_full (string title, bool set_path,
+        out TreePath? path_to_set, TreePath? parent, int? step, int? nb_steps)
     {
         LogStore log_store = new LogStore ();
         TreeModelFilter filter = new TreeModelFilter (log_store, null);
         filter.set_visible_func (filter_visible_func);
 
-        // print title and command to the new list store
-        string title_with_num = "%d. %s".printf (action_num, title);
-        log_store.print_output_title (title_with_num);
-        log_store.print_output_info ("$ " + command);
+        // print title to the new list store
+        string log_store_title;
+        if (step != null && nb_steps != null)
+            log_store_title = "%s (step %d of %d)".printf (title, step, nb_steps);
+        else
+            log_store_title = "%d. %s".printf (action_num, title);
 
-        // append a new entry to the history action list
-        ListStore history_model = (ListStore) history_view.get_model ();
-        TreeIter iter;
-        history_model.append (out iter);
+        log_store.print_output_title (log_store_title);
+
+        string history_title = log_store_title;
+        if (parent != null)
+            history_title = title;
+
+        // append a new entry to the history action tree
+        TreeStore history_model = (TreeStore) history_view.get_model ();
+        TreeIter iter, parent_iter;
+        if (parent != null)
+        {
+            history_model.get_iter (out parent_iter, parent);
+            history_model.append (out iter, parent_iter);
+        }
+        else
+            history_model.append (out iter, null);
         history_model.set (iter,
-            HistoryActionColumn.TITLE, title_with_num,
+            HistoryActionColumn.TITLE, history_title,
             HistoryActionColumn.OUTPUT_STORE, filter,
             -1);
 
@@ -229,6 +260,9 @@ public class LogZone : HPaned
         TreePath path = history_model.get_path (iter);
         history_view.scroll_to_cell (path, null, false, 0, 0);
 
+        if (set_path)
+            path_to_set = path;
+
         // delete the first entry
         if (action_num > 5)
         {
@@ -237,7 +271,13 @@ public class LogZone : HPaned
             history_model.remove (first);
         }
 
-        action_num++;
+        if (parent == null)
+            action_num++;
+        else
+        {
+            history_view.collapse_all ();
+            history_view.expand_to_path (parent);
+        }
         return log_store;
     }
 

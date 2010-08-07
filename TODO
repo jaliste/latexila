@@ -1,8 +1,5 @@
 TODO
 
-- Log Zone:
-	- action history: support for quick-build actions (one parent action and several child actions)
-
 - Compilation, build menu, etc
 
 - File browser

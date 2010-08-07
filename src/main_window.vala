@@ -435,7 +435,22 @@ public class MainWindow : Window
         show_or_hide_build_messages ();
 
         /* TEST log zone */
-        LogStore log_store = log_zone.add_action ("Title", "command");
+        // create a parent action
+        TreePath path;
+        LogStore log_store = log_zone.add_parent_action ("Quick-build 1", out path);
+        log_store.print_output_info ("Step 1: compile (latex)");
+        log_store.print_output_info ("Step 2: DVI to PDF");
+        log_store.print_output_info ("Step 3: view PDF");
+
+        // add a child action
+        log_store = log_zone.add_child_action ("Compile (latex)", path, 1, 3);
+        log_store.print_output_info ("$ latex doc.tex");
+        log_store.print_output_stats (0, 0, 0);
+        log_store.print_output_exit (0);
+
+        // add a simple action (first parent action is not finished)
+        log_store = log_zone.add_simple_action ("Compile (pdflatex)");
+        log_store.print_output_info ("$ pdflatex doc.tex");
         log_store.print_output_info ("Info");
         log_store.print_output_normal ("Normal");
         log_store.print_output_message (null, null,
@@ -452,9 +467,12 @@ public class MainWindow : Window
         log_store.print_output_exit (1);
         log_store.print_output_exit (42, "exit message");
 
-        log_store = log_zone.add_action ("Title 2", "command 2");
-        log_store.print_output_message ("/home/seb/test/test", 3, "error",
-            OutputMessageType.ERROR);
+        // add a child action to the first parent action
+        log_store = log_zone.add_child_action ("DVI to PDF", path, 2, 3);
+        log_store.print_output_info ("$ dvipdf doc.dvi");
+
+        log_store = log_zone.add_child_action ("View PDF", path, 3, 3);
+        log_store.print_output_info ("$ evince doc.pdf");
 
         /* signal handlers */
 
