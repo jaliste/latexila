@@ -1,7 +1,7 @@
 TODO
 
-- Compilation, build menu, etc
-
+- External commands
+- Document compilation output filter 
 - File browser
 
 - choose the character encoding and the line ending type when saving a document

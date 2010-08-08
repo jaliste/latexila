@@ -69,7 +69,22 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
     </menu>
 
     <menu action="Build">
+      <menuitem action="BuildCompileLatex" />
+      <menuitem action="BuildViewDVI" />
+      <separator />
+      <menuitem action="BuildCompilePdflatex" />
+      <menuitem action="BuildViewPDF" />
+      <separator />
+      <menuitem action="BuildDVItoPDF" />
+      <menuitem action="BuildDVItoPS" />
+      <menuitem action="BuildViewPS" />
+      <separator />
+      <menuitem action="BuildBibtex" />
+      <menuitem action="BuildMakeindex" />
+      <separator />
+      <menuitem action="BuildClean" />
       <menuitem action="BuildStopExecution" />
+      <separator />
       <menuitem action="BuildPreviousMessage" />
       <menuitem action="BuildNextMessage" />
       <menuitem action="BuildShowErrors" />
@@ -233,6 +248,12 @@ along with LaTeXila.  If not, see <http://www.gnu.org/licenses/>.
     <separator />
     <toolitem action="SearchFind" />
     <toolitem action="SearchReplace" />
+    <separator />
+    <toolitem action="BuildCompileLatex" />
+    <toolitem action="BuildViewDVI" />
+    <separator />
+    <toolitem action="BuildCompilePdflatex" />
+    <toolitem action="BuildViewPDF" />
   </toolbar>
 
   <toolbar name="EditToolbar">

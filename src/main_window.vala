@@ -91,6 +91,27 @@ public class MainWindow : Window
 
         // Build
         { "Build", null, N_("_Build") },
+        { "BuildCompileLatex", "compile_latex", N_("_Compile (latex)"), "<Release>F5",
+            N_("Produce the document in DVI format"), on_build_latex },
+        { "BuildViewDVI", "view_dvi", N_("_View DVI"), "<Release>F6",
+            N_("View the DVI file"), on_build_view_dvi },
+        { "BuildCompilePdflatex", "compile_pdflatex", N_("C_ompile (pdflatex)"),
+            "<Release>F7", N_("Produce the document in PDF format"), on_build_pdflatex },
+		{ "BuildViewPDF", "view_pdf", N_("V_iew PDF"), "<Release>F8",
+		    N_("View the PDF file"), on_build_view_pdf },
+		{ "BuildDVItoPDF", "dvi_to_pdf", N_("_DVI to PDF"), null,
+		    N_("Convert the DVI document to the PDF format"), on_build_dvi_to_pdf },
+		{ "BuildDVItoPS", "dvi_to_ps", N_("DVI to _PS"), null,
+		    N_("Convert the DVI document to the PostScript format"), on_build_dvi_to_ps },
+		{ "BuildViewPS", "view_ps", N_("Vi_ew PS"), null,
+		    N_("View the PostScript file"), on_build_view_ps },
+		{ "BuildBibtex", null, "_BibTeX", null,
+		    N_("Run BibTeX on the current document"), on_build_bibtex },
+		{ "BuildMakeindex", null, "_MakeIndex", null,
+		    N_("Run MakeIndex on the current document"), on_build_makeindex },
+		{ "BuildClean", STOCK_CLEAR, N_("Cleanup Build _Files"), null,
+		    N_("Clean-up build files (*.aux, *.log, *.out, *.toc, etc)"),
+	        on_build_clean },
         { "BuildStopExecution", STOCK_STOP, N_("_Stop Execution"), "<Release>F9",
             N_("Stop Execution"), null },
         { "BuildPreviousMessage", STOCK_GO_UP, N_("_Previous Message"), null,
@@ -1005,7 +1026,9 @@ public class MainWindow : Window
             "EditCopy", "EditPaste", "EditDelete", "EditSelectAll", "EditComment",
             "EditUncomment", "ViewZoomIn", "ViewZoomOut", "ViewZoomReset",
             "DocumentsSaveAll", "DocumentsCloseAll", "DocumentsPrevious", "DocumentsNext",
-            "SearchFind", "SearchReplace", "SearchGoToLine"
+            "SearchFind", "SearchReplace", "SearchGoToLine", "BuildCompileLatex",
+            "BuildViewDVI", "BuildCompilePdflatex", "BuildViewPDF", "BuildDVItoPDF",
+            "BuildDVItoPS", "BuildViewPS", "BuildBibtex", "BuildMakeindex", "BuildClean"
         };
 
         foreach (string file_action in file_actions)
@@ -1625,6 +1648,56 @@ public class MainWindow : Window
     }
 
     /* Build */
+
+    public void on_build_latex ()
+    {
+        return_if_fail (active_tab != null);
+    }
+
+    public void on_build_view_dvi ()
+    {
+        return_if_fail (active_tab != null);
+    }
+
+    public void on_build_pdflatex ()
+    {
+        return_if_fail (active_tab != null);
+    }
+
+    public void on_build_view_pdf ()
+    {
+        return_if_fail (active_tab != null);
+    }
+
+    public void on_build_dvi_to_pdf ()
+    {
+        return_if_fail (active_tab != null);
+    }
+
+    public void on_build_dvi_to_ps ()
+    {
+        return_if_fail (active_tab != null);
+    }
+
+    public void on_build_view_ps ()
+    {
+        return_if_fail (active_tab != null);
+    }
+
+    public void on_build_bibtex ()
+    {
+        return_if_fail (active_tab != null);
+    }
+
+    public void on_build_makeindex ()
+    {
+        return_if_fail (active_tab != null);
+    }
+
+    public void on_build_clean ()
+    {
+        return_if_fail (active_tab != null);
+    }
 
     public void on_build_previous_msg ()
     {
